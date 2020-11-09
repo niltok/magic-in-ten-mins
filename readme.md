@@ -8,3 +8,4 @@
 
 [代数数据类型(Algebraic Data Type)[Java基础]](doc/ADT.md)
 
+[单位半群(Monoid)[Java基础]](doc/Monoid.md)
