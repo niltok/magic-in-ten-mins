@@ -10,7 +10,7 @@
 
 
 ```java
-public class Student {
+public final class Student {
     public String name;
     public int id;
 }
@@ -24,11 +24,11 @@ public class Student {
 
 ```java
 public class SchoolPerson {}
-public class Student extends SchoolPerson {
+public final class Student extends SchoolPerson {
     public String name;
     public int id;
 }
-public class Teacher extends SchoolPerson {
+public final class Teacher extends SchoolPerson {
     public String name;
     public String  office;
 }
@@ -44,8 +44,8 @@ SchoolPerson可能是Student也可能是Teacher，可以表示为Student和Teach
 
 ```java
 public class Bool {}
-public class True extends Bool {}
-public class False extends Bool {}
+public final class True extends Bool {}
+public final class False extends Bool {}
 ```
 
 然后用`t instanceof True`就可以用来判定t作为Bool的值是不是True。
@@ -54,8 +54,8 @@ public class False extends Bool {}
 
 ```java
 public class Nat {}
-public class Z extends Nat {}
-public class S extends Nat {
+public final class Z extends Nat {}
+public final class S extends Nat {
     public Nat value;
     
     public S(Nat v) { value = v; }
@@ -68,8 +68,8 @@ public class S extends Nat {
 
 ```java
 public class List<T> {}
-public class Nil<T> extends List<T> {}
-public class Cons<T> extends List<T> {
+public final class Nil<T> extends List<T> {}
+public final class Cons<T> extends List<T> {
     public T value;
     public List<T> next;
     
@@ -94,19 +94,19 @@ ADT最适合构造树状的结构，比如解析JSON出的结果需要一个聚�
 
 ```java
 public class JsonValue {}
-public class JsonBool extends JsonValue {
+public final class JsonBool extends JsonValue {
     public boolean value;
 }
-public class JsonInt extends JsonValue {
+public final class JsonInt extends JsonValue {
     public int value;
 }
-public class JsonString extends JsonValue {
+public final class JsonString extends JsonValue {
     public String value;
 }
-public class JsonArray extends JsonValue {
+public final class JsonArray extends JsonValue {
     public List<JsonValue> value;
 }
-public class JsonMap extends JsonValue {
+public final class JsonMap extends JsonValue {
     public Map<String, JsonValue> value;
 }
 ```
