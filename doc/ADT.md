@@ -10,7 +10,7 @@
 
 
 ```java
-public final class Student {
+final class Student {
     public String name;
     public int id;
 }
@@ -23,14 +23,14 @@ public final class Student {
 和类型是指可以是某一些类型之一的类型，在Java中可以用继承来表示：
 
 ```java
-public class SchoolPerson {}
-public final class Student extends SchoolPerson {
-    public String name;
-    public int id;
+class SchoolPerson {}
+final class Student extends SchoolPerson {
+    String name;
+    int id;
 }
-public final class Teacher extends SchoolPerson {
-    public String name;
-    public String  office;
+final class Teacher extends SchoolPerson {
+    String name;
+    String  office;
 }
 ```
 
@@ -43,9 +43,9 @@ SchoolPerson可能是Student也可能是Teacher，可以表示为Student和Teach
 利用和类型的枚举特性与积类型的组合特性，我们可以构造出Java中本来很基础的基础类型，比如枚举布尔的两个量来构造布尔类型：
 
 ```java
-public class Bool {}
-public final class True extends Bool {}
-public final class False extends Bool {}
+class Bool {}
+final class True extends Bool {}
+final class False extends Bool {}
 ```
 
 然后用`t instanceof True`就可以用来判定t作为Bool的值是不是True。
@@ -53,12 +53,12 @@ public final class False extends Bool {}
 比如利用S的数量表示的自然数：
 
 ```java
-public class Nat {}
-public final class Z extends Nat {}
-public final class S extends Nat {
-    public Nat value;
+class Nat {}
+final class Z extends Nat {}
+final class S extends Nat {
+    Nat value;
     
-    public S(Nat v) { value = v; }
+    S(Nat v) { value = v; }
 }
 ```
 
@@ -67,13 +67,13 @@ public final class S extends Nat {
 再比如链表：
 
 ```java
-public class List<T> {}
-public final class Nil<T> extends List<T> {}
-public final class Cons<T> extends List<T> {
-    public T value;
-    public List<T> next;
+class List<T> {}
+final class Nil<T> extends List<T> {}
+final class Cons<T> extends List<T> {
+    T value;
+    List<T> next;
     
-    public Cons(T v, List<T> n) {
+    Cons(T v, List<T> n) {
         value = v;
         next = n;
     }
@@ -93,21 +93,21 @@ public final class Cons<T> extends List<T> {
 ADT最适合构造树状的结构，比如解析JSON出的结果需要一个聚合数据结构。
 
 ```java
-public class JsonValue {}
-public final class JsonBool extends JsonValue {
-    public boolean value;
+class JsonValue {}
+final class JsonBool extends JsonValue {
+    boolean value;
 }
-public final class JsonInt extends JsonValue {
-    public int value;
+final class JsonInt extends JsonValue {
+    int value;
 }
-public final class JsonString extends JsonValue {
-    public String value;
+final class JsonString extends JsonValue {
+    String value;
 }
-public final class JsonArray extends JsonValue {
-    public List<JsonValue> value;
+final class JsonArray extends JsonValue {
+    List<JsonValue> value;
 }
-public final class JsonMap extends JsonValue {
-    public Map<String, JsonValue> value;
+final class JsonMap extends JsonValue {
+    Map<String, JsonValue> value;
 }
 ```
 

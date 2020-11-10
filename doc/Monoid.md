@@ -19,10 +19,10 @@
 用Java代码可以表示为：
 
 ```java
-public interface Monoid<T> {
-    public static T empty();
-    public static T append(T a, T b);
-    public static default T appends(Stream<T> x) {
+interface Monoid<T> {
+    T empty();
+    T append(T a, T b);
+    default T appends(Stream<T> x) {
         return x.reduce(empty(), this::append);
     }
 }
@@ -33,11 +33,11 @@ public interface Monoid<T> {
 在Java8中有个新的类`Optional`可以用来表示可能有值的类型，而我们可以对它定义个Monoid：
 
 ```java
-public class OptionalM<T> implements Monoid<Optional<T>> {
-    public static Optional<T> empty() {
+class OptionalM<T> implements Monoid<Optional<T>> {
+    Optional<T> empty() {
         return Optional<T>.empty();
     }
-    public static Optional<T> append(Optional<T> a, Optional<T> b) {
+    Optional<T> append(Optional<T> a, Optional<T> b) {
         if (a.isPresent()) return a;
         else return b;
     }
@@ -47,7 +47,7 @@ public class OptionalM<T> implements Monoid<Optional<T>> {
 这样对于appends来说我们将获得一串Optional中第一个不为空的值，对于需要进行一连串尝试操作可以这样写：
 
 ```java
-OptionalM<int>.appends(Stream.of(try1(), try2(), try3(), try4()))
+new OptionalM<int>.appends(Stream.of(try1(), try2(), try3(), try4()))
 ```
 
 ## 应用：Ordering
@@ -55,9 +55,9 @@ OptionalM<int>.appends(Stream.of(try1(), try2(), try3(), try4()))
 对于`Comparable`接口可以构造出：
 
 ```java
-public class OrderingM implements Monoid<int> {
-    public static int empty() { return 0; }
-    public static int append(int a, int b) {
+class OrderingM implements Monoid<int> {
+    int empty() { return 0; }
+    int append(int a, int b) {
         if (a == 0) return b;
         else return a;
     }
@@ -67,14 +67,14 @@ public class OrderingM implements Monoid<int> {
 同样如果有一串带有优先级的比较操作就可以用appends串起来，比如：
 
 ```java
-public class Student implements Comparable {
-    public String name;
-    public String sex;
-    public Date birthday;
-    public String from;
-    public compareTo(Object o) {
+class Student implements Comparable {
+    String name;
+    String sex;
+    Date birthday;
+    String from;
+    compareTo(Object o) {
         Student s = (Student)(o);
-        return OrderingM.appends(Stream.of(
+        return new OrderingM.appends(Stream.of(
             name.compareTo(s.name),
             sex.compareTo(s.sex),
             birthday.compareTo(s.birthday),
@@ -91,23 +91,23 @@ public class Student implements Comparable {
 在Monoid接口里面加default方法可以支持更多方便的操作：
 
 ```java
-public interface Monoid<T> {
+interface Monoid<T> {
     //...
-    public static default T when(boolean c, T then) {
+    default T when(boolean c, T then) {
         if (c) return then;
         else return empty();
     }
-    public static default T cond(boolean c, T then, T els) {
+    default T cond(boolean c, T then, T els) {
         if (c) return then;
         else return els;
     }
 }
 
-public class Todo implements Monoid<Runnable> {
-    public static Runnable empty() {
+class Todo implements Monoid<Runnable> {
+    Runnable empty() {
         return () -> {};
     }
-    public static Runnable append(Runnable a, Runnable b) {
+    Runnable append(Runnable a, Runnable b) {
         return () -> { a(); b(); };
     }
 }
@@ -116,7 +116,7 @@ public class Todo implements Monoid<Runnable> {
 然后就可以像下面这样使用上面的定义:
 
 ```java
-Todo.appends(Stream.of(
+new Todo.appends(Stream.of(
     logic1,
     () -> { logic2(); },
     Todo.when(condition1, logic3)
