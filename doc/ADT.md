@@ -11,8 +11,8 @@
 
 ```java
 final class Student {
-    public String name;
-    public int id;
+    String name;
+    int id;
 }
 ```
 
@@ -23,12 +23,12 @@ final class Student {
 和类型是指可以是某一些类型之一的类型，在Java中可以用继承来表示：
 
 ```java
-class SchoolPerson {}
-final class Student extends SchoolPerson {
+interface SchoolPerson {}
+final class Student implements SchoolPerson {
     String name;
     int id;
 }
-final class Teacher extends SchoolPerson {
+final class Teacher implements SchoolPerson {
     String name;
     String  office;
 }
@@ -43,9 +43,9 @@ SchoolPerson可能是Student也可能是Teacher，可以表示为Student和Teach
 利用和类型的枚举特性与积类型的组合特性，我们可以构造出Java中本来很基础的基础类型，比如枚举布尔的两个量来构造布尔类型：
 
 ```java
-class Bool {}
-final class True extends Bool {}
-final class False extends Bool {}
+interface Bool {}
+final class True implements Bool {}
+final class False implements Bool {}
 ```
 
 然后用`t instanceof True`就可以用来判定t作为Bool的值是不是True。
@@ -53,9 +53,9 @@ final class False extends Bool {}
 比如利用S的数量表示的自然数：
 
 ```java
-class Nat {}
-final class Z extends Nat {}
-final class S extends Nat {
+interface Nat {}
+final class Z implements Nat {}
+final class S implements Nat {
     Nat value;
     
     S(Nat v) { value = v; }
@@ -67,9 +67,9 @@ final class S extends Nat {
 再比如链表：
 
 ```java
-class List<T> {}
-final class Nil<T> extends List<T> {}
-final class Cons<T> extends List<T> {
+interface List<T> {}
+final class Nil<T> implements List<T> {}
+final class Cons<T> implements List<T> {
     T value;
     List<T> next;
     
@@ -93,20 +93,20 @@ final class Cons<T> extends List<T> {
 ADT最适合构造树状的结构，比如解析JSON出的结果需要一个聚合数据结构。
 
 ```java
-class JsonValue {}
-final class JsonBool extends JsonValue {
+interface JsonValue {}
+final class JsonBool implements JsonValue {
     boolean value;
 }
-final class JsonInt extends JsonValue {
+final class JsonInt implements JsonValue {
     int value;
 }
-final class JsonString extends JsonValue {
+final class JsonString implements JsonValue {
     String value;
 }
-final class JsonArray extends JsonValue {
+final class JsonArray implements JsonValue {
     List<JsonValue> value;
 }
-final class JsonMap extends JsonValue {
+final class JsonMap implements JsonValue {
     Map<String, JsonValue> value;
 }
 ```

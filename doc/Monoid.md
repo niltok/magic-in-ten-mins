@@ -34,10 +34,11 @@ interface Monoid<T> {
 
 ```java
 class OptionalM<T> implements Monoid<Optional<T>> {
-    Optional<T> empty() {
+    public Optional<T> empty() {
         return Optional<T>.empty();
     }
-    Optional<T> append(Optional<T> a, Optional<T> b) {
+    public Optional<T> 
+    append(Optional<T> a, Optional<T> b) {
         if (a.isPresent()) return a;
         else return b;
     }
@@ -56,8 +57,8 @@ new OptionalM<int>.appends(Stream.of(try1(), try2(), try3(), try4()))
 
 ```java
 class OrderingM implements Monoid<int> {
-    int empty() { return 0; }
-    int append(int a, int b) {
+    public int empty() { return 0; }
+    public int append(int a, int b) {
         if (a == 0) return b;
         else return a;
     }
@@ -72,7 +73,7 @@ class Student implements Comparable {
     String sex;
     Date birthday;
     String from;
-    compareTo(Object o) {
+    public int compareTo(Object o) {
         Student s = (Student)(o);
         return new OrderingM.appends(Stream.of(
             name.compareTo(s.name),
@@ -104,10 +105,11 @@ interface Monoid<T> {
 }
 
 class Todo implements Monoid<Runnable> {
-    Runnable empty() {
+    public Runnable empty() {
         return () -> {};
     }
-    Runnable append(Runnable a, Runnable b) {
+    public Runnable 
+    append(Runnable a, Runnable b) {
         return () -> { a(); b(); };
     }
 }

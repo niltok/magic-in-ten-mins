@@ -93,9 +93,9 @@ class HKTList<A>
 这样，实现`Functor`类就是一件简单的事情了：
 
 ```java
-class ListF 
+class ListF
     implements Functor<HKTList<?>> {
-    
+
     public <A, B> HKT<HKTList<?>, B>
     map(HKT<HKTList<?>, A> ma, 
         Function<A, B> f) {

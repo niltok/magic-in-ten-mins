@@ -11,3 +11,7 @@
 [单位半群(Monoid)[Java基础]](doc/Monoid.md)
 
 [高阶类型(Higher Kinded Type)[Java基础]](doc/HKT.md)
+
+## 计算理论
+
+[λ演算(Lambda Calculus)[Java基础，ADT]](doc/Lambda.md)
