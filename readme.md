@@ -15,3 +15,5 @@
 ## 计算理论
 
 [λ演算(Lambda Calculus)[Java基础，ADT]](doc/Lambda.md)
+
+[求值策略(Evaluation Strategy)[Java基础，λ演算]](doc/EvalStrategy.md)
