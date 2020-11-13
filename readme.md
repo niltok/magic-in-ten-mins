@@ -12,6 +12,8 @@
 
 [高阶类型(Higher Kinded Type)[Java基础]](doc/HKT.md)
 
+[单子(Monad)[Java基础，HKT]](doc/Monad.md)
+
 ## 计算理论
 
 [λ演算(Lambda Calculus)[Java基础，ADT]](doc/Lambda.md)
