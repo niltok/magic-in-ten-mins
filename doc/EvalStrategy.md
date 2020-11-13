@@ -36,12 +36,12 @@ public Expr reduce() {
 // class App
 public Expr reduce() {
     Expr fr = f.reduce();
-    Expr fx = x.reduce();
+    Expr xr = x.reduce();
     if (fr instanceof Fun) {
         Fun fun = (Fun) fr;
-        return fun.e.apply(fun.x, fx).reduce();
+        return fun.e.apply(fun.x, xr).reduce();
     }
-    return new App(fr, fx);
+    return new App(fr, xr);
 }
 ```
 
