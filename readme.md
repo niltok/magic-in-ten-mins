@@ -14,6 +14,8 @@
 
 [单子(Monad)[Java基础，HKT]](doc/Monad.md)
 
+[状态单子(State Monad)[Java基础，HKT，Monad]](doc/StateMonad.md)
+
 ## 计算理论
 
 [λ演算(Lambda Calculus)[Java基础，ADT]](doc/Lambda.md)
