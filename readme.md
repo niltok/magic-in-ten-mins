@@ -6,18 +6,22 @@
 
 ## 类型系统
 
-[代数数据类型(Algebraic Data Type)[Java基础]](doc/ADT.md)
+[偏易|代数数据类型(Algebraic Data Type)[Java基础]](doc/ADT.md)
 
-[单位半群(Monoid)[Java基础]](doc/Monoid.md)
+[偏易|单位半群(Monoid)[Java基础]](doc/Monoid.md)
 
-[高阶类型(Higher Kinded Type)[Java基础]](doc/HKT.md)
+[较难|高阶类型(Higher Kinded Type)[Java基础]](doc/HKT.md)
 
-[单子(Monad)[Java基础，HKT]](doc/Monad.md)
+[中等|单子(Monad)[Java基础，HKT]](doc/Monad.md)
 
-[状态单子(State Monad)[Java基础，HKT，Monad]](doc/StateMonad.md)
+[较难|状态单子(State Monad)[Java基础，HKT，Monad]](doc/StateMonad.md)
 
 ## 计算理论
 
-[λ演算(Lambda Calculus)[Java基础，ADT]](doc/Lambda.md)
+[较难|λ演算(Lambda Calculus)[Java基础，ADT]](doc/Lambda.md)
 
-[求值策略(Evaluation Strategy)[Java基础，λ演算]](doc/EvalStrategy.md)
+[偏易|求值策略(Evaluation Strategy)[Java基础，λ演算]](doc/EvalStrategy.md)
+
+## 编程范式
+
+[简单|表驱动编程(Table-Driven Programming)[简单Java基础]](doc/TableDriven.md)

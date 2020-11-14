@@ -61,25 +61,37 @@ class State<S, A>
 
 这里为了好看定义了一个`StateData`类，包含变化后的状态和计算结果。而最核心的就是`runState`函数对象，通过组合这个函数对象来使变化的状态在逻辑间传递。
 
-`State`是一个Monad：
+`State`是一个Monad（注释中是简化的伪代码）：
 
 ```java
-class StateM<S> implements Monad<State<S, ?>> {
-    public <A> HKT<State<S, ?>, A> pure(A v) {
+class StateM<S> 
+    implements Monad<State<S, ?>> {
+    
+    public <A> HKT<State<S, ?>, A> 
+    pure(A v) {
         return new State<>(s -> 
             new State.StateData<>(v, s));
     }
     
+    // <A, B> State<S, B> 
+    // flatMap(State<S, A> ma, 
+    //     Function<A, State<S, B> f)
     public <A, B> HKT<State<S, ?>, B>
     flatMap(HKT<State<S, ?>, A> ma, 
-          Function<A, HKT<State<S, ?>, B>> f) {
+        Function<A,
+            HKT<State<S, ?>, B>> f) {
         
         return new State<>(s -> {
-            State.StateData<A, S> r = State
+            
+            // r = ma.runState(s)
+            State.StateData<A, S> r = 
+                State
                 .narrow(ma)
                 .runState
                 .apply(s);
             
+            // return f(r.value)
+            //     .runState(r.state)
             return State
                 .narrow(f.apply(r.value))
                 .runState
@@ -106,16 +118,20 @@ HKT<State<S, ?>, S> put(S s) {
         new State.StateData<>(any, s));
 }
 // 修改
-HKT<State<S, ?>, S> modify(Function<S, S> f) {
+HKT<State<S, ?>, S> 
+modify(Function<S, S> f) {
     return new State<>(s -> 
-        new State.StateData<>(s, f.apply(s)));
+        new State.StateData<>(
+            s, 
+            f.apply(s)));
 }
 ```
 
 使用的话这里举个求斐波那契数列的例子：
 
 ```java
-static State<Pair<Integer, Integer>, Integer> 
+static 
+State<Pair<Integer, Integer>, Integer> 
 fib(Integer n) {
     StateM<Pair<Integer, Integer>> m = 
         new StateM<>();
@@ -126,7 +142,7 @@ fib(Integer n) {
     return State.narrow(
              m.flatMap(m.modify(x -> 
                  new Pair<>(x.second, 
-                          x.first + x.second)),
+                     x.first + x.second)),
         v -> fib(n - 1))
     );
 }
