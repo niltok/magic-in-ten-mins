@@ -24,6 +24,14 @@
 
 [偏易|求值策略(Evaluation Strategy)[Java基础，λ演算]](doc/EvalStrategy.md)
 
+[较难|编码(Encode)[λ演算]](doc/Encode.md)
+
 ## 编程范式
 
 [简单|表驱动编程(Table-Driven Programming)[简单Java基础]](doc/TableDriven.md)
+
+## 编译原理
+
+[较难|解析器单子(Parser Monad)[Java基础，HKT，Monad]](doc/ParserM.md)
+
+[中等|解析器组合子(Parser Combinator)](doc/Parsec.md)
