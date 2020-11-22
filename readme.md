@@ -10,6 +10,8 @@
 
 [偏易|代数数据类型(Algebraic Data Type)[Java基础]](doc/ADT.md)
 
+[偏易|广义代数数据类型(Generalized Algebriac Data Type)[Java基础，ADT]](doc/GADT.md)
+
 [偏易|单位半群(Monoid)[Java基础]](doc/Monoid.md)
 
 [较难|高阶类型(Higher Kinded Type)[Java基础]](doc/HKT.md)
@@ -30,8 +32,12 @@
 
 [简单|表驱动编程(Table-Driven Programming)[简单Java基础]](doc/TableDriven.md)
 
+[简单|续延(Continuation)[简单Java基础]](doc/Continuation.md)
+
+[中等|代数作用(Algebraic Effect)[简单Java基础，续延]](doc/Algeff.md)
+
 ## 编译原理
 
 [较难|解析器单子(Parser Monad)[Java基础，HKT，Monad]](doc/ParserM.md)
 
-[中等|解析器组合子(Parser Combinator)](doc/Parsec.md)
+[中等|解析器组合子(Parser Combinator)[Java基础，HKT，Monad]](doc/Parsec.md)
