@@ -12,9 +12,9 @@
 
 ```java
 void test() {
-	int i = 1;                // 1
-	i++;                      // 2
-	System.out.println(i);    // 3
+    int i = 1;                // 1
+    i++;                      // 2
+    System.out.println(i);    // 3
 }
 ```
 
@@ -22,8 +22,8 @@ void test() {
 
 ```java
 void cont(int i) {
-	i++;                      // 2
-	System.out.println(i);    // 3
+    i++;                      // 2
+    System.out.println(i);    // 3
 }
 ```
 
@@ -31,7 +31,7 @@ void cont(int i) {
 
 ```java
 void cont(int i) {
-	System.out.println(i);    // 3
+    System.out.println(i);    // 3
 }
 ```
 
@@ -39,15 +39,15 @@ void cont(int i) {
 
 ```java
 void cont1() {
-	int i = 1;                // 1
-	cont2(i);
+    int i = 1;                // 1
+    cont2(i);
 }
 void cont2(int i) {
-	i++;                      // 2
-	cont3(i);
+    i++;                      // 2
+    cont3(i);
 }
 void cont3(int i) {
-	System.out.println(i);    // 3
+    System.out.println(i);    // 3
 }
 void test() {
     cont1();
