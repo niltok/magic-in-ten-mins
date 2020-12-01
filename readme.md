@@ -38,6 +38,8 @@
 
 [中等|依赖注入(Dependency Injection)[Java基础，Monad，代数作用]](doc/DepsInj.md)
 
+[中等|提升(Lifting)[Java基础，HKT，Monad]](doc/Lifting.md)
+
 ## 编译原理
 
 [较难|解析器单子(Parser Monad)[Java基础，HKT，Monad]](doc/ParserM.md)
