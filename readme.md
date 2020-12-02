@@ -12,6 +12,8 @@
 
 [偏易|广义代数数据类型(Generalized Algebriac Data Type)[Java基础，ADT]](doc/GADT.md)
 
+[偏易|余代数数据类型(Coalgebraic Data Type)[Java基础，ADT]](doc/CoData.md)
+
 [偏易|单位半群(Monoid)[Java基础]](doc/Monoid.md)
 
 [较难|高阶类型(Higher Kinded Type)[Java基础]](doc/HKT.md)
