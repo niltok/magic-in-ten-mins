@@ -1,5 +1,7 @@
 # 十分钟魔法练习
 
+[Rust版](https://github.com/PhotonQuantum/magic-in-ten-mins-rs)
+
 抽象与组合
 
 希望能在十分钟内教会你一样魔法
