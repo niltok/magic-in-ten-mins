@@ -1,6 +1,6 @@
 # 十分钟魔法练习
 
-[Rust版](https://github.com/PhotonQuantum/magic-in-ten-mins-rs)
+[Rust版-光量子](https://github.com/PhotonQuantum/magic-in-ten-mins-rs)
 
 抽象与组合
 
