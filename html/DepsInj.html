@@ -14,6 +14,7 @@ blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid b
 code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
 pre { overflow: scroll; padding: 10px }
 ::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+a { color: rgb(255,167,196); text-decoration: none; }
 </style>
 </head>
 <body>
@@ -46,7 +47,7 @@ pre { overflow: scroll; padding: 10px }
 <p>而这个 <code>Hand</code> 在这里就是 <code>Human</code> 的一个<strong>依赖</strong>，也就是说 <code>Human</code> <strong>依赖</strong> <code>Hand</code> 。</p>
 <h2 id="依赖注入">依赖注入</h2>
 <blockquote>
-<p>依赖注入就是我依赖你，你注入我。</p>
+<p>依赖注入就是我依赖你，你把你注入给我。</p>
 <p>By 千里冰封</p>
 </blockquote>
 <p>上面的代码有个问题，如果两个人的手依赖不同的实现该怎么办？如果一个人的手是肉做的一个人是机械手该怎么办？</p>

@@ -26,8 +26,9 @@ const squote = 'blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-l
 const scodef = 'code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }\n'
 const spre = 'pre { overflow: scroll; padding: 10px }\n'
 const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }\n'
+const sa = 'a { color: rgb(255,167,196); text-decoration: none; }\n'
 
-const style = $$('style')(sbody + sfont + sh1 + sh2 + scenter + squote + scodef + spre + sscorll)
+const style = $$('style')(sbody + sfont + sh1 + sh2 + scenter + squote + scodef + spre + sscorll + sa)
 
 const head = $$('head')(charset + viewpoint + title + hljscss + style)
 
@@ -41,3 +42,6 @@ fs.readdirSync("doc").forEach(f => {
         fs.writeFileSync("html/" + f.substr(0, f.length - 3) + ".html", gen(content))
     }
 })
+
+const index = fs.readFileSync('readme.md').toString()
+fs.writeFileSync('index.html', gen(index))
