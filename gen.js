@@ -28,7 +28,7 @@ const spre = 'pre { overflow: scroll; padding: 10px; background: #f6f8fa; }\n'
 const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }\n'
 const sa = 'a { color: rgb(255,167,196); text-decoration: none; }\n'
 
-const style = $$('style')(sbody + sfont + sh1 + sh2 + scenter + squote + scode + spre + sscorll + sa)
+const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sscorll + sa)
 
 const head = $$('head')(charset + viewpoint + title + hljscss + style)
 
