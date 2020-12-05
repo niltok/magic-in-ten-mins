@@ -50,7 +50,7 @@ class Fun implements Expr {
         x = s;
         e = a;
     }
-    public String toString {
+    public String toString() {
         return "(λ " + x + ". " 
             + e.toString() + ")";
     }
