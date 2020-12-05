@@ -16,7 +16,7 @@
 
 偏易 | 广义代数数据类型(Generalized Algebriac Data Type)[Java基础，ADT] |
 [Markdown](doc/GADT.md) |
-[HTML](https://goldimax.github.io/magic-in-ten-mins/html/GADT.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/GADT.html)
 
 偏易 | 余代数数据类型(Coalgebraic Data Type)[Java基础，ADT] |
 [Markdown](doc/CoData.md) |
@@ -78,7 +78,7 @@
 
 较难 | 解析器单子(Parser Monad)[Java基础，HKT，Monad] |
 [Markdown](doc/ParserM.md) |
-[HTML](https://goldimax.github.io/magic-in-ten-mins/html/ParserM.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/ParserM.html)
 
 中等|解析器组合子(Parser Combinator)[Java基础，HKT，Monad] |
 [Markdown](doc/Parsec.md) |

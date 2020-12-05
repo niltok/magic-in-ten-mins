@@ -23,12 +23,12 @@ const sh1 = 'h1 { font-size: 2.5em; }\n'
 const sh2 = 'h2 { margin-top: 2em; }\n'
 const scenter = 'h1, h2, h3 { text-align: center; }\n'
 const squote = 'blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }\n'
-const scodef = 'code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }\n'
-const spre = 'pre { overflow: scroll; padding: 10px }\n'
+const scode = 'code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #f6f8fa; }\n'
+const spre = 'pre { overflow: scroll; padding: 10px; background: #f6f8fa; }\n'
 const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }\n'
 const sa = 'a { color: rgb(255,167,196); text-decoration: none; }\n'
 
-const style = $$('style')(sbody + sfont + sh1 + sh2 + scenter + squote + scodef + spre + sscorll + sa)
+const style = $$('style')(sbody + sfont + sh1 + sh2 + scenter + squote + scode + spre + sscorll + sa)
 
 const head = $$('head')(charset + viewpoint + title + hljscss + style)
 
