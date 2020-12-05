@@ -1,0 +1,68 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：求值策略">十分钟魔法练习：求值策略</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，λ演算</p>
+</blockquote>
+<h2 id="非严格求值">非严格求值</h2>
+<p>细心的读者应该已经注意到， λ 演算那期中讲到的 λ 演算解释器的 <code>reduce</code> 并不会先将参数 <code>reduce</code> ，而是先 <code>apply</code> 参数再在最后 <code>reduce</code> 结果：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class App</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
+    Expr fr = f.reduce();
+    <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Fun) {
+        Fun fun = (Fun) fr;
+        <span class="hljs-keyword">return</span> fun.e.apply(fun.x, x).reduce();
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr, x);
+}</code></pre>
+<p>并且函数的 <code>reduce</code> 并不会 <code>reduce</code> 函数内部表达式而是直接返回 <code>this</code> 。</p>
+<p>这样处理和平时见过的常规语言似乎很不一样，C、Java在处理函数参数时都选择先对参数求值再传参。</p>
+<p>像这样先传参再归约的求值思路就叫非严格求值，也叫惰性求值。其最大好处是在很多时候函数的参数没有被使用过的情况下节省了求值时归约次数。</p>
+<p>比如 <code>(λ x. λ y. x) complex1 complex2</code> 这个 λ 表达式只会取 <code>complex1</code> 和 <code>complex2</code> 中的 <code>complex1</code> ，如果 <code>complex2</code> 非常复杂那就非常浪费算力了。</p>
+<h2 id="严格求值">严格求值</h2>
+<p>所谓严格求值就是像 C 系语言一样先求参数的值再传参：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class App</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
+    Expr fr = f.reduce();
+    Expr xr = x.reduce();
+    <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Fun) {
+        Fun fun = (Fun) fr;
+        <span class="hljs-keyword">return</span> fun.e.apply(fun.x, xr).reduce();
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr, xr);
+}</code></pre>
+<p>λ 演算中所有的表达式都是<strong>纯</strong>的，也就是说不同的求值策略和求值顺序并不会影响最终求值的结果。所以不同的求值策略求出的结果都是等价的，只是打印出来的效果不同。这与 C 系语言就很不一样。</p>
+<h2 id="完全-β-归约">完全 β 归约</h2>
+<p>如果想要让打印出的表达式被化到最简还需要在严格求值的基础上把函数定义中的表达式也进一步归约：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class Fun</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(x, e.reduce());
+}</code></pre>
+<p>这就是完全 β 归约。它会将任何能归约的地方归约，即使这个函数并没有被应用函数内部也会被归约。</p>
+<h2 id="对比">对比</h2>
+<p>对于λ表达式：</p>
+<pre><code>(λ n. λ f. λ x. (f (n f x)) (λ f. λ x. x))</code></pre>
+<p>进行非严格求值会得到：</p>
+<pre><code>λ f. λ x. f ((λ f. λ x. x) f x)</code></pre>
+<p>进行完全β归约会得到：</p>
+<pre><code>λ f. λ x. f x</code></pre>
+</body>
+</html>

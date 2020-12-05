@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：单位半群">十分钟魔法练习：单位半群</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础</p>
+</blockquote>
+<h2 id="半群（semigroup）">半群（Semigroup）</h2>
+<p>半群是一种代数结构，在集合 <code>A</code> 上包含一个将两个 <code>A</code> 的元素映射到 <code>A</code> 上的运算即 <code>&lt;&gt; : (A, A) -&gt; A​</code> ，同时该运算满足<strong>结合律</strong>即 <code>(a &lt;&gt; b) &lt;&gt; c == a &lt;&gt; (b &lt;&gt; c)</code> ，那么代数结构 <code>{&lt;&gt;, A}</code> 就是一个半群。</p>
+<p>比如在自然数集上的加法或者减法可以构成一个半群，再比如字符串集上字符串的连接构成一个半群。</p>
+<h2 id="单位半群（monoid）">单位半群（Monoid）</h2>
+<p>单位半群是一种带单位元的半群，对于集合 <code>A</code> 上的半群 <code>{&lt;&gt;, A}</code> ， <code>A</code> 中的元素 <code>a</code> 使 <code>A</code> 中的所有元素 <code>x</code> 满足 <code>x &lt;&gt; a</code> 和 <code>a &lt;&gt; x</code> 都等于 <code>x</code>，则 <code>a</code> 就是 <code>{&lt;&gt;, A}</code> 上的单位元。</p>
+<p>举个例子， <code>{+, 自然数集}</code> 的单位元就是 0 ， <code>{*, 自然数集}</code> 的单位元就是 1 ， <code>{+, 字符串集}</code> 的单位元就是空串 <code>&quot;&quot;</code> 。</p>
+<p>用 Java 代码可以表示为：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Monoid</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
+    <span class="hljs-function">T <span class="hljs-title">empty</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function">T <span class="hljs-title">append</span><span class="hljs-params">(T a, T b)</span></span>;
+    <span class="hljs-function"><span class="hljs-keyword">default</span> T <span class="hljs-title">appends</span><span class="hljs-params">(Stream&lt;T&gt; x)</span> </span>{
+        <span class="hljs-keyword">return</span> x.reduce(empty(), <span class="hljs-keyword">this</span>::append);
+    }
+}</code></pre>
+<h2 id="应用：optional">应用：Optional</h2>
+<p>在 Java8 中有个新的类 <code>Optional</code> 可以用来表示可能有值的类型，而我们可以对它定义个 Monoid ：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OptionalM</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title">Monoid</span>&lt;<span class="hljs-title">Optional</span>&lt;<span class="hljs-title">T</span>&gt;&gt; </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Optional&lt;T&gt; <span class="hljs-title">empty</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> Optional&lt;T&gt;.empty();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Optional&lt;T&gt; 
+    <span class="hljs-title">append</span><span class="hljs-params">(Optional&lt;T&gt; a, Optional&lt;T&gt; b)</span> </span>{
+        <span class="hljs-keyword">if</span> (a.isPresent()) <span class="hljs-keyword">return</span> a;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> b;
+    }
+}</code></pre>
+<p>这样对于 appends 来说我们将获得一串 Optional 中第一个不为空的值，对于需要进行一连串尝试操作可以这样写：</p>
+<pre><code class="language-java"><span class="hljs-keyword">new</span> OptionalM&lt;<span class="hljs-keyword">int</span>&gt;.appends(Stream.of(try1(), try2(), try3(), try4()))</code></pre>
+<h2 id="应用：ordering">应用：Ordering</h2>
+<p>对于 <code>Comparable</code> 接口可以构造出：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OrderingM</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Monoid</span>&lt;<span class="hljs-title">int</span>&gt; </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">empty</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>; }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">append</span><span class="hljs-params">(<span class="hljs-keyword">int</span> a, <span class="hljs-keyword">int</span> b)</span> </span>{
+        <span class="hljs-keyword">if</span> (a == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> b;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> a;
+    }
+}</code></pre>
+<p>同样如果有一串带有优先级的比较操作就可以用 appends 串起来，比如：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Student</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Comparable</span> </span>{
+    String name;
+    String sex;
+    Date birthday;
+    String from;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">compareTo</span><span class="hljs-params">(Object o)</span> </span>{
+        Student s = (Student)(o);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> OrderingM.appends(Stream.of(
+            name.compareTo(s.name),
+            sex.compareTo(s.sex),
+            birthday.compareTo(s.birthday),
+            from.compareTo(s.from)
+        ));
+    }
+}</code></pre>
+<p>这样的写法比一连串 <code>if-else</code> 优雅太多。</p>
+<h2 id="扩展">扩展</h2>
+<p>在 Monoid 接口里面加 default 方法可以支持更多方便的操作：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Monoid</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
+    <span class="hljs-comment">//...</span>
+    <span class="hljs-function"><span class="hljs-keyword">default</span> T <span class="hljs-title">when</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> c, T then)</span> </span>{
+        <span class="hljs-keyword">if</span> (c) <span class="hljs-keyword">return</span> then;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> empty();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">default</span> T <span class="hljs-title">cond</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> c, T then, T els)</span> </span>{
+        <span class="hljs-keyword">if</span> (c) <span class="hljs-keyword">return</span> then;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> els;
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Todo</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Monoid</span>&lt;<span class="hljs-title">Runnable</span>&gt; </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Runnable <span class="hljs-title">empty</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> () -&gt; {};
+    }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Runnable 
+    <span class="hljs-title">append</span><span class="hljs-params">(Runnable a, Runnable b)</span> </span>{
+        <span class="hljs-keyword">return</span> () -&gt; { a(); b(); };
+    }
+}</code></pre>
+<p>然后就可以像下面这样使用上面的定义:</p>
+<pre><code class="language-java"><span class="hljs-keyword">new</span> Todo.appends(Stream.of(
+    logic1,
+    () -&gt; { logic2(); },
+    Todo.when(condition1, logic3)
+))</code></pre>
+<blockquote>
+<p>注：上面的 Optional 并不是 lazy 的，实际运用中加上非空短路能提高效率。</p>
+</blockquote>
+</body>
+</html>

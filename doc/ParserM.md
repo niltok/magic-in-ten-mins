@@ -13,9 +13,9 @@ Function<ParseState,
          Maybe<Pair<A, ParseState>>>
 ```
 
-其中`ParseState`是包含当前解析位置的源文本的类型。返回值用`Maybe`包起来因为解析可能失败。`A`就是解析出来的具体数据类型。返回值中包括解析后的状态`ParseState`，这样就可以传递给下一个解析器函数，从而组合多个解析器。
+其中 `ParseState` 是包含当前解析位置的源文本的类型。返回值用 `Maybe` 包起来因为解析可能失败。 `A` 就是解析出来的具体数据类型。返回值中包括解析后的状态 `ParseState` ，这样就可以传递给下一个解析器函数，从而组合多个解析器。
 
-而且很显然这个函数是一个Monad，为了为它实现Monad需要用HKT包装一下：
+而且很显然这个函数是一个 Monad ，为了为它实现 Monad 需要用 HKT 包装一下：
 
 ```java
 class Parser<A>
@@ -50,7 +50,7 @@ class Parser<A>
 }
 ```
 
-然后就可以实现Parser Monad了：
+然后就可以实现 Parser Monad 了：
 
 ```java
 class ParserM 
@@ -97,9 +97,9 @@ class ParserM
 
 ```
 
-实现了Monad以后写Parser就可以不用管理错误回溯也不用手动传递解析状态，只需要把解析器看成一个抽象的容器，取出解析结果，组合，再放回容器。
+实现了 Monad 以后写 Parser 就可以不用管理错误回溯也不用手动传递解析状态，只需要把解析器看成一个抽象的容器，取出解析结果，组合，再放回容器。
 
-这里举两个用Parser Monad写的组合函数：
+这里举两个用 Parser Monad 写的组合函数：
 
 ```java
 // class Parser<A>

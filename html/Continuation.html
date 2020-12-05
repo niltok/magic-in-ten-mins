@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：续延">十分钟魔法练习：续延</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：简单Java基础</p>
+</blockquote>
+<h2 id="续延">续延</h2>
+<p>续延（Continuation）是指代表一个程序未来的函数，其参数是一个程序过去计算的结果。</p>
+<p>比如对于这个程序：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>;                <span class="hljs-comment">// 1</span>
+    i++;                      <span class="hljs-comment">// 2</span>
+    System.out.println(i);    <span class="hljs-comment">// 3</span>
+}</code></pre>
+<p>它第二行以及之后的续延就是：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>{
+    i++;                      <span class="hljs-comment">// 2</span>
+    System.out.println(i);    <span class="hljs-comment">// 3</span>
+}</code></pre>
+<p>而第三行之后的续延是：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>{
+    System.out.println(i);    <span class="hljs-comment">// 3</span>
+}</code></pre>
+<p>实际上可以把这整个程序的每一行改成一个续延然后用函数调用串起来变成和刚才的程序一样的东西：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont1</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>;                <span class="hljs-comment">// 1</span>
+    cont2(i);
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont2</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>{
+    i++;                      <span class="hljs-comment">// 2</span>
+    cont3(i);
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont3</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>{
+    System.out.println(i);    <span class="hljs-comment">// 3</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{
+    cont1();
+}</code></pre>
+<h2 id="续延传递风格">续延传递风格</h2>
+<p>续延传递风格（Continuation-Passing Style, CPS）是指把程序的续延作为函数的参数来获取函数返回值的编程思路。</p>
+<p>听上去很难理解，把上面的三个 <code>cont</code> 函数改成CPS就很好理解了：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">logic1</span><span class="hljs-params">(Consumer&lt;Integer&gt; f)</span> </span>{
+    <span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>;
+    f.accept(i); <span class="hljs-comment">// return i</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">logic2</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i, Consumer&lt;Integer&gt; f)</span> </span>{
+    i++;
+    f.accept(i);
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">logic3</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i, Consumer&lt;Integer&gt; f)</span> </span>{
+    System.out.println(i);
+    f.accept(i);
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{
+         logic1( <span class="hljs-comment">// 获取返回值 i</span>
+    i -&gt; logic2(i, 
+    i -&gt; logic3(i, 
+    i -&gt; {})));
+}</code></pre>
+<p>每个 <code>logic</code> 函数的最后一个参数 <code>f</code> 就是整个程序的续延，而在每个函数的逻辑结束后整个程序的续延也就是未来会被调用。而 <code>test</code> 函数把整个程序组装起来。</p>
+<p>小朋友，你有没有觉得最后的 <code>test</code> 函数写法超眼熟呢？实际上这个写法就是 Monad 的写法， Monad 的写法就是 CPS 。</p>
+<p>另一个角度来说，这也是回调函数的写法，每个 <code>logic</code> 函数完成逻辑后调用了回调函数 <code>f</code> 来完成剩下的逻辑。实际上，异步回调思想很大程度上就是 CPS 。</p>
+<h2 id="有界续延">有界续延</h2>
+<p>考虑有另一个函数 <code>callT</code> 调用了 <code>test</code> 函数，如：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">callT</span><span class="hljs-params">()</span> </span>{
+    test();
+    System.out.println(<span class="hljs-number">3</span>);
+}</code></pre>
+<p>那么对于 <code>logic</code> 函数来说调用的 <code>f</code> 这个续延并不包括 <code>callT</code> 中的打印语句，那么实际上 <code>f</code> 这个续延并不是整个函数的未来而是 <code>test</code> 这个函数局部的未来。</p>
+<p>这样代表局部程序的未来的函数就叫有界续延（Delimited Continuation）。</p>
+<p>实际上在大多时候用的比较多的还是有界续延，因为在 Java 中获取整个程序的续延还是比较困难的，这需要全用 CPS 的写法。</p>
+<h2 id="异常">异常</h2>
+<p>拿到了有界续延我们就能实现一大堆控制流魔法，这里拿异常处理举个例子，通过CPS写法自己实现一个 <code>try-throw</code> 。</p>
+<p>首先最基本的想法是把每次调用 <code>try</code> 的 <code>catch</code> 函数保存起来，由于 <code>try</code> 可层层嵌套所以每次压入栈中，然后 <code>throw</code> 的时候将最近的 <code>catch</code> 函数取出来调用即可：</p>
+<pre><code class="language-java">Stack&lt;Consumer&lt;Exception&gt;&gt; cs = 
+    <span class="hljs-keyword">new</span> Stack&lt;&gt;();
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Try</span><span class="hljs-params">(
+        Consumer&lt;Runnable&gt; body,
+        BiConsumer&lt;Exception, Runnable&gt; 
+                  handler,
+        Runnable cont)</span> </span>{
+
+    cs.push(e -&gt; handler.accept(e, cont));
+    body.accept(cont);
+    cs.pop();
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Throw</span><span class="hljs-params">(Exception e)</span> </span>{
+    cs.peek().accept(e);
+}</code></pre>
+<p>这里 <code>body</code> 、 <code>Try</code> 、 <code>handler</code> 的最后一个参数都是这个程序的有界续延。</p>
+<p>有了 <code>try-throw</code> 就可以按照CPS风格调用它们来达到处理异常的目的：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">(<span class="hljs-keyword">int</span> t)</span> </span>{
+    Try(
+    cont -&gt; {
+        System.out.println(<span class="hljs-string">&quot;try&quot;</span>);
+        <span class="hljs-keyword">if</span> (t == <span class="hljs-number">0</span>) Throw(
+            <span class="hljs-keyword">new</span> ArithmeticException());
+        <span class="hljs-keyword">else</span> {
+            System.out.println(<span class="hljs-number">100</span> / t);
+            cont.run();
+        }
+    },
+    (e, cont) -&gt; {
+        System.out.println(<span class="hljs-string">&quot;catch&quot;</span>);
+        cont.run();
+    },
+    () -&gt; System.out.println(<span class="hljs-string">&quot;final&quot;</span>));
+}</code></pre>
+<p>调用 <code>test(0)</code> 会得到：</p>
+<pre><code><span class="hljs-keyword">try</span>
+<span class="hljs-keyword">catch</span>
+<span class="hljs-keyword">final</span></code></pre>
+<p>而调用 <code>test(1)</code> 会得到：</p>
+<pre><code><span class="hljs-keyword">try</span>
+<span class="hljs-number">100</span>
+<span class="hljs-keyword">final</span></code></pre>
+</body>
+</html>

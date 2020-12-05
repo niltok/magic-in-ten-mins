@@ -1,0 +1,59 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：广义代数数据类型">十分钟魔法练习：广义代数数据类型</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，ADT</p>
+</blockquote>
+<p>在 ADT 中可以构造出如下类型：</p>
+<pre><code class="language-java"><span class="hljs-comment">// 构造函数已省去</span>
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Integer value;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Boolean value;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Add</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Expr e1, e2;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Eq</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Expr e1, e2;
+}</code></pre>
+<p>但是这样构造有个问题，很显然 <code>BVal</code> 是不能相加的而这样的构造并不能防止构造出这样的东西。实际上在这种情况下ADT的表达能力是不足的。</p>
+<p>一个比较显然的解决办法是给 <code>Expr</code> 添加一个类型参数用于标记表达式的类型：</p>
+<pre><code class="language-java"><span class="hljs-comment">// 构造函数已省去</span>
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span>&lt;<span class="hljs-title">T</span>&gt; </span>{}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span>&lt;<span class="hljs-title">Integer</span>&gt; </span>{
+    Integer value;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span>&lt;<span class="hljs-title">Boolean</span>&gt; </span>{
+    Boolean value;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Add</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span>&lt;<span class="hljs-title">Integer</span>&gt; </span>{
+    Expr&lt;Integer&gt; e1, e2;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Eq</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span>&lt;<span class="hljs-title">Boolean</span>&gt; </span>{
+    Expr&lt;T&gt; e1, e2;
+}</code></pre>
+<p>这样就可以避免构造出两个类型为 <code>Boolean</code> 的表达式相加，能构造出的表达式都是类型安全的。</p>
+<p>注意到四个 <code>class</code> 的父类都不是 <code>Expr&lt;T&gt;</code> 而是包含参数的 <code>Expr</code> ，这和 ADT 并不一样。而这就是广义代数数据类型（Generalized Algebraic Data Type, GADT）。</p>
+</body>
+</html>

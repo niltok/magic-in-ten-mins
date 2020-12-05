@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：依赖注入">十分钟魔法练习：依赖注入</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，Monad，代数作用</p>
+</blockquote>
+<h2 id="模块依赖">模块依赖</h2>
+<p>有时候某些类需要在被调用方法的时候使用其他类：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">please</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">new</span> Hand().rush();
+    }
+    &lt;T&gt; <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pick</span><span class="hljs-params">(T thing)</span> </span>{
+        <span class="hljs-keyword">new</span> Hand().hold(thing);
+    }
+}</code></pre>
+<p>不过像上面的 <code>hand</code> 在每次调用的时候都创建一个实例对 GC 就很不友好，实际上如果不是一次性的东西完全可以复用：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
+    Hand hand = <span class="hljs-keyword">new</span> Hand();
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">please</span><span class="hljs-params">()</span> </span>{
+        hand.rush();
+    }
+    &lt;T&gt; <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pick</span><span class="hljs-params">(T thing)</span> </span>{
+        hand.hold(thing);
+    }
+}</code></pre>
+<p>这样处理 <code>Human</code> 的依赖可以增强扩展性，比如换一个 <code>Hand</code> 实现只需要改一个地方。</p>
+<p>而这个 <code>Hand</code> 在这里就是 <code>Human</code> 的一个<strong>依赖</strong>，也就是说 <code>Human</code> <strong>依赖</strong> <code>Hand</code> 。</p>
+<h2 id="依赖注入">依赖注入</h2>
+<blockquote>
+<p>依赖注入就是我依赖你，你注入我。</p>
+<p>By 千里冰封</p>
+</blockquote>
+<p>上面的代码有个问题，如果两个人的手依赖不同的实现该怎么办？如果一个人的手是肉做的一个人是机械手该怎么办？</p>
+<p>这时候就应该让构造 <code>Human</code> 的代码来选择构造什么样的 <code>Hand</code> 然后赋值给对应的属性或者直接传给构造函数：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
+    Hand hand;
+    Human(Hand hand) {
+        <span class="hljs-keyword">this</span>.hand = hand;
+    }
+}</code></pre>
+<p>这样使用 <code>Human</code> 的代码在构造 <code>Human</code> 的时候就需要传入它的依赖，也就是完成一次对 <code>Human</code> 的<strong>依赖注入</strong>（Dependency Injection），依赖从使用 <code>Human</code> 的代码转移到了 <code>Human</code> 中。</p>
+<p>这样设计就可以在造人的时候选择人有什么样的手，甚至还能让两个人共用一个手。</p>
+<h2 id="自动注入">自动注入</h2>
+<p>每次在使用 <code>Human</code> 的时候都要自己搓一个 <code>Hand</code> 塞进去实在是太麻烦，很多时候只需要默认的 <code>Hand</code> 就行了。这时候就需要工厂模式来自动注入依赖：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HumanFactory</span> </span>{
+    Hand hand;
+    <span class="hljs-function">HumanFactory <span class="hljs-title">withHand</span><span class="hljs-params">(Hand hand)</span> </span>{
+        <span class="hljs-keyword">this</span>.hand = hand;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+    <span class="hljs-function">Human <span class="hljs-title">build</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">if</span> (hand == <span class="hljs-keyword">null</span>) 
+            hand = <span class="hljs-keyword">new</span> HandDefault();
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Human(hand);
+    }
+}</code></pre>
+<p>这种注入依赖的方法对一堆依赖的模块效果拔群，只需要配置部分依赖就可以正确使用。</p>
+<h2 id="依赖注入框架">依赖注入框架</h2>
+<p>工厂模式有个问题，当产出物非常非常复杂的时候代码量极大，但这实际上都是能自动生成的重复代码，于是人们就在这一层上进一步抽象，做出了依赖注入框架来自动生成装配工厂代码。</p>
+<p>例如在Spring中可以通过这样添加注解来生成自动依赖注入代码：</p>
+<pre><code class="language-java"><span class="hljs-meta">@Component(&quot;Human&quot;)</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
+    <span class="hljs-meta">@Resource(name=&quot;handDefault&quot;)</span>
+    Hand hand;
+}</code></pre>
+<p>而调用 <code>context.getBean(&quot;Human&quot;)</code> 就可以得到一个 <code>Human</code> 的实例。</p>
+<h2 id="读取器单子">读取器单子</h2>
+<p>如果你精通函数式编程就会想到为啥 <code>Hand</code> 要放在对象里面呢，保存状态多不好。于是第一个程序可以改成：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">please</span><span class="hljs-params">(Hand hand)</span> </span>{
+        hand.rush();
+    }
+    &lt;T&gt; <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pick</span><span class="hljs-params">(Hand hand, T thing)</span> </span>{
+        hand.hold(thing);
+    }
+}</code></pre>
+<p>不过这样每个函数都要传一遍 <code>Hand</code> 就挺麻烦的，这时候就可以使用 <code>Reader Monad</code> 来改写这两个方法：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
+    <span class="hljs-function">Reader&lt;Hand, Hand&gt; <span class="hljs-title">please</span><span class="hljs-params">()</span> </span>{
+        ReaderM&lt;Hand&gt; m = <span class="hljs-keyword">new</span> ReaderM&lt;&gt;();
+        <span class="hljs-keyword">return</span> Reader.narrow(
+            m.flatMap(m.ask,
+            hand -&gt; {
+                hand.rush();
+                <span class="hljs-keyword">return</span> m.pure(hand);
+            }));
+    }
+    &lt;T&gt; <span class="hljs-function">Reader&lt;Hand, Hand&gt; <span class="hljs-title">pick</span><span class="hljs-params">(T thing)</span> </span>{
+        ReaderM&lt;Hand&gt; m = <span class="hljs-keyword">new</span> ReaderM&lt;&gt;();
+        <span class="hljs-keyword">return</span> Reader.narrow(
+            m.flatMap(m.ask,
+            hand -&gt; {
+                hand.hold(thing);
+                <span class="hljs-keyword">return</span> m.pure(hand);
+            }));
+    }
+}</code></pre>
+<p>这样就可以让一个环境在函数之间隐式传递，来达到依赖注入的目的。</p>
+<p>不过……这似乎看上去更加复杂了……</p>
+<p>我在这里只是提供一种思路，在某些对 <code>Monad</code> 支持良好的语言中这种思路是一种更简便的办法。</p>
+<h2 id="代数作用">代数作用</h2>
+<p>讲到 <code>Reader Monad</code> ，读过代数作用那期的读者就会想到 <code>Reader Monad</code> 和代数作用是同构的。那既然 <code>Reader Monad</code> 能用来注入依赖，代数作用也可以：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">please</span><span class="hljs-params">(Runnable cont)</span> </span>{
+        Eff.Perform(<span class="hljs-string">&quot;Hand&quot;</span>, hand -&gt; {
+            ((Hand) hand).rush();
+            cont.run();
+        });
+    }
+    &lt;T&gt; <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pick</span><span class="hljs-params">(T thing, Runnable cont)</span> </span>{
+        Eff.Perform(<span class="hljs-string">&quot;Hand&quot;</span>, hand -&gt; {
+            ((Hand) hand).hold(thing);
+            cont.run();
+        })
+    }
+}</code></pre>
+<p>这样看上去就比 <code>Reader Monad</code> 的写法清晰很多，虽然回调的写法也挺反人类的……不过在支持代数作用的语言里面这种写法将是强力的依赖注入工具。</p>
+</body>
+</html>

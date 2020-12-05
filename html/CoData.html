@@ -1,0 +1,68 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：余代数数据类型">十分钟魔法练习：余代数数据类型</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，ADT</p>
+</blockquote>
+<h2 id="adt-的局限性">ADT 的局限性</h2>
+<p>很显然， ADT 可以构造任何树形的数据结构：树的节点内分支用和类型连接，层级间节点用积类型连接。</p>
+<p>但是同样很显然 ADT 并不能搞出环形的数据结构或者说是无穷大小的数据结构。比如下面的代码：</p>
+<pre><code class="language-java">IntList list = <span class="hljs-keyword">new</span> IntCons(<span class="hljs-number">1</span>, list);</code></pre>
+<p>编译器会表示 <code>list</code> 在使用时未初始化。</p>
+<p>为什么会这样呢？ ADT 是归纳构造的，也就是说它必须从非递归的基本元素开始组合构造成更大的元素。</p>
+<p>如果我们去掉这些基本元素那就没法凭空构造大的元素，也就是说如果去掉归纳的第一步那整个归纳过程毫无意义。</p>
+<h2 id="余代数数据类型">余代数数据类型</h2>
+<p>余代数数据类型（Coalgebraic Data Type）也就是余归纳数据类型（Coinductive Data Type），代表了自顶向下的数据类型构造思路，思考一个类型可以如何被分解从而构造数据类型。</p>
+<p>这样在分解过程中再次使用自己这个数据类型本身就是一件非常自然的事情了。</p>
+<p>不过在编程实现过程中使用自己需要加个惰性数据结构包裹，防止积极求值的语言无限递归生成数据。</p>
+<p>比如一个列表可以被分解为第一项和剩余的列表：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InfIntList</span> </span>{
+    <span class="hljs-keyword">int</span> head;
+    Supplier&lt;InfIntList&gt; next;
+
+    InfIntList(
+        <span class="hljs-keyword">int</span> head, 
+        Supplier&lt;InfIntList&gt; next
+    ) {
+        <span class="hljs-keyword">this</span>.head = head;
+        <span class="hljs-keyword">this</span>.next = next;
+    }
+}</code></pre>
+<p>这里的 <code>Supplier</code> 可以做到仅在需要 <code>next</code> 的时候才求值。使用的例子如下：</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Codata</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">static</span> InfIntList
+    <span class="hljs-title">infAlt</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> InfIntList(<span class="hljs-number">1</span>, 
+         () -&gt; <span class="hljs-keyword">new</span> InfIntList(<span class="hljs-number">2</span>, 
+         Codata::infAlt));
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> 
+    <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        System.out.println(
+            infAlt().next.get().head);
+    }
+}</code></pre>
+<p>运行会输出 <code>2</code> 。注意，这里的 <code>infAlt</code> 从某种角度来看实际上就是个长度为 2 的环形结构。</p>
+<p>用这样的思路可以构造出无限大的树、带环的图等数据结构。</p>
+<p>不过以上都是对余代数数据类型的一种模拟，实际上在对其支持良好的语言都会自动加上 <code>Supplier</code> 来辅助构造，同时还能处理好对无限大（其实是环）的数据结构的无限递归变换（<code>map</code>, <code>fold</code> ...）的操作。</p>
+</body>
+</html>

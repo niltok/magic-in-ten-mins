@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：解析器组合子">十分钟魔法练习：解析器组合子</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，HKT，Monad</p>
+</blockquote>
+<h2 id="常见组合子">常见组合子</h2>
+<p>解析器单子那期的最后给出了 <code>map</code> 和 <code>combine</code> 的定义，而 <code>combine</code> 可以进一步组合出只取自己结果和只取参数结果的组合子：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
+
+<span class="hljs-comment">// 忽略参数解析器的解析结果</span>
+&lt;B&gt; <span class="hljs-function">Parser&lt;A&gt;
+<span class="hljs-title">skip</span><span class="hljs-params">(Parser&lt;B&gt; p)</span> </span>{
+    <span class="hljs-keyword">return</span> combine(p, (a, b) -&gt; a);
+}
+<span class="hljs-comment">// 使用参数解析器的解析结果</span>
+&lt;B&gt; <span class="hljs-function">Parser&lt;B&gt;
+<span class="hljs-title">use</span><span class="hljs-params">(Parser&lt;B&gt; p)</span> </span>{
+    <span class="hljs-keyword">return</span> combine(p, (a, b) -&gt; b);
+}</code></pre>
+<p><code>or</code> 组合子可以在解析失败的时候用参数解析器来重新解析：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
+<span class="hljs-function">Parser&lt;A&gt;
+<span class="hljs-title">or</span><span class="hljs-params">(Parser&lt;A&gt; p)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt; {
+        Maybe&lt;Pair&lt;A, ParseState&gt;&gt;
+            r = runParser(s);
+        <span class="hljs-keyword">if</span> (r.value == <span class="hljs-keyword">null</span>)
+            <span class="hljs-keyword">return</span> p.runParser(s);
+        <span class="hljs-keyword">return</span> r;
+    });
+}</code></pre>
+<p><code>many</code> 组合子用来构造匹配任意个相同的解析器的解析器，用了 List 来返回结果，所以代码比较复杂：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
+Parser&lt;List&lt;A&gt;&gt;
+many() {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt; {
+        Maybe&lt;Pair&lt;A, ParseState&gt;&gt;
+            r = runParser(s);
+        <span class="hljs-keyword">if</span> (r.value == <span class="hljs-keyword">null</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;(
+                <span class="hljs-keyword">new</span> Pair&lt;&gt;(
+                <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(), s));
+        Maybe&lt;Pair&lt;List&lt;A&gt;, ParseState&gt;&gt;
+            rs = many().runParser(
+                        r.value.second);
+        rs.value.first.add(<span class="hljs-number">0</span>,
+                         r.value.first);
+        <span class="hljs-keyword">return</span> rs;
+    });
+}</code></pre>
+<p><code>some</code> 组合子利用 <code>many</code> 定义，用来构造匹配一个及以上相同的解析器的解析器：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
+Parser&lt;List&lt;A&gt;&gt;
+some() {
+    <span class="hljs-keyword">return</span> combine(many(), (x, xs) -&gt; {
+        xs.add(<span class="hljs-number">0</span>, x);
+        <span class="hljs-keyword">return</span> xs;
+    });
+}</code></pre>
+<h2 id="常见解析器">常见解析器</h2>
+<p>最基本的是 <code>id</code> 解析器，解析任意一个字符并作为解析结果返回：</p>
+<pre><code class="language-java"><span class="hljs-keyword">static</span> Parser&lt;Character&gt; id =
+        <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt; {
+
+    <span class="hljs-keyword">if</span> (s.p == s.s.length())
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;();
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;(
+        <span class="hljs-keyword">new</span> Pair&lt;&gt;(s.s.charAt(s.p),
+                    s.next()));
+
+});</code></pre>
+<p>有了 <code>id</code> 解析器之后构造的解析器就只需要把 <code>id</code> 和组合子组合而不需要再关心解析一个字符的细节。</p>
+<p>最常用的解析器就是 <code>pred</code> ，解析一个符合要求的字符：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> Parser&lt;Character&gt;
+<span class="hljs-title">pred</span><span class="hljs-params">(Predicate&lt;Character&gt; f)</span> </span>{
+    ParserM m = <span class="hljs-keyword">new</span> ParserM();
+    <span class="hljs-keyword">return</span> narrow(
+              m.flatMap(id,
+         c -&gt; f.test(c) ?
+                  m.pure(c) :
+                  m.fail()));
+}</code></pre>
+<p>另一个常用的解析器是 <code>character</code> ，解析特定字符：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> Parser&lt;Character&gt;
+<span class="hljs-title">character</span><span class="hljs-params">(<span class="hljs-keyword">char</span> x)</span> </span>{
+    <span class="hljs-keyword">return</span> pred(c -&gt; c == x);
+}</code></pre>
+<h2 id="组合">组合</h2>
+<p>既然叫解析器组合子，那么它们是用来组合的，这里给出如何用它们组合出一个解析浮点数的解析器例子：</p>
+<pre><code class="language-java"><span class="hljs-comment">// 解析一个数字字符</span>
+<span class="hljs-keyword">static</span> Parser&lt;Integer&gt; digit =
+    pred(c -&gt; <span class="hljs-string">&#x27;0&#x27;</span> &lt;= c &amp;&amp; c &lt;= <span class="hljs-string">&#x27;9&#x27;</span>)
+                    p(c -&gt; c - <span class="hljs-string">&#x27;0&#x27;</span>);
+<span class="hljs-comment">// 解析一个自然数</span>
+<span class="hljs-keyword">static</span> Parser&lt;Integer&gt; nat =
+        digit.some().map(xs -&gt; {
+    <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i : xs) x = x * <span class="hljs-number">10</span> + i;
+    <span class="hljs-keyword">return</span> x;
+});
+<span class="hljs-comment">// 解析一个整数</span>
+<span class="hljs-keyword">static</span> Parser&lt;Integer&gt; integer =
+    (character(<span class="hljs-string">&#x27;-&#x27;</span>).use(nat).map(x -&gt; -x))
+                   .or(nat);
+<span class="hljs-comment">// 解析一个浮点数</span>
+<span class="hljs-keyword">static</span> Parser&lt;Double&gt; real =
+    (integer.combine(character(<span class="hljs-string">&#x27;.&#x27;</span>)
+        .use(digit.some()).map(xs -&gt; {
+            <span class="hljs-keyword">double</span> ans = <span class="hljs-number">0</span>, base = <span class="hljs-number">0.1</span>;
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i : xs) {
+                    ans += base * i;
+                    base *= <span class="hljs-number">0.1</span>;
+                }
+                <span class="hljs-keyword">return</span> ans;
+            }),
+            Double::sum)).or(integer
+            .map(Integer::doubleValue));</code></pre>
+</body>
+</html>

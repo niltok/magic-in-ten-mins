@@ -12,11 +12,11 @@
 
 ## 单位半群（Monoid）
 
-单位半群是一种带单位元的半群，对于集合 `A` 上的半群 `{<>, A}` ，`A`中的元素`a`使`A`中的所有元素`x`满足 `x <> a` 和 `a <> x` 都等于 `x`，则 `a` 就是 `{<>, A}` 上的单位元。
+单位半群是一种带单位元的半群，对于集合 `A` 上的半群 `{<>, A}` ， `A` 中的元素 `a` 使 `A` 中的所有元素 `x` 满足 `x <> a` 和 `a <> x` 都等于 `x`，则 `a` 就是 `{<>, A}` 上的单位元。
 
-举个例子，`{+, 自然数集}`的单位元就是0，`{*, 自然数集}`的单位元就是1，`{+, 字符串集}`的单位元就是空串`""`。
+举个例子， `{+, 自然数集}` 的单位元就是 0 ， `{*, 自然数集}` 的单位元就是 1 ， `{+, 字符串集}` 的单位元就是空串 `""` 。
 
-用Java代码可以表示为：
+用 Java 代码可以表示为：
 
 ```java
 interface Monoid<T> {
@@ -30,7 +30,7 @@ interface Monoid<T> {
 
 ## 应用：Optional
 
-在Java8中有个新的类`Optional`可以用来表示可能有值的类型，而我们可以对它定义个Monoid：
+在 Java8 中有个新的类 `Optional` 可以用来表示可能有值的类型，而我们可以对它定义个 Monoid ：
 
 ```java
 class OptionalM<T> implements Monoid<Optional<T>> {
@@ -45,7 +45,7 @@ class OptionalM<T> implements Monoid<Optional<T>> {
 }
 ```
 
-这样对于appends来说我们将获得一串Optional中第一个不为空的值，对于需要进行一连串尝试操作可以这样写：
+这样对于 appends 来说我们将获得一串 Optional 中第一个不为空的值，对于需要进行一连串尝试操作可以这样写：
 
 ```java
 new OptionalM<int>.appends(Stream.of(try1(), try2(), try3(), try4()))
@@ -53,7 +53,7 @@ new OptionalM<int>.appends(Stream.of(try1(), try2(), try3(), try4()))
 
 ## 应用：Ordering
 
-对于`Comparable`接口可以构造出：
+对于 `Comparable` 接口可以构造出：
 
 ```java
 class OrderingM implements Monoid<int> {
@@ -65,7 +65,7 @@ class OrderingM implements Monoid<int> {
 }
 ```
 
-同样如果有一串带有优先级的比较操作就可以用appends串起来，比如：
+同样如果有一串带有优先级的比较操作就可以用 appends 串起来，比如：
 
 ```java
 class Student implements Comparable {
@@ -85,11 +85,11 @@ class Student implements Comparable {
 }
 ```
 
-这样的写法比一连串`if-else`优雅太多。
+这样的写法比一连串 `if-else` 优雅太多。
 
 ## 扩展
 
-在Monoid接口里面加default方法可以支持更多方便的操作：
+在 Monoid 接口里面加 default 方法可以支持更多方便的操作：
 
 ```java
 interface Monoid<T> {
@@ -125,4 +125,4 @@ new Todo.appends(Stream.of(
 ))
 ```
 
-> 注：上面的Optional并不是lazy的，实际运用中加上非空短路能提高效率。
+> 注：上面的 Optional 并不是 lazy 的，实际运用中加上非空短路能提高效率。

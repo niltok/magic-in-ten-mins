@@ -10,42 +10,59 @@
 
 ## 类型系统
 
-[偏易|代数数据类型(Algebraic Data Type)[Java基础]](doc/ADT.md)
+[偏易|代数数据类型(Algebraic Data Type)[Java基础]](doc/ADT.md) 
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/ADT.html)
 
 [偏易|广义代数数据类型(Generalized Algebriac Data Type)[Java基础，ADT]](doc/GADT.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/GADT.md)
 
 [偏易|余代数数据类型(Coalgebraic Data Type)[Java基础，ADT]](doc/CoData.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/CoData.html)
 
 [偏易|单位半群(Monoid)[Java基础]](doc/Monoid.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Monoid.html)
 
 [较难|高阶类型(Higher Kinded Type)[Java基础]](doc/HKT.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/HKT.html)
 
 [中等|单子(Monad)[Java基础，HKT]](doc/Monad.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Monad.html)
 
 [较难|状态单子(State Monad)[Java基础，HKT，Monad]](doc/StateMonad.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/StateMonad.html)
 
 ## 计算理论
 
 [较难|λ演算(Lambda Calculus)[Java基础，ADT]](doc/Lambda.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Lambda.html)
 
 [偏易|求值策略(Evaluation Strategy)[Java基础，λ演算]](doc/EvalStrategy.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/EvalStrategy.html)
 
 [较难|编码(Encode)[λ演算]](doc/Encode.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Encode.html)
 
 ## 编程范式
 
 [简单|表驱动编程(Table-Driven Programming)[简单Java基础]](doc/TableDriven.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/TableDriven.html)
 
 [简单|续延(Continuation)[简单Java基础]](doc/Continuation.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Continuation.html)
 
 [中等|代数作用(Algebraic Effect)[简单Java基础，续延]](doc/Algeff.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Algeff.html)
 
 [中等|依赖注入(Dependency Injection)[Java基础，Monad，代数作用]](doc/DepsInj.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/DepsInj.html)
 
 [中等|提升(Lifting)[Java基础，HKT，Monad]](doc/Lifting.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Lifting.html)
 
 ## 编译原理
 
 [较难|解析器单子(Parser Monad)[Java基础，HKT，Monad]](doc/ParserM.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/ParserM.md)
 
 [中等|解析器组合子(Parser Combinator)[Java基础，HKT，Monad]](doc/Parsec.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Parsec.html)

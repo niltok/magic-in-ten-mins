@@ -1,0 +1,132 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：解析器单子">十分钟魔法练习：解析器单子</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，HKT，Monad</p>
+</blockquote>
+<p>解析器（Parser）是编译器的一部分，它读取源代码（Source Code），输出一个抽象语法树（Abstract Syntax Tree, AST）。某种程度上来说，解析器是一种可组合的东西，字符解析器组成了整数解析器，整数解析器组成了浮点数解析器。</p>
+<p>这样可组合的解析器有一个抽象的函数表达：</p>
+<pre><code class="language-java">Function&lt;ParseState, 
+         Maybe&lt;Pair&lt;A, ParseState&gt;&gt;&gt;</code></pre>
+<p>其中 <code>ParseState</code> 是包含当前解析位置的源文本的类型。返回值用 <code>Maybe</code> 包起来因为解析可能失败。 <code>A</code> 就是解析出来的具体数据类型。返回值中包括解析后的状态 <code>ParseState</code> ，这样就可以传递给下一个解析器函数，从而组合多个解析器。</p>
+<p>而且很显然这个函数是一个 Monad ，为了为它实现 Monad 需要用 HKT 包装一下：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parser</span>&lt;<span class="hljs-title">A</span>&gt;
+        <span class="hljs-keyword">implements</span> <span class="hljs-title">HKT</span>&lt;<span class="hljs-title">Parser</span>&lt;?&gt;, <span class="hljs-title">A</span>&gt; </span>{
+
+    <span class="hljs-keyword">static</span> &lt;A&gt; <span class="hljs-function">Parser&lt;A&gt;
+    <span class="hljs-title">narrow</span><span class="hljs-params">(HKT&lt;Parser&lt;?&gt;, A&gt; v)</span> </span>{
+        <span class="hljs-keyword">return</span> (Parser&lt;A&gt;) v;
+    }
+
+    Function&lt;ParseState,
+             Maybe&lt;Pair&lt;A, ParseState&gt;&gt;&gt;
+                 parser;
+
+    Parser(Function&lt;ParseState,
+        Maybe&lt;Pair&lt;A, ParseState&gt;&gt;&gt; f) {
+        parser = f;
+    }
+
+    Maybe&lt;Pair&lt;A, ParseState&gt;&gt;
+    runParser(ParseState s) {
+        <span class="hljs-keyword">return</span> parser.apply(s);
+    }
+
+    <span class="hljs-function">Maybe&lt;A&gt; <span class="hljs-title">parse</span><span class="hljs-params">(String s)</span> </span>{
+        MaybeM m = <span class="hljs-keyword">new</span> MaybeM();
+        <span class="hljs-keyword">return</span> Maybe.narrow(
+                 m.flatMap(runParser(
+                     <span class="hljs-keyword">new</span> ParseState(s)),
+            r -&gt; m.pure(r.first)));
+    }
+}</code></pre>
+<p>然后就可以实现 Parser Monad 了：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ParserM</span> 
+    <span class="hljs-keyword">implements</span> <span class="hljs-title">Monad</span>&lt;<span class="hljs-title">Parser</span>&lt;?&gt;&gt; </span>{
+
+    <span class="hljs-keyword">public</span> &lt;A&gt; HKT&lt;Parser&lt;?&gt;, A&gt; 
+    pure(A v) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt;
+               <span class="hljs-keyword">new</span> Maybe&lt;&gt;(
+               <span class="hljs-keyword">new</span> Pair&lt;&gt;(v, s)));
+    }
+
+    <span class="hljs-keyword">public</span> &lt;A&gt; HKT&lt;Parser&lt;?&gt;, A&gt; 
+    fail() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt; 
+               <span class="hljs-keyword">new</span> Maybe&lt;&gt;());
+    }
+
+    <span class="hljs-keyword">public</span> &lt;A, B&gt; HKT&lt;Parser&lt;?&gt;, B&gt;
+    flatMap(HKT&lt;Parser&lt;?&gt;, A&gt; ma,
+        Function&lt;A, 
+            HKT&lt;Parser&lt;?&gt;, B&gt;&gt; f) {
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt; {
+            MaybeM m = <span class="hljs-keyword">new</span> MaybeM();
+            <span class="hljs-comment">// 一点伪代码(not Haskell)</span>
+            <span class="hljs-comment">// do</span>
+            <span class="hljs-comment">//   r &lt;- ma.runParser(s)</span>
+            <span class="hljs-comment">//   f(r.first).runParser(</span>
+            <span class="hljs-comment">//       r.second)</span>
+            <span class="hljs-keyword">return</span> Maybe.narrow(
+                     m.flatMap(Parser
+                         .narrow(ma)
+                         .runParser(s),
+                r -&gt; Parser
+                     .narrow(f.apply(
+                         r.first))
+                     .runParser(
+                         r.second))
+            );
+        });
+    }
+}
+</code></pre>
+<p>实现了 Monad 以后写 Parser 就可以不用管理错误回溯也不用手动传递解析状态，只需要把解析器看成一个抽象的容器，取出解析结果，组合，再放回容器。</p>
+<p>这里举两个用 Parser Monad 写的组合函数：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
+&lt;B&gt; <span class="hljs-function">Parser&lt;B&gt;
+<span class="hljs-title">map</span><span class="hljs-params">(Function&lt;A, B&gt; f)</span> </span>{
+    ParserM m = <span class="hljs-keyword">new</span> ParserM();
+    <span class="hljs-comment">// do</span>
+    <span class="hljs-comment">//   x &lt;- this</span>
+    <span class="hljs-comment">//   pure (f(x))</span>
+    <span class="hljs-keyword">return</span> narrow(
+             m.flatMap(<span class="hljs-keyword">this</span>,
+        x -&gt; m.pure(f.apply(x))));
+}
+
+&lt;B, C&gt; <span class="hljs-function">Parser&lt;C&gt;
+<span class="hljs-title">combine</span><span class="hljs-params">(Parser&lt;B&gt; p,
+        BiFunction&lt;A, B, C&gt; f)</span> </span>{
+    ParserM m = <span class="hljs-keyword">new</span> ParserM();
+    <span class="hljs-comment">// do</span>
+    <span class="hljs-comment">//   a &lt;- this</span>
+    <span class="hljs-comment">//   b &lt;- p</span>
+    <span class="hljs-comment">//   pure (f(a, b))</span>
+    <span class="hljs-keyword">return</span> narrow(
+             m.flatMap(<span class="hljs-keyword">this</span>,
+        a -&gt; m.flatMap(p,
+        b -&gt; m.pure(f.apply(a, b)))));
+}</code></pre>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：状态单子">十分钟魔法练习：状态单子</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，HKT，Monad</p>
+</blockquote>
+<h2 id="函数容器">函数容器</h2>
+<p>很显然Java标准库中的各类容器都是可以看成是单子的， <code>Stream</code> 类也给出了这些类的 <code>flatMap</code> 实现。不过在函数式的理论中单子不仅仅可以是实例意义上的容器，也可以是其他抽象意义上的容器，比如函数。</p>
+<p>对于一个形如<code> Function&lt;S, Complex&lt;A&gt;&gt;</code> 形式的函数来说，我们可以把它看成包含了一个 <code>A</code> 的惰性容器，只有在给出 <code>S</code> 的时候才能知道 <code>A</code> 的值。对于这样形式的函数我们同样能写出对应的 <code>flatMap</code> ，这里就拿状态单子举例子。</p>
+<h2 id="状态单子">状态单子</h2>
+<p>状态单子（State Monad）是一种可以包含一个“可变”状态的单子，我这里用了引号是因为尽管状态随着逻辑流在变化但是在内存里面实际上都是不变量。</p>
+<p>其本质就是在每次状态变化的时候将新状态作为代表接下来逻辑的函数的输入。比如对于：</p>
+<pre><code class="language-java">i = i + 1;
+System.out.println(i);</code></pre>
+<p>可以用状态单子的思路改写成：</p>
+<pre><code class="language-java">(v -&gt; System.out.println(v)).apply(i + 1);</code></pre>
+<p>最简单的理解就是这样的一个包含函数的对象：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">State</span>&lt;<span class="hljs-title">S</span>, <span class="hljs-title">A</span>&gt; 
+    <span class="hljs-keyword">implements</span> <span class="hljs-title">HKT</span>&lt;<span class="hljs-title">State</span>&lt;<span class="hljs-title">S</span>, ?&gt;, <span class="hljs-title">A</span>&gt; </span>{
+
+    Function&lt;S, StateData&lt;A, S&gt;&gt; runState;
+
+    <span class="hljs-comment">// Pair alias</span>
+    <span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StateData</span>&lt;<span class="hljs-title">A</span>, <span class="hljs-title">S</span>&gt; </span>{
+        S state;
+        A value;
+        StateData(A v, S s) {
+            state = s;
+            value = v;
+        }
+    }
+
+    <span class="hljs-comment">// Constructor</span>
+    State(Function&lt;S, 
+          StateData&lt;A, S&gt;&gt; f) { 
+        runState = f; 
+    }
+
+    <span class="hljs-comment">// Transformer</span>
+    <span class="hljs-keyword">static</span> &lt;S, A&gt; <span class="hljs-function">State&lt;S, A&gt;
+    <span class="hljs-title">narrow</span><span class="hljs-params">(HKT&lt;State&lt;S, ?&gt;, A&gt; v)</span> </span>{
+        <span class="hljs-keyword">return</span> (State&lt;S, A&gt;) v;
+    }
+}</code></pre>
+<p>这里为了好看定义了一个 <code>StateData</code> 类，包含变化后的状态和计算结果。而最核心的就是 <code>runState</code> 函数对象，通过组合这个函数对象来使变化的状态在逻辑间传递。</p>
+<p><code>State</code> 是一个 Monad （注释中是简化的伪代码）：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StateM</span>&lt;<span class="hljs-title">S</span>&gt; 
+    <span class="hljs-keyword">implements</span> <span class="hljs-title">Monad</span>&lt;<span class="hljs-title">State</span>&lt;<span class="hljs-title">S</span>, ?&gt;&gt; </span>{
+
+    <span class="hljs-keyword">public</span> &lt;A&gt; HKT&lt;State&lt;S, ?&gt;, A&gt; 
+    pure(A v) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> State&lt;&gt;(s -&gt; 
+            <span class="hljs-keyword">new</span> State.StateData&lt;&gt;(v, s));
+    }
+
+    <span class="hljs-comment">// &lt;A, B&gt; State&lt;S, B&gt; </span>
+    <span class="hljs-comment">// flatMap(State&lt;S, A&gt; ma, </span>
+    <span class="hljs-comment">//     Function&lt;A, State&lt;S, B&gt; f)</span>
+    <span class="hljs-keyword">public</span> &lt;A, B&gt; HKT&lt;State&lt;S, ?&gt;, B&gt;
+    flatMap(HKT&lt;State&lt;S, ?&gt;, A&gt; ma, 
+        Function&lt;A,
+            HKT&lt;State&lt;S, ?&gt;, B&gt;&gt; f) {
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> State&lt;&gt;(s -&gt; {
+
+            <span class="hljs-comment">// r = ma.runState(s)</span>
+            State.StateData&lt;A, S&gt; r = 
+                State
+                .narrow(ma)
+                .runState
+                .apply(s);
+
+            <span class="hljs-comment">// return f(r.value)</span>
+            <span class="hljs-comment">//     .runState(r.state)</span>
+            <span class="hljs-keyword">return</span> State
+                .narrow(f.apply(r.value))
+                .runState
+                .apply(r.state);
+        });
+    }
+}
+</code></pre>
+<p><code>pure</code> 操作直接返回当前状态和给定的值， <code>flatMap</code> 操作只需要把 <code>ma</code> 中的 <code>A</code> 取出来然后传给 <code>f</code> ，并处理好 <code>state</code> 。</p>
+<p>仅仅这样的话 <code>State</code> 使用起来并不方便，还需要定义一些常用的操作来读取写入状态：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class StateM&lt;S&gt;</span>
+<span class="hljs-comment">// 读取</span>
+HKT&lt;State&lt;S, ?&gt;, S&gt; get = 
+    <span class="hljs-keyword">new</span> State&lt;&gt;(s -&gt; 
+        <span class="hljs-keyword">new</span> State.StateData&lt;&gt;(s, s));
+<span class="hljs-comment">// 写入</span>
+HKT&lt;State&lt;S, ?&gt;, S&gt; put(S s) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> State&lt;&gt;(any -&gt; 
+        <span class="hljs-keyword">new</span> State.StateData&lt;&gt;(any, s));
+}
+<span class="hljs-comment">// 修改</span>
+HKT&lt;State&lt;S, ?&gt;, S&gt; 
+modify(Function&lt;S, S&gt; f) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> State&lt;&gt;(s -&gt; 
+        <span class="hljs-keyword">new</span> State.StateData&lt;&gt;(
+            s, 
+            f.apply(s)));
+}</code></pre>
+<p>使用的话这里举个求斐波那契数列的例子：</p>
+<pre><code class="language-java"><span class="hljs-keyword">static</span> 
+State&lt;Pair&lt;Integer, Integer&gt;, Integer&gt; 
+fib(Integer n) {
+    StateM&lt;Pair&lt;Integer, Integer&gt;&gt; m = 
+        <span class="hljs-keyword">new</span> StateM&lt;&gt;();
+    <span class="hljs-keyword">if</span> (n == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> State.narrow(
+             m.flatMap(m.get,
+        x -&gt; m.pure(x.second)));
+
+    <span class="hljs-keyword">return</span> State.narrow(
+             m.flatMap(m.modify(x -&gt; 
+                 <span class="hljs-keyword">new</span> Pair&lt;&gt;(x.second, 
+                     x.first + x.second)),
+        v -&gt; fib(n - <span class="hljs-number">1</span>))
+    );
+}
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+    System.out.println(
+        fib(<span class="hljs-number">7</span>)
+        .runState
+        .apply(<span class="hljs-keyword">new</span> Pair&lt;&gt;(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>))
+        .value);
+}</code></pre>
+<p><code>fib</code> 函数对应的 Haskell 代码是：</p>
+<pre><code class="language-haskell">fib :: Int -&gt; State (Int, Int) Int
+fib <span class="hljs-number">0</span> = <span class="hljs-keyword">do</span>
+  (_, x) &lt;- get
+  pure x
+fib n = <span class="hljs-function"><span class="hljs-keyword">do</span>
+  <span class="hljs-title">modify</span> <span class="hljs-params">(\(a, b)</span> -&gt; <span class="hljs-params">(b, a + b)</span>)
+  <span class="hljs-title">fib</span> <span class="hljs-params">(n - <span class="hljs-number">1</span>)</span></span></code></pre>
+<p><del>看上去比 Java 版简单很多</del></p>
+<h2 id="有啥用">有啥用</h2>
+<p>看到这里肯定有人会拍桌而起：求斐波那契数列我有更简单的写法！</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">fib</span><span class="hljs-params">(<span class="hljs-keyword">int</span> n)</span> </span>{
+    <span class="hljs-keyword">int</span>[] a = {<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>};
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++)
+        a[(i + <span class="hljs-number">2</span>) % <span class="hljs-number">3</span>] = a[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">3</span>] + 
+                         a[i % <span class="hljs-number">3</span>];
+    <span class="hljs-keyword">return</span> a[(n + <span class="hljs-number">1</span>) % <span class="hljs-number">3</span>];
+}</code></pre>
+<p>但问题是你用变量了啊， <code>State Monad</code> 最妙的一点就是全程都是常量而模拟出了变量的感觉。</p>
+<p>更何况你这里用了数组而不是在递归，如果你递归就会需要在 <code>fib</code> 上加一个状态参数， <code>State Monad</code> 可以做到在不添加任何函数参数的情况下在函数之间传递参数。</p>
+<p>同时它还是纯的，也就是说是<strong>可组合</strong>的，把任意两个状态类型相同的 <code>State Monad</code> 组合起来并不会有任何问题，比全局变量的解决方案不知道高到哪里去。</p>
+</body>
+</html>

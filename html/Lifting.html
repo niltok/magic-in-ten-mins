@@ -1,0 +1,67 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet"><style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; }
+h2 { margin-top: 2em; }
+h1, h2, h3 { text-align: center; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid black; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace }
+pre { overflow: scroll; padding: 10px }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：提升">十分钟魔法练习：提升</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java基础，HKT，Monad</p>
+</blockquote>
+<h2 id="概念">概念</h2>
+<p>提升（Lifting）指的是把一个通用函数变成容器映射函数的操作。</p>
+<p>比如把 <code>Function&lt;A, B&gt;</code> 变成 <code>Function&lt;M&lt;A&gt;, M&lt;B&gt;&gt;</code> 就是一种提升操作。而由于被操作的函数有一个参数所以这个操作也叫 <code>lift1</code> 。</p>
+<p>注意被提升的函数可以有不止一个参数，我们也可以把 <code>BiFunction&lt;A, B, C&gt;</code> 提升为 <code>BiFunction&lt;M&lt;A&gt;, M&lt;B&gt;, M&lt;C&gt;&gt;</code> 。这样两个参数的提升可以称为 <code>lift2</code> 。</p>
+<p>同样，被提升的函数可以没有参数，这时候我们可以看成没有这个函数，也就是把 <code>A</code> 提升为 <code>M&lt;A&gt;</code> 。这样的提升可以称为 <code>lift0</code> 。实际上它也和 <code>Monad</code> 中的 <code>pure</code> 是同构的。</p>
+<p>也就是说：</p>
+<pre><code class="language-java">&lt;A&gt; <span class="hljs-function">M&lt;A&gt; 
+    <span class="hljs-title">lift0</span><span class="hljs-params">(A f)</span> </span>{}
+&lt;A, B&gt; Function&lt;M&lt;A&gt;, M&lt;B&gt;&gt; 
+    lift1(Function&lt;A, B&gt; f) {}
+&lt;A, B, C&gt; BiFunction&lt;M&lt;A&gt;, M&lt;B&gt;, M&lt;C&gt;&gt;
+    lift2(Function&lt;A, B, C&gt;) {}</code></pre>
+<h2 id="fmap">fmap</h2>
+<p>看到这个函数签名肯定有人会拍案而起：这不就是 fmap 么？</p>
+<p>fmap is a lifting surly. 因为它符合 lifting 的函数签名，但是 lifting 并不一定是 fmap 。只要符合这样的函数签名就可以说是一个 lifting 。</p>
+<p>比如对于 list 来说 <code>f -&gt; x -&gt; x.tail().map(f)</code> 也符合 lifting 的函数签名但很显然它不是一个 <code>fmap</code> 函数。或者说很多改变结构的函数和 <code>fmap</code> 组合还是一个 lifting 函数。</p>
+<h2 id="除此之外呢">除此之外呢</h2>
+<p>回到上面那个函数签名，里面有个非泛型的参数 <code>M</code> ，这个 <code>M</code> 可以是个泛型参数，可以是个包装器比如 <code>Maybe</code> ，也可以是个线性容器比如 <code>List</code> ，可以是个非线性的容器比如 <code>Set</code> ，甚至可以是抽象容器比如 <code>Function</code> 。</p>
+<p>同时提升操作也可能对容器结构做出一些改变，尤其是对于多参函数的提升可能会对函数的参数做出一些组合。比如对于 <code>List</code> 来说 <code>lift2</code> 既可以是 <code>zipMap</code> 也可也是以 <code>f</code> 为操作的卷积。</p>
+<h2 id="liftm">liftM</h2>
+<p>对于 Monad 来说，存在一种通用的提升操作叫 <code>liftM</code> ，比如对于 <code>List</code> 来说 <code>liftM2</code> 就是：</p>
+<pre><code class="language-java">&lt;A, B, C&gt;
+BiFunction&lt;List&lt;A&gt;, List&lt;B&gt;, List&lt;C&gt;&gt;
+liftM2List(BiFunction&lt;A, B, C&gt; f) {
+    HKTListM m = <span class="hljs-keyword">new</span> HKTListM();
+    <span class="hljs-keyword">return</span> (ma, mb) -&gt; HKTList.narrow(
+             m.flatMap(<span class="hljs-keyword">new</span> HKTList&lt;&gt;(ma),
+        a -&gt; m.flatMap(<span class="hljs-keyword">new</span> HKTList&lt;&gt;(mb),
+        b -&gt; m.pure(f.apply(a, b))))
+    ).value;
+}</code></pre>
+<p>而对 <code>Integer::sum</code> 进行提升以后的函数输入 <code>[1, 2, 3]</code> 和 <code>[2, 3, 4]</code> 就会得到 <code>[3, 4, 5, 4, 5, 6, 5, 6, 7]</code> 。实际上就是对于任意两个元素组合操作。</p>
+<p>再比如 <code>liftM5</code> 在 <code>Haskell</code> 中的表述为：</p>
+<pre><code class="language-haskell">liftM5 f ma mb mc md me = <span class="hljs-keyword">do</span>
+  a &lt;- ma
+  b &lt;- mb
+  c &lt;- mc
+  d &lt;- md
+  e &lt;- <span class="hljs-function">me
+  <span class="hljs-title">pure</span> <span class="hljs-params">(f a b c d e)</span></span></code></pre>
+<p>也就是 <code>liftM[n]</code> 就相当于嵌套 <code>n</code> 层 <code>flatMap</code> 提取 <code>Monad</code> 中的值然后应用给被提升的函数。</p>
+</body>
+</html>
