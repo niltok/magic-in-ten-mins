@@ -44,7 +44,7 @@ class HKTListM implements Monad<HKTList<?>> {
 }
 ```
 
-简单来说 `pure(v)` 将得到 `{v}` ，而 `flatMap({1, 2, 3}, v -> {v + 1, v + 2})` 将得到 `{2, 3, 4, 3, 4, 5}` 。这都是 Java 里面非常常见的操作了，并没有什么新意。
+简单来说 `pure(v)` 将得到 `{v}` ，而 `flatMap({1, 2, 3}, v -> {v + 1, v + 2})` 将得到 `{2, 3, 3, 4, 4, 5}` 。这都是 Java 里面非常常见的操作了，并没有什么新意。
 
 ## Maybe Monad
 
