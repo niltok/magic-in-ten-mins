@@ -39,7 +39,7 @@
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/StateMonad.html)
 
 中等 | 简单类型 λ 演算(Simply-Typed Lambda Calculus)[Java 基础，ADT，λ 演算] |
-[Markdown](doc/STLC.md)
+[Markdown](doc/STLC.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/STLC.html)
 
 ## 计算理论
