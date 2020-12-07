@@ -38,9 +38,13 @@
 [Markdown](doc/StateMonad.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/StateMonad.html)
 
+中等 | 简单类型 λ 演算(Simply-Typed Lambda Calculus)[Java 基础，ADT，λ 演算] |
+[Markdown](doc/STLC.md)
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/STLC.html)
+
 ## 计算理论
 
-较难 | λ演算(Lambda Calculus)[Java基础，ADT] |
+较难 | λ 演算(Lambda Calculus)[Java基础，ADT] |
 [Markdown](doc/Lambda.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/Lambda.html)
 
@@ -80,6 +84,6 @@
 [Markdown](doc/ParserM.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/ParserM.html)
 
-中等|解析器组合子(Parser Combinator)[Java基础，HKT，Monad] |
+中等 | 解析器组合子(Parser Combinator)[Java基础，HKT，Monad] |
 [Markdown](doc/Parsec.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/Parsec.html)
