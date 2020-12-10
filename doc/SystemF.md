@@ -22,7 +22,7 @@ true = Λ a. λ (x: a). λ (y: a). (x: a)
 ∀ a. a → a → a
 ```
 
-这就有点类似 Java 中的泛型：
+这就有点类似 Java 中的泛型函数：
 
 ```java
 <A> A True(A x, A y) {
