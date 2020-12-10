@@ -55,7 +55,7 @@ a { color: #02AEF1; text-decoration: none; }
             .collect(HKTList.collector());
     }
 }</code></pre>
-<p>简单来说 <code>pure(v)</code> 将得到 <code>{v}</code> ，而 <code>flatMap({1, 2, 3}, v -&gt; {v + 1, v + 2})</code> 将得到 <code>{2, 3, 4, 3, 4, 5}</code> 。这都是 Java 里面非常常见的操作了，并没有什么新意。</p>
+<p>简单来说 <code>pure(v)</code> 将得到 <code>{v}</code> ，而 <code>flatMap({1, 2, 3}, v -&gt; {v + 1, v + 2})</code> 将得到 <code>{2, 3, 3, 4, 4, 5}</code> 。这都是 Java 里面非常常见的操作了，并没有什么新意。</p>
 <h2 id="maybe-monad">Maybe Monad</h2>
 <p>Java 不是一个空安全的语言，也就是说任何对象类型的变量都有可能为 <code>null</code> 。对于一串可能出现空值的逻辑来说，判空常常是件麻烦事：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> Maybe&lt;Integer&gt;
