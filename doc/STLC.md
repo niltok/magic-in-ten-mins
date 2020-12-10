@@ -8,29 +8,30 @@
 
 简单类型 λ 演算（Simply-Typed Lambda Calculus）是在无类型 λ 演算（Untyped Lambda Calculus）的基础上加了个非常简单的类型系统。
 
-这个类型系统包含两种类型结构，一种是内建的基础类型 `T` ，一种是函数类型 `A -> B` ，其中函数类型由源类型 `A` 和目标类型 `B` 组成：
+这个类型系统包含两种类型结构，一种是内建的基础类型 `T` ，一种是函数类型 `A → B` ，其中函数类型由源类型 `A` 和目标类型 `B` 组成：
 
 ```
 Type = BaseType + FunctionType
 FunctionType = Type * Type
 ```
 
+注意函数类型的符号是右结合的，也就是说 `A → A → A` 等价于 `A → (A → A)` 。
+
 用 Java 代码可以表示为：
 
 ```java
 // 构造函数， equals 已省去
-interface SType {}
-class BaseT implements SType {
-    final String name;
+interface Type {}
+class BaseT implements Type {
+    String name;
     public String toString() {
         return name;
     }
 }
-class FunT implements SType {
-    final SType src, tar;
+class FunT implements Type {
+    Type src, tar;
     public String toString() {
-        return "(" + src.toString() + " -> " 
-                   + tar.toString() + ")";
+        return "(" + src + " → " + tar + ")";
     }
 }
 ```
@@ -41,16 +42,16 @@ class FunT implements SType {
 
 ```java
 // 构造函数， toString 已省去
-class STVal implements STExpr {
+class Val implements Expr {
     String x;
-    SType type;
+    Type type;
 }
-class STFun implements STExpr {
-    STVal x;
-    STExpr e;
+class Fun implements Expr {
+    Val x;
+    Expr e;
 }
-class STApp implements STExpr {
-    STExpr f, x;
+class App implements Expr {
+    Expr f, x;
 }
 ```
 
@@ -64,33 +65,33 @@ class STApp implements STExpr {
 
 ```java
 // 构造函数， toString 已省去
-interface STExpr {
-    SType checkType() 
+interface Expr {
+    Type checkType() 
         throws BadTypeException;
 
-    boolean checkApply(STVal val);
+    boolean checkApply(Val val);
 }
 
-class STVal implements STExpr {
+class Val implements Expr {
     String x;
-    SType type;
+    Type type;
 
-    public SType checkType() {
+    public Type checkType() {
         return type;
     }
 
-    public boolean checkApply(STVal val) {
+    public boolean checkApply(Val val) {
         if (x.equals(val.x))
             return type.equals(val.type);
         else return true;
     }
 }
 
-class STFun implements STExpr {
-    STVal x;
-    STExpr e;
+class Fun implements Expr {
+    Val x;
+    Expr e;
 
-    public SType checkType() 
+    public Type checkType() 
             throws BadTypeException {
         if (e.checkApply(x))
             return new FunT(x.type, 
@@ -98,18 +99,18 @@ class STFun implements STExpr {
         else throw new BadTypeException();
     }
 
-    public boolean checkApply(STVal val) {
+    public boolean checkApply(Val val) {
         if (x.x.equals(val.x)) return true;
         return e.checkApply(val);
     }
 }
 
-class STApp implements STExpr {
-    STExpr f, x;
+class App implements Expr {
+    Expr f, x;
 
-    public SType checkType() 
+    public Type checkType() 
             throws BadTypeException {
-        SType tf = f.checkType();
+        Type tf = f.checkType();
         
         if (tf instanceof FunT &&
                 ((FunT) tf).src
@@ -118,7 +119,7 @@ class STApp implements STExpr {
         else throw new BadTypeException();
     }
 
-    public boolean checkApply(STVal val) {
+    public boolean checkApply(Val val) {
         return f.checkApply(val) 
             && x.checkApply(val);
     }
@@ -128,23 +129,23 @@ class STApp implements STExpr {
 下面的测试代码对
 
  ````
-(λ (x: int). (y: bool -> int)) (1: int)
+(λ (x: int). (y: bool → int)) (1: int)
  ````
 
-进行了类型检查，会打印输出 `(bool -> int)` ：
+进行了类型检查，会打印输出 `(bool → int)` ：
 
 ```java
 public class STLambda {
     public static void main(String[] args) {
         try {
-            System.out.println(new STApp(
-                new STFun(
-                    new STVal("x", 
+            System.out.println(new App(
+                new Fun(
+                    new Val("x", 
                         new BaseT("int")),
-                    new STVal("y", new FunT(
+                    new Val("y", new FunT(
                         new BaseT("bool"),
                         new BaseT("int")))),
-                new STVal("1", new BaseT("int"))
+                new Val("1", new BaseT("int"))
             ).checkType());
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,7 +157,7 @@ public class STLambda {
 而如果对
 
 ```
-(λ (x: int). (x: bool -> int)) (1: int)
+(λ (x: int). (x: bool → int)) (1: int)
 ```
 
 进行类型检查就会抛出 `BadTypeException` 。

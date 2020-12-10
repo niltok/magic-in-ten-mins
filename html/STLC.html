@@ -28,71 +28,71 @@ a { color: #02AEF1; text-decoration: none; }
 </blockquote>
 <h2 id="简单类型-λ-演算">简单类型 λ 演算</h2>
 <p>简单类型 λ 演算（Simply-Typed Lambda Calculus）是在无类型 λ 演算（Untyped Lambda Calculus）的基础上加了个非常简单的类型系统。</p>
-<p>这个类型系统包含两种类型结构，一种是内建的基础类型 <code>T</code> ，一种是函数类型 <code>A -&gt; B</code> ，其中函数类型由源类型 <code>A</code> 和目标类型 <code>B</code> 组成：</p>
+<p>这个类型系统包含两种类型结构，一种是内建的基础类型 <code>T</code> ，一种是函数类型 <code>A → B</code> ，其中函数类型由源类型 <code>A</code> 和目标类型 <code>B</code> 组成：</p>
 <pre><code>Type = BaseType + FunctionType
 FunctionType = Type * Type</code></pre>
+<p>注意函数类型的符号是右结合的，也就是说 <code>A → A → A</code> 等价于 <code>A → (A → A)</code> 。</p>
 <p>用 Java 代码可以表示为：</p>
 <pre><code class="language-java"><span class="hljs-comment">// 构造函数， equals 已省去</span>
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">SType</span> </span>{}
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BaseT</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">SType</span> </span>{
-    <span class="hljs-keyword">final</span> String name;
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BaseT</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    String name;
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> name;
     }
 }
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FunT</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">SType</span> </span>{
-    <span class="hljs-keyword">final</span> SType src, tar;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FunT</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    Type src, tar;
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + src.toString() + <span class="hljs-string">&quot; -&gt; &quot;</span> 
-                   + tar.toString() + <span class="hljs-string">&quot;)&quot;</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + src + <span class="hljs-string">&quot; → &quot;</span> + tar + <span class="hljs-string">&quot;)&quot;</span>;
     }
 }</code></pre>
 <h2 id="年轻人的第一个-typechecker">年轻人的第一个 TypeChecker</h2>
 <p>然后需把类型嵌入到 λ 演算的语法树中：</p>
 <pre><code class="language-java"><span class="hljs-comment">// 构造函数， toString 已省去</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">STVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">STExpr</span> </span>{
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     String x;
-    SType type;
+    Type type;
 }
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">STFun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">STExpr</span> </span>{
-    STVal x;
-    STExpr e;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Val x;
+    Expr e;
 }
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">STApp</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">STExpr</span> </span>{
-    STExpr f, x;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Expr f, x;
 }</code></pre>
 <p>注意只有变量和函数定义的变量需要标记类型，表达式的类型是可以被简单推导出的。</p>
 <p>而对于这样简单的模型，类型检查只需要判断 <code>F X</code> 中的 <code>F</code> 需要是函数类型，并且 <code>λ x. E</code> 中 <code>E</code> 里所有的 <code>x</code> 类型匹配，并且 <code>(λ x. F) E</code> 中 <code>x</code> 的类型和 <code>E</code> 的类型一致。</p>
 <p>而类型推导也很简单：变量的类型就是它被标记的类型；函数定义的类型就是以它变量的标记类型为源，它函数体的类型为目标的函数类型；而函数应用的类型就是函数的目标类型，在能通过类型检查的情况下。</p>
 <p>以上用 Java 代码描述就是：</p>
 <pre><code class="language-java"><span class="hljs-comment">// 构造函数， toString 已省去</span>
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">STExpr</span> </span>{
-    <span class="hljs-function">SType <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
+    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
         <span class="hljs-keyword">throws</span> BadTypeException</span>;
 
-    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(STVal val)</span></span>;
+    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span></span>;
 }
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">STVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">STExpr</span> </span>{
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     String x;
-    SType type;
+    Type type;
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> SType <span class="hljs-title">checkType</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> type;
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(STVal val)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span> </span>{
         <span class="hljs-keyword">if</span> (x.equals(val.x))
             <span class="hljs-keyword">return</span> type.equals(val.type);
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
     }
 }
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">STFun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">STExpr</span> </span>{
-    STVal x;
-    STExpr e;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Val x;
+    Expr e;
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> SType <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
             <span class="hljs-keyword">throws</span> BadTypeException </span>{
         <span class="hljs-keyword">if</span> (e.checkApply(x))
             <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> FunT(x.type, 
@@ -100,18 +100,18 @@ FunctionType = Type * Type</code></pre>
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(STVal val)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span> </span>{
         <span class="hljs-keyword">if</span> (x.x.equals(val.x)) <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
         <span class="hljs-keyword">return</span> e.checkApply(val);
     }
 }
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">STApp</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">STExpr</span> </span>{
-    STExpr f, x;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Expr f, x;
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> SType <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
             <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        SType tf = f.checkType();
+        Type tf = f.checkType();
 
         <span class="hljs-keyword">if</span> (tf <span class="hljs-keyword">instanceof</span> FunT &amp;&amp;
                 ((FunT) tf).src
@@ -120,25 +120,25 @@ FunctionType = Type * Type</code></pre>
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(STVal val)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span> </span>{
         <span class="hljs-keyword">return</span> f.checkApply(val) 
             &amp;&amp; x.checkApply(val);
     }
 }</code></pre>
 <p>下面的测试代码对</p>
-<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (y: bool -&gt; <span class="hljs-keyword">int</span>)) (<span class="hljs-number">1</span>: <span class="hljs-keyword">int</span>)</code></pre>
-<p>进行了类型检查，会打印输出 <code>(bool -&gt; int)</code> ：</p>
+<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (y: bool → <span class="hljs-keyword">int</span>)) (<span class="hljs-number">1</span>: <span class="hljs-keyword">int</span>)</code></pre>
+<p>进行了类型检查，会打印输出 <code>(bool → int)</code> ：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">STLambda</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
         <span class="hljs-keyword">try</span> {
-            System.out.println(<span class="hljs-keyword">new</span> STApp(
-                <span class="hljs-keyword">new</span> STFun(
-                    <span class="hljs-keyword">new</span> STVal(<span class="hljs-string">&quot;x&quot;</span>, 
+            System.out.println(<span class="hljs-keyword">new</span> App(
+                <span class="hljs-keyword">new</span> Fun(
+                    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, 
                         <span class="hljs-keyword">new</span> BaseT(<span class="hljs-string">&quot;int&quot;</span>)),
-                    <span class="hljs-keyword">new</span> STVal(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> FunT(
+                    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> FunT(
                         <span class="hljs-keyword">new</span> BaseT(<span class="hljs-string">&quot;bool&quot;</span>),
                         <span class="hljs-keyword">new</span> BaseT(<span class="hljs-string">&quot;int&quot;</span>)))),
-                <span class="hljs-keyword">new</span> STVal(<span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-keyword">new</span> BaseT(<span class="hljs-string">&quot;int&quot;</span>))
+                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-keyword">new</span> BaseT(<span class="hljs-string">&quot;int&quot;</span>))
             ).checkType());
         } <span class="hljs-keyword">catch</span> (Exception e) {
             e.printStackTrace();
@@ -146,7 +146,7 @@ FunctionType = Type * Type</code></pre>
     }
 }</code></pre>
 <p>而如果对</p>
-<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (x: bool -&gt; <span class="hljs-keyword">int</span>)) (<span class="hljs-number">1</span>: <span class="hljs-keyword">int</span>)</code></pre>
+<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (x: bool → <span class="hljs-keyword">int</span>)) (<span class="hljs-number">1</span>: <span class="hljs-keyword">int</span>)</code></pre>
 <p>进行类型检查就会抛出 <code>BadTypeException</code> 。</p>
 </body>
 </html>

@@ -1,0 +1,158 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFF; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; color: #EF96AB; }
+h2 { margin-top: 2em; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #F2F0F0; }
+pre { overflow: scroll; padding: 10px; background: #F1F0F0; }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+a { color: #02AEF1; text-decoration: none; }
+.hljs-keyword { color: #F288AF; }
+.hljs-comment { color: #929CA6; }
+.hljs-string { color: #0594A6; }
+.hljs-title { color: #4581D9 }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：系统-f">十分钟魔法练习：系统 F</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java 基础，ADT，简单类型 λ 演算</p>
+</blockquote>
+<p>简单类型 λ 演算的类型系统非常简单，比常见的 C++, Java 语言的类型系统表现力差远了。而如果往简单类型 λ 演算的表达式中加入类型函数定义和类型函数应用来联系类型和表达式就可以大大增强其表现力，这样的类型系统被称为系统 F （System F）。</p>
+<p>类型函数定义 <code>Λ t. E</code> 定义了一个类型变量 <code>t</code> ，可以在表达式 <code>E</code> 中使用，其类型是 <code>∀ t. [Typeof(E)]</code> 。</p>
+<p>类型函数应用 <code>F T</code> 类似于函数应用，当 <code>F</code> 的类型为 <code>∀ t. E</code> 时 <code>F T</code> 的类型是 <code>E(t → T)</code> ，也就是 <code>E</code> 中所有自由的 <code>t</code> 被替换为 <code>T</code> 。  </p>
+<p>比如 <code>true</code> 的定义可以写成：</p>
+<pre><code><span class="hljs-keyword">true</span> = Λ a. λ (x: a). λ (y: a). (x: a)</code></pre>
+<p>其类型是：</p>
+<pre><code>∀ a. a → a → a</code></pre>
+<p>这就有点类似 Java 中的泛型：</p>
+<pre><code class="language-java">&lt;A&gt; <span class="hljs-function">A <span class="hljs-title">True</span><span class="hljs-params">(A x, A y)</span> </span>{
+    <span class="hljs-keyword">return</span> x;
+}</code></pre>
+<p>而类型函数应用就像是给函数填入泛型参数的类型，像这样：</p>
+<pre><code>Λ x. <span class="hljs-keyword">true</span> x</code></pre>
+<p>会得到 <code>true</code> 本身。</p>
+<p>表达式中加入了新东西那么显然类型系统也需要有一些改变，系统 F 的类型系统由类型变量 <code>x</code> ，类型函数 <code>∀ t. E</code> ，函数类型 <code>a → b</code> 构成：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    String x;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> x;
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TFun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    String x;
+    Type e;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(∀ &quot;</span> + x + <span class="hljs-string">&quot;. &quot;</span> + e + <span class="hljs-string">&quot;)&quot;</span>;
+    }
+}
+<span class="hljs-comment">// 对应简单类型 λ 演算中的 FunT</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    Type a, b;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + a + <span class="hljs-string">&quot; → &quot;</span> + b + <span class="hljs-string">&quot;)&quot;</span>;
+    }
+}</code></pre>
+<p>既然有类型函数那就需要有类似函数应用的操作来填入类型参数：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{
+    <span class="hljs-function">Type <span class="hljs-title">apply</span><span class="hljs-params">(String x, Type t)</span></span>;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    String x;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">apply</span><span class="hljs-params">(String x, Type t)</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.x.equals(x)) <span class="hljs-keyword">return</span> t;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TFun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    String x;
+    Type e;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">apply</span><span class="hljs-params">(String x, Type t)</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.x.equals(x)) <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> e.apply(x, t);
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    Type a, b;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">apply</span><span class="hljs-params">(String x, Type t)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.apply(x, t), 
+                        b.apply(x, t));
+    }
+}</code></pre>
+<p>再在简单类型 λ 演算的基础上给表达式加上类型函数定义和类型函数应用：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
+    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
+    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span></span>;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{ <span class="hljs-comment">/* ... */</span> }
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{ <span class="hljs-comment">/* ... */</span> }
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{ <span class="hljs-comment">/* ... */</span> }
+<span class="hljs-comment">// 类型函数定义</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Forall</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    String x;
+    Expr e;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
+            <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TFun(x, e.checkType());
+    }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
+        <span class="hljs-keyword">return</span> e.checkApply(v);
+    }
+}
+<span class="hljs-comment">// 类型函数应用</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TApp</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Expr e;
+    Type t;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
+            <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Type te = e.checkType();
+        <span class="hljs-keyword">if</span> (te <span class="hljs-keyword">instanceof</span> TFun) <span class="hljs-comment">// 填入类型参数</span>
+            <span class="hljs-keyword">return</span> ((TFun) te).e
+                   .apply(((TFun) te).x, t);
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
+        <span class="hljs-keyword">return</span> e.checkApply(v);
+    }
+}</code></pre>
+<p>其中 <code>Val</code>, <code>Fun</code>, <code>App</code> 的定义和简单类型 λ 演算中基本一致，这里不作展示。</p>
+<p>而测试代码</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">SystemF</span> </span>{
+    Expr T = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-keyword">new</span> Fun(
+        <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+        <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)))));
+    Expr F = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-keyword">new</span> Fun(
+        <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+        <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)))));
+    Type Bool = <span class="hljs-keyword">new</span> TFun(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TArr(
+        <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;x&quot;</span>),
+        <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;x&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;x&quot;</span>))));
+    Expr IF = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-keyword">new</span> Fun(
+        <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;b&quot;</span>, Bool),
+        <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)), <span class="hljs-keyword">new</span> Fun(
+            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+            <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> App(
+                <span class="hljs-keyword">new</span> TApp(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;b&quot;</span>, Bool), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>))),
+                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)))))));
+    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        System.out.println(T.checkType());
+        System.out.println(IF.checkType());
+    }
+}</code></pre>
+<p>运行会输出：</p>
+<pre><code>(∀ a. (a → (a → a)))
+(∀ a. ((∀ x. (x → (x → x))) → (a → (a → a))))</code></pre>
+</body>
+</html>
