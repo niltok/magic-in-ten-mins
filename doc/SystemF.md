@@ -44,12 +44,13 @@ true = Λ a. λ (x: a). λ (y: a). (x: a)
 interface Type {}
 class TVal implements Type {
     String x;
+    UUID id;
     public String toString() {
         return x;
     }
 }
 class TFun implements Type {
-    String x;
+    TVal x;
     Type e;
     public String toString() {
         return "(∀ " + x + ". " + e + ")";
@@ -64,42 +65,71 @@ class TArr implements Type {
 }
 ```
 
-既然有类型函数那就需要有类似函数应用的操作来填入类型参数：
+注意 `TVal` 的 `id` 字段是像无类型 λ 演算中一样 `equals` 函数只需要比较 `id` 字段。
+
+既然有类型函数那就需要有类似函数应用的操作来填入类型参数，同时还需要函数来生成 `UUID` ：
 
 ```java
 interface Type {
-    Type apply(String x, Type t);
+    Type apply(TVal x, Type t);
+    Type genUUID();
+    void applyUUID(TVal v);
 }
 class TVal implements Type {
-    String x;
-    public Type apply(String x, Type t) {
-        if (this.x.equals(x)) return t;
-        else return this;
+    public Type apply(TVal x, Type t) {
+        if (equals(x)) return t;
+        else return this; 
+    }
+    public Type genUUID() { return this; }
+    public void applyUUID(TVal v) {
+        if (x.equals(v.x)) id = v.id;
     }
 }
 class TFun implements Type {
-    String x;
-    Type e;
-    public Type apply(String x, Type t) {
+    public Type apply(TVal x, Type t) {
         if (this.x.equals(x)) return this;
         else return e.apply(x, t);
     }
+    public Type genUUID() {
+        if (x.id == null) {
+            x.id = UUID.randomUUID();
+            e.applyUUID(x);
+        }
+        e.genUUID();
+        return this;
+    }
+    public void applyUUID(TVal v) {
+        if (!x.x.equals(v.x))
+            e.applyUUID(v);
+    }
 }
 class TArr implements Type {
-    Type a, b;
-    public Type apply(String x, Type t) {
+    public Type apply(TVal x, Type t) {
         return new TArr(a.apply(x, t), 
                         b.apply(x, t));
+    }
+    public Type genUUID() {
+        a.genUUID();
+        b.genUUID();
+        return this;
+    }
+    public void applyUUID(TVal v) {
+        a.applyUUID(v);
+        b.applyUUID(v);
     }
 }
 ```
 
-再在简单类型 λ 演算的基础上给表达式加上类型函数定义和类型函数应用：
+这里的实现和无类型 λ 演算很像。
+
+再在简单类型 λ 演算的基础上给表达式加上类型函数定义和类型函数应用，同时还需要协助类型系统生成类型的 `UUID` ：
 
 ```java
 interface Expr {
     Type checkType() throws BadTypeException;
     boolean checkApply(Val v);
+    Expr genUUID();
+    void applyUUID(TVal v);
 }
 class Val implements Expr { /* ... */ }
 class Fun implements Expr { /* ... */ }
@@ -114,6 +144,18 @@ class Forall implements Expr {
     }
     public boolean checkApply(Val v) {
         return e.checkApply(v);
+    }
+    public Expr genUUID() {
+        if (x.id == null) {
+            x.id = UUID.randomUUID();
+            e.applyUUID(x);
+        }
+        e.genUUID();
+        return this;
+    }
+    public void applyUUID(TVal v) {
+        if (!x.x.equals(v.x))
+            e.applyUUID(v);
     }
 }
 // 类型函数应用
@@ -131,10 +173,18 @@ class TApp implements Expr {
     public boolean checkApply(Val v) {
         return e.checkApply(v);
     }
+    public Expr genUUID() {
+        e.genUUID();
+        return this;
+    }
+    public void applyUUID(TVal v) {
+        e.applyUUID(v);
+        t.applyUUID(v);
+    }
 }
 ```
 
-其中 `Val`, `Fun`, `App` 的定义和简单类型 λ 演算中基本一致，这里不作展示。
+其中 `Val`, `Fun`, `App` 的定义和简单类型 λ 演算中基本一致，这里不作展示。他们的 `UUID` 生成只需要想 `TApp` 那样递归就可以，无需特殊操作。
 
 而测试代码
 
@@ -143,14 +193,14 @@ public interface SystemF {
     Expr T = new Forall("a", new Fun(
         new Val("x", new TVal("a")),
         new Fun(new Val("y", new TVal("a")),
-            new Val("x", new TVal("a")))));
+            new Val("x", new TVal("a"))))).genUUID();
     Expr F = new Forall("a", new Fun(
         new Val("x", new TVal("a")),
         new Fun(new Val("y", new TVal("a")),
-            new Val("y", new TVal("a")))));
+            new Val("y", new TVal("a"))))).genUUID();
     Type Bool = new TFun("x", new TArr(
         new TVal("x"),
-        new TArr(new TVal("x"), new TVal("x"))));
+        new TArr(new TVal("x"), new TVal("x")))).genUUID();
     Expr IF = new Forall("a", new Fun(
         new Val("b", Bool),
         new Fun(new Val("x", new TVal("a")), new Fun(
@@ -158,7 +208,7 @@ public interface SystemF {
             new App(new App(
                 new TApp(new Val("b", Bool), new TVal("a")),
                 new Val("x", new TVal("a"))),
-                new Val("y", new TVal("a")))))));
+                new Val("y", new TVal("a"))))))).genUUID();
     static void main(String[] args) throws BadTypeException {
         System.out.println(T.checkType());
         System.out.println(IF.checkType());

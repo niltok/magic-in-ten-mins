@@ -74,9 +74,6 @@ FunctionType = Type * Type</code></pre>
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    String x;
-    Type type;
-
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> type;
     }
@@ -89,9 +86,6 @@ FunctionType = Type * Type</code></pre>
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    Val x;
-    Expr e;
-
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
             <span class="hljs-keyword">throws</span> BadTypeException </span>{
         <span class="hljs-keyword">if</span> (e.checkApply(x))
@@ -107,8 +101,6 @@ FunctionType = Type * Type</code></pre>
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    Expr f, x;
-
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
             <span class="hljs-keyword">throws</span> BadTypeException </span>{
         Type tf = f.checkType();

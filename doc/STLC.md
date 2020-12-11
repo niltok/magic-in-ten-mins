@@ -73,9 +73,6 @@ interface Expr {
 }
 
 class Val implements Expr {
-    String x;
-    Type type;
-
     public Type checkType() {
         return type;
     }
@@ -88,9 +85,6 @@ class Val implements Expr {
 }
 
 class Fun implements Expr {
-    Val x;
-    Expr e;
-
     public Type checkType() 
             throws BadTypeException {
         if (e.checkApply(x))
@@ -106,8 +100,6 @@ class Fun implements Expr {
 }
 
 class App implements Expr {
-    Expr f, x;
-
     public Type checkType() 
             throws BadTypeException {
         Type tf = f.checkType();
