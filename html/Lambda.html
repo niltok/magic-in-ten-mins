@@ -104,7 +104,7 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-keyword">new</span> Fun(<span class="hljs-string">&quot;x&quot;</span>, 
         <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>), 
             <span class="hljs-keyword">new</span> Fun(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>)))), 
-    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>)).genUUID();</code></pre>
+    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>));</code></pre>
 <p>然后就可以定义归约函数 <code>reduce</code> 和应用自由变量函数 <code>apply</code> 还有用来生成 <code>UUID</code> 的 <code>genUUID</code> 函数和 <code>applyUUID</code> 函数：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function">Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span></span>;
@@ -172,6 +172,7 @@ a { color: #02AEF1; text-decoration: none; }
     }
 }
 </code></pre>
+<p>注意在 <code>reduce</code> 一个表达式之前应该先调用 <code>genUUID</code> 来生成变量标签否则会抛出空指针异常。</p>
 <p>以上就是 100 行 Java 写成的解释器啦！</p>
 </body>
 </html>

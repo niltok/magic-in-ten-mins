@@ -108,7 +108,7 @@ Expr expr = new App(
     new Fun("x", 
         new App(new Val("x"), 
             new Fun("x", new Val("x")))), 
-    new Val("y")).genUUID();
+    new Val("y"));
 ```
 
 然后就可以定义归约函数 `reduce` 和应用自由变量函数 `apply` 还有用来生成 `UUID` 的 `genUUID` 函数和 `applyUUID` 函数：
@@ -181,6 +181,8 @@ class App implements Expr {
 }
 
 ```
+
+注意在 `reduce` 一个表达式之前应该先调用 `genUUID` 来生成变量标签否则会抛出空指针异常。
 
 以上就是 100 行 Java 写成的解释器啦！
 
