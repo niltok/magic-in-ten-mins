@@ -24,22 +24,22 @@ public Expr reduce() {
 
 这样处理和平时见过的常规语言似乎很不一样，C、Java在处理函数参数时都选择先对参数求值再传参。
 
-像这样先传参再归约的求值思路就叫非严格求值，也叫惰性求值。其最大好处是在很多时候函数的参数没有被使用过的情况下节省了求值时归约次数。
+像这样先传参再归约的求值思路就叫非严格求值（Non-strict Evaluation），也叫惰性求值（Lazy Evaluation）。其最大好处是在很多时候函数的参数没有被使用过的情况下节省了求值时归约次数。
 
 比如 `(λ x. λ y. x) complex1 complex2` 这个 λ 表达式只会取 `complex1` 和 `complex2` 中的 `complex1` ，如果 `complex2` 非常复杂那就非常浪费算力了。
 
 ## 严格求值
 
-所谓严格求值就是像 C 系语言一样先求参数的值再传参：
+所谓严格求值（Strict Evaluation）就是像 C 系语言一样先求参数的值再传参：
 
 ```java
 // class App
-public Expr reduce() {
-    Expr fr = f.reduce();
-    Expr xr = x.reduce();
+public Expr strictReduce() {
+    Expr fr = f.strictReduce();
+    Expr xr = x.strictReduce();
     if (fr instanceof Fun) {
         Fun fun = (Fun) fr;
-        return fun.e.apply(fun.x, xr).reduce();
+        return fun.e.apply(fun.x, xr).strictReduce();
     }
     return new App(fr, xr);
 }
@@ -53,8 +53,8 @@ public Expr reduce() {
 
 ```java
 // class Fun
-public Expr reduce() {
-    return new Fun(x, e.reduce());
+public Expr fullBetaReduce() {
+    return new Fun(x, e.fullBetaReduce());
 }
 ```
 

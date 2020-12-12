@@ -1,0 +1,81 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFF; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; color: #EF96AB; }
+h2 { margin-top: 2em; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
+code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #F2F0F0; }
+pre { overflow: scroll; padding: 10px; background: #F1F0F0; }
+::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }
+a { color: #02AEF1; text-decoration: none; }
+.hljs-keyword { color: #F288AF; }
+.hljs-comment { color: #929CA6; }
+.hljs-string { color: #0594A6; }
+.hljs-title { color: #4581D9 }
+</style>
+</head>
+<body>
+<h1 id="十分钟魔法练习：y-组合子">十分钟魔法练习：Y 组合子</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java 基础，λ 演算，λ 演算编码</p>
+</blockquote>
+<h2 id="递归">递归</h2>
+<p>在 Java 里面实现递归非常简单，只需要在函数内调用函数本身就好了，比如下面的求和程序：</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">sum</span><span class="hljs-params">(<span class="hljs-keyword">int</span> n)</span> </span>{
+    <span class="hljs-keyword">if</span> (n == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> n + sum(n - <span class="hljs-number">1</span>);
+}</code></pre>
+<p>这时候就会注意到看起来递归必须要函数有名字，不然怎么调用时表示自己呢？实际上有个很显然的例子：</p>
+<pre><code>(λ x. x x) (λ x. x x)</code></pre>
+<p>这个表达式无论怎么求值都会得到它自身，实际上这就是个无限递归的例子。而在它的基础上稍加修改就可以得到 Y 组合子（Y Combinator）：</p>
+<pre><code>Y = λ f. (λ x. f (x x)) (λ x. f (x x))</code></pre>
+<p>而往 Y 组合子上应用一个函数就会得到：</p>
+<pre><code>Y g = (λ x. g (x x)) (λ x. g (x x))
+    = g ((λ x. g (x x)) (λ x. g (x x)))
+    = g (Y g)</code></pre>
+<p>这样 <code>g</code> 就拿到了 <code>Y g</code> 也就是它自己的函数作为参数，那么就可以递归了，比如上面的 <code>sum</code> 就可以写成：</p>
+<pre><code>sum&#x27; = λ self. λ n.
+    isZero n
+        n
+        (+ n (self (prev n)))
+sum = Y sum&#x27;</code></pre>
+<p><code>n</code> 是个丘奇数， <code>isZero</code> 判断数字是不是 0 并得到一个 λ 演算编码的布尔值， <code>+</code> 函数把两个丘奇数相加， <code>prev</code> 函数得到比 <code>n</code> 小一的数。 <code>sum</code> 在递归到 <code>n</code> 为 0 时停止递归。</p>
+<h2 id="求值策略">求值策略</h2>
+<p>很显然如果直接使用严格求值会无限展开 Y 算子而得不到结果，如果使用惰性求值会得不到易于阅读的结果。这时候就要用一种介于两者之间的求值策略：</p>
+<pre><code class="language-java"><span class="hljs-comment">// class Fun</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(x, e.fullReduce());
+}
+<span class="hljs-comment">// class App</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span> </span>{
+    Expr fr = f.reduce();
+    <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Fun) {
+        Fun fun = (Fun) fr;
+        <span class="hljs-keyword">return</span> fun.e.apply(fun.x, x).fullReduce();
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr.fullReduce(), x.fullReduce());
+}</code></pre>
+<p>它只有在尝试应用函数失败的时候才会进行完全展开，这样每次只展开一点就可以避免陷入无限递归。</p>
+<h2 id="循环">循环</h2>
+<p>在编码那期中介绍了如何在 λ 演算中构造分支结构，而循环循环可以用递归来表示，每个循环都可以写成循环变量作为参数的尾递归函数，实际上如下的循环：</p>
+<pre><code class="language-java">State state;
+<span class="hljs-keyword">while</span> (needLoop(state)) {
+    doSomething();
+    state = update(state);
+}</code></pre>
+<p>都可以写成如下的递归函数：</p>
+<pre><code class="language-java"><span class="hljs-function">State <span class="hljs-title">While</span><span class="hljs-params">(State state)</span> </span>{
+    <span class="hljs-keyword">if</span> (needLoop(state)) 
+        <span class="hljs-keyword">return</span> While(update(state));
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> state;
+}</code></pre>
+<p>这样就可以把任意的循环改写成 λ 演算的形式了。</p>
+</body>
+</html>

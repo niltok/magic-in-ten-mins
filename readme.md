@@ -6,6 +6,8 @@
 
 希望能在十分钟内教会你一样魔法
 
+QQ群：1070975853
+
 > 目录中方括号里的是前置技能。
 
 ## 类型系统
@@ -59,6 +61,10 @@
 较难 | 编码(Encode)[λ演算] |
 [Markdown](doc/Encode.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/Encode.html)
+
+中等 | Y 组合子(Y Combinator)[Java 基础，λ 演算，λ 演算编码] |
+[Markdown](doc/YCombinator.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/YCombinator.html)
 
 ## 编程范式
 

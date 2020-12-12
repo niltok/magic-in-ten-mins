@@ -39,17 +39,17 @@ a { color: #02AEF1; text-decoration: none; }
 }</code></pre>
 <p>并且函数的 <code>reduce</code> 并不会 <code>reduce</code> 函数内部表达式而是直接返回 <code>this</code> 。</p>
 <p>这样处理和平时见过的常规语言似乎很不一样，C、Java在处理函数参数时都选择先对参数求值再传参。</p>
-<p>像这样先传参再归约的求值思路就叫非严格求值，也叫惰性求值。其最大好处是在很多时候函数的参数没有被使用过的情况下节省了求值时归约次数。</p>
+<p>像这样先传参再归约的求值思路就叫非严格求值（Non-strict Evaluation），也叫惰性求值（Lazy Evaluation）。其最大好处是在很多时候函数的参数没有被使用过的情况下节省了求值时归约次数。</p>
 <p>比如 <code>(λ x. λ y. x) complex1 complex2</code> 这个 λ 表达式只会取 <code>complex1</code> 和 <code>complex2</code> 中的 <code>complex1</code> ，如果 <code>complex2</code> 非常复杂那就非常浪费算力了。</p>
 <h2 id="严格求值">严格求值</h2>
-<p>所谓严格求值就是像 C 系语言一样先求参数的值再传参：</p>
+<p>所谓严格求值（Strict Evaluation）就是像 C 系语言一样先求参数的值再传参：</p>
 <pre><code class="language-java"><span class="hljs-comment">// class App</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
-    Expr fr = f.reduce();
-    Expr xr = x.reduce();
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">strictReduce</span><span class="hljs-params">()</span> </span>{
+    Expr fr = f.strictReduce();
+    Expr xr = x.strictReduce();
     <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Fun) {
         Fun fun = (Fun) fr;
-        <span class="hljs-keyword">return</span> fun.e.apply(fun.x, xr).reduce();
+        <span class="hljs-keyword">return</span> fun.e.apply(fun.x, xr).strictReduce();
     }
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr, xr);
 }</code></pre>
@@ -57,8 +57,8 @@ a { color: #02AEF1; text-decoration: none; }
 <h2 id="完全-β-归约">完全 β 归约</h2>
 <p>如果想要让打印出的表达式被化到最简还需要在严格求值的基础上把函数定义中的表达式也进一步归约：</p>
 <pre><code class="language-java"><span class="hljs-comment">// class Fun</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(x, e.reduce());
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">fullBetaReduce</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(x, e.fullBetaReduce());
 }</code></pre>
 <p>这就是完全 β 归约。它会将任何能归约的地方归约，即使这个函数并没有被应用函数内部也会被归约。</p>
 <h2 id="对比">对比</h2>
