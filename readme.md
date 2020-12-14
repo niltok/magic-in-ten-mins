@@ -6,7 +6,8 @@
 
 希望能在十分钟内教会你一样魔法
 
-QQ群：1070975853
+QQ群：1070975853 | 
+[Telegram Group](https://t.me/joinchat/Gla40h2ZvlSrqImOMaMUEA)
 
 > 目录中方括号里的是前置技能。
 
