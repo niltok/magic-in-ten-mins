@@ -22,13 +22,15 @@ FunctionType = Type * Type
 ```java
 // 构造函数， equals 已省去
 interface Type {}
-class BaseT implements Type {
+// BaseType
+class TVal implements Type {
     String name;
     public String toString() {
         return name;
     }
 }
-class FunT implements Type {
+// FunctionType
+class TArr implements Type {
     Type src, tar;
     public String toString() {
         return "(" + src + " → " + tar + ")";
@@ -88,7 +90,7 @@ class Fun implements Expr {
     public Type checkType() 
             throws BadTypeException {
         if (e.checkApply(x))
-            return new FunT(x.type, 
+            return new TArr(x.type, 
                             e.checkType());
         else throw new BadTypeException();
     }
@@ -104,10 +106,10 @@ class App implements Expr {
             throws BadTypeException {
         Type tf = f.checkType();
         
-        if (tf instanceof FunT &&
-                ((FunT) tf).src
+        if (tf instanceof TArr &&
+                ((TArr) tf).src
                 .equals(x.checkType()))
-            return ((FunT) tf).tar;
+            return ((TArr) tf).tar;
         else throw new BadTypeException();
     }
 
@@ -127,21 +129,18 @@ class App implements Expr {
 进行了类型检查，会打印输出 `(bool → int)` ：
 
 ```java
-public class STLambda {
-    public static void main(String[] args) {
-        try {
-            System.out.println(new App(
-                new Fun(
-                    new Val("x", 
-                        new BaseT("int")),
-                    new Val("y", new FunT(
-                        new BaseT("bool"),
-                        new BaseT("int")))),
-                new Val("1", new BaseT("int"))
-            ).checkType());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+public interface STLambda {
+    static void main(String[] args) 
+    throws BadTypeException {
+        System.out.println(new App(
+            new Fun(
+                new Val("x", 
+                    new TVal("int")),
+                new Val("y", new TArr(
+                    new TVal("bool"),
+                    new TVal("int")))),
+            new Val("1", new TVal("int"))
+        ).checkType());
     }
 }
 ```

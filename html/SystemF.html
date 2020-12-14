@@ -56,7 +56,6 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(∀ &quot;</span> + x + <span class="hljs-string">&quot;. &quot;</span> + e + <span class="hljs-string">&quot;)&quot;</span>;
     }
 }
-<span class="hljs-comment">// 对应简单类型 λ 演算中的 FunT</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     Type a, b;
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
@@ -149,7 +148,7 @@ a { color: #02AEF1; text-decoration: none; }
     }
 }
 <span class="hljs-comment">// 类型函数应用</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TApp</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppT</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Expr e;
     Type t;
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
@@ -172,7 +171,7 @@ a { color: #02AEF1; text-decoration: none; }
         t.applyUUID(v);
     }
 }</code></pre>
-<p>其中 <code>Val</code>, <code>Fun</code>, <code>App</code> 的定义和简单类型 λ 演算中基本一致，这里不作展示。他们的 <code>UUID</code> 生成只需要想 <code>TApp</code> 那样递归就可以，无需特殊操作。</p>
+<p>其中 <code>Val</code>, <code>Fun</code>, <code>App</code> 的定义和简单类型 λ 演算中基本一致，这里不作展示。他们的 <code>UUID</code> 生成只需要想 <code>AppT</code> 那样递归就可以，无需特殊操作。</p>
 <p>而测试代码</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">SystemF</span> </span>{
     Expr T = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-keyword">new</span> Fun(
@@ -191,7 +190,7 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)), <span class="hljs-keyword">new</span> Fun(
             <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
             <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> App(
-                <span class="hljs-keyword">new</span> TApp(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;b&quot;</span>, Bool), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+                <span class="hljs-keyword">new</span> AppT(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;b&quot;</span>, Bool), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
                 <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>))),
                 <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>))))))).genUUID();
     <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{

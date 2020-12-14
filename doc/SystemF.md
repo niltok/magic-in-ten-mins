@@ -56,7 +56,6 @@ class TFun implements Type {
         return "(∀ " + x + ". " + e + ")";
     }
 }
-// 对应简单类型 λ 演算中的 FunT
 class TArr implements Type {
     Type a, b;
     public String toString() {
@@ -159,7 +158,7 @@ class Forall implements Expr {
     }
 }
 // 类型函数应用
-class TApp implements Expr {
+class AppT implements Expr {
     Expr e;
     Type t;
     public Type checkType() 
@@ -184,7 +183,7 @@ class TApp implements Expr {
 }
 ```
 
-其中 `Val`, `Fun`, `App` 的定义和简单类型 λ 演算中基本一致，这里不作展示。他们的 `UUID` 生成只需要想 `TApp` 那样递归就可以，无需特殊操作。
+其中 `Val`, `Fun`, `App` 的定义和简单类型 λ 演算中基本一致，这里不作展示。他们的 `UUID` 生成只需要想 `AppT` 那样递归就可以，无需特殊操作。
 
 而测试代码
 
@@ -206,7 +205,7 @@ public interface SystemF {
         new Fun(new Val("x", new TVal("a")), new Fun(
             new Val("y", new TVal("a")),
             new App(new App(
-                new TApp(new Val("b", Bool), new TVal("a")),
+                new AppT(new Val("b", Bool), new TVal("a")),
                 new Val("x", new TVal("a"))),
                 new Val("y", new TVal("a"))))))).genUUID();
     static void main(String[] args) throws BadTypeException {
