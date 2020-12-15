@@ -28,7 +28,7 @@ a { color: #02AEF1; text-decoration: none; }
 </blockquote>
 <h2 id="半群（semigroup）">半群（Semigroup）</h2>
 <p>半群是一种代数结构，在集合 <code>A</code> 上包含一个将两个 <code>A</code> 的元素映射到 <code>A</code> 上的运算即 <code>&lt;&gt; : (A, A) -&gt; A​</code> ，同时该运算满足<strong>结合律</strong>即 <code>(a &lt;&gt; b) &lt;&gt; c == a &lt;&gt; (b &lt;&gt; c)</code> ，那么代数结构 <code>{&lt;&gt;, A}</code> 就是一个半群。</p>
-<p>比如在自然数集上的加法或者减法可以构成一个半群，再比如字符串集上字符串的连接构成一个半群。</p>
+<p>比如在自然数集上的加法或者乘法可以构成一个半群，再比如字符串集上字符串的连接构成一个半群。</p>
 <h2 id="单位半群（monoid）">单位半群（Monoid）</h2>
 <p>单位半群是一种带单位元的半群，对于集合 <code>A</code> 上的半群 <code>{&lt;&gt;, A}</code> ， <code>A</code> 中的元素 <code>a</code> 使 <code>A</code> 中的所有元素 <code>x</code> 满足 <code>x &lt;&gt; a</code> 和 <code>a &lt;&gt; x</code> 都等于 <code>x</code>，则 <code>a</code> 就是 <code>{&lt;&gt;, A}</code> 上的单位元。</p>
 <p>举个例子， <code>{+, 自然数集}</code> 的单位元就是 0 ， <code>{*, 自然数集}</code> 的单位元就是 1 ， <code>{+, 字符串集}</code> 的单位元就是空串 <code>&quot;&quot;</code> 。</p>
