@@ -49,6 +49,10 @@ QQ群：1070975853 |
 [Markdown](doc/SystemF.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/SystemF.html)
 
+偏易 | 系统 F <u>ω</u>(System F <u>ω</u>)[Java 基础，ADT，简单类型 λ 演算] |
+[Markdown](doc/SysF_O.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/SysF_O.html)
+
 ## 计算理论
 
 较难 | λ 演算(Lambda Calculus)[Java基础，ADT] |
