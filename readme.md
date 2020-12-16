@@ -51,7 +51,7 @@ QQ群：1070975853 |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/SystemF.html)
 
 偏易 | 系统 F ω(System F ω)[Java 基础，ADT，系统 F] |
-[Markdown](doc/SysFO.md) |
+[Markdown](doc/SysFO.md) | 
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/SysFO.html)
 
 ## 计算理论
