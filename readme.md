@@ -50,9 +50,9 @@ QQ群：1070975853 |
 [Markdown](doc/SystemF.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/SystemF.html)
 
-偏易 | 系统 F <u>ω</u>(System F <u>ω</u>)[Java 基础，ADT，简单类型 λ 演算] |
-[Markdown](doc/SysF_O.md) |
-[HTML](https://goldimax.github.io/magic-in-ten-mins/html/SysF_O.html)
+偏易 | 系统 F ω(System F ω)[Java 基础，ADT，系统 F] |
+[Markdown](doc/SysFO.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/SysFO.html)
 
 ## 计算理论
 
