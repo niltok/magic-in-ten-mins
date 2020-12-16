@@ -28,18 +28,20 @@ const spre = 'pre { overflow-x: auto; padding: 10px; background: #F1F0F0; }\n'
 const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }\n'
 const sa = 'a { color: #02AEF1; text-decoration: none; }\n'
 
+const sdarkbody = '@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }\n'
+
 const hlkeyword = '.hljs-keyword { color: #F288AF; }\n'
 const hlconmment = '.hljs-comment { color: #929CA6; }\n'
 const hlstring = '.hljs-string { color: #0594A6; }\n'
 const hltitle = '.hljs-title { color: #4581D9 }\n'
 
 const hlcss = hlkeyword + hlconmment + hlstring + hltitle
-const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sa + hlcss)
+const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sa + hlcss + sdarkbody)
 
 const head = $$('head')(charset + viewpoint + title + style)
 
 const gen = s => {
-    return $$('html')(head + $$('body')(marked(s, {highlight: s => hljs.highlightAuto(s, ['java']).value})))
+    return $$('html')(head + $$('body')(marked(s, { highlight: s => hljs.highlightAuto(s, ['java']).value })))
 }
 
 fs.readdirSync("doc").forEach(f => {
