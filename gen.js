@@ -23,12 +23,13 @@ const sh1 = 'h1 { font-size: 2.5em; color: #EF96AB; }\n'
 const sh2 = 'h2 { margin-top: 2em; }\n'
 const scenter = 'h1, h2, h3 { text-align: center; }\n'
 const squote = 'blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }\n'
-const scode = 'code { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #F2F0F0; }\n'
-const spre = 'pre { overflow-x: auto; padding: 10px; background: #F1F0F0; }\n'
+const scode = 'code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #F2F0F0; }\n'
+const spre = 'pre { overflow-x: auto; padding: 10px; }\n'
 const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }\n'
 const sa = 'a { color: #02AEF1; text-decoration: none; }\n'
 
 const sdarkbody = '@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }\n'
+const sdarkpre = '@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1A; } }\n'
 
 const hlkeyword = '.hljs-keyword { color: #F288AF; }\n'
 const hlconmment = '.hljs-comment { color: #929CA6; }\n'
@@ -36,7 +37,7 @@ const hlstring = '.hljs-string { color: #0594A6; }\n'
 const hltitle = '.hljs-title { color: #4581D9 }\n'
 
 const hlcss = hlkeyword + hlconmment + hlstring + hltitle
-const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sa + hlcss + sdarkbody)
+const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sa + sdarkbody + sdarkpre + hlcss)
 
 const head = $$('head')(charset + viewpoint + title + style)
 
