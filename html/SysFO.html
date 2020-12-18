@@ -5,16 +5,16 @@
 <title>
 十分钟魔法练习</title>
 <style>
-body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFF; }
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFC; }
 body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
 h1 { font-size: 2.5em; color: #EF96AB; }
 h2 { margin-top: 2em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #F2F0F0; }
+code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; }
 pre { overflow-x: auto; padding: 10px; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
-@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1A; } }
+@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
@@ -22,6 +22,8 @@ a { color: #02AEF1; text-decoration: none; }
 </style>
 </head>
 <body>
+<p>
+<a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
 <h1 id="十分钟魔法练习：系统-f-ω">十分钟魔法练习：系统 F ω</h1>
 <h3 id="by-「玩火」">By 「玩火」</h3>
 <blockquote>
@@ -31,7 +33,8 @@ a { color: #02AEF1; text-decoration: none; }
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Just</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
     T value;
 }</code></pre>
-<p><code>Just</code> 就是个能接受类型参数 <code>T</code> 的类型，它被称为类型构造器（Type Constructor）。在系统 F 中加入类型构造器后它被称为系统 F ω （System F ω）。实际上这相当于在类型系统中嵌入了一个完整的 λ 演算解释器，所以我们需要在系统 F 的类型系统中加入 <code>TApp</code> 来应用一个类型函数：</p>
+<p><code>Just</code> 就是个能接受类型参数 <code>T</code> 的类型，它被称为类型构造器（Type Constructor）。在系统 F 中加入类型构造器后它被称为系统 F ω （System F ω）。加入了类型构造器后就可以在 λ 演算中构造泛型容器了，比如构造泛型的 List 。</p>
+<p>实际上这相当于在类型系统中嵌入了一个完整的 λ 演算解释器，所以我们需要在系统 F 的类型系统中加入 <code>TFun</code> 来定义一个类型函数 <code>TApp</code> 来应用一个类型函数：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{
     <span class="hljs-function">Type <span class="hljs-title">reduce</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Type <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span></span>;
@@ -50,6 +53,10 @@ a { color: #02AEF1; text-decoration: none; }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TApp</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     Type f, x;
 }
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TForall</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
+    TVal x;
+    Type t;
+}
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     Type a, b;
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
@@ -65,7 +72,7 @@ a { color: #02AEF1; text-decoration: none; }
                         b.apply(v, t));
     }
 }</code></pre>
-<p>其中 <code>TVal</code> 、 <code>TFun</code> 和 <code>TApp</code> 的函数实现和无类型 λ 演算中的表达式基本一致， <code>fullReduce</code> 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 <code>TArr</code> 的实现也只是简单进行递归调用，非常简单。</p>
+<p>其中 <code>TVal</code> 、 <code>TFun</code> 和 <code>TApp</code> 的函数实现和无类型 λ 演算中的表达式基本一致， <code>fullReduce</code> 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 <code>TForall</code> 的实现可以参考 System F 和 <code>TFun</code> ， <code>TArr</code> 的实现也只是简单进行递归调用，非常简单。</p>
 <p>而表达式相比系统 F 需要的改动是 <code>TVal</code> 在检查类型时需要先调用 <code>fullReduce</code> 来化简类型：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
@@ -110,8 +117,8 @@ a { color: #02AEF1; text-decoration: none; }
 }</code></pre>
 <p>有了类型构造器，我们就可以表达带有泛型的容器，比如列表（建议只看注释）：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">TypeCons</span> </span>{
-    <span class="hljs-comment">// List = ∀ X. ∀ R. (X → (R → R)) → (R → R)</span>
-    Type List = <span class="hljs-keyword">new</span> TFun(<span class="hljs-string">&quot;X&quot;</span>, <span class="hljs-keyword">new</span> TFun(<span class="hljs-string">&quot;R&quot;</span>, <span class="hljs-keyword">new</span> TArr(
+    <span class="hljs-comment">// List = λ X. ∀ R. (X → (R → R)) → (R → R)</span>
+    Type List = <span class="hljs-keyword">new</span> TFun(<span class="hljs-string">&quot;X&quot;</span>, <span class="hljs-keyword">new</span> TForall(<span class="hljs-string">&quot;R&quot;</span>, <span class="hljs-keyword">new</span> TArr(
         <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>), <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>))),
         <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>))))).genUUID();
     <span class="hljs-comment">// nil  = Λ X. (Λ R. λ c: X → (R → R). λ n: R. n)</span>

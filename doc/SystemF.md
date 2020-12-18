@@ -49,7 +49,7 @@ class TVal implements Type {
         return x;
     }
 }
-class TFun implements Type {
+class TForall implements Type {
     TVal x;
     Type e;
     public String toString() {
@@ -84,7 +84,7 @@ class TVal implements Type {
         if (x.equals(v.x)) id = v.id;
     }
 }
-class TFun implements Type {
+class TForall implements Type {
     public Type apply(TVal x, Type t) {
         if (this.x.equals(x)) return this;
         else return e.apply(x, t);
@@ -139,7 +139,7 @@ class Forall implements Expr {
     Expr e;
     public Type checkType() 
         	throws BadTypeException {
-        return new TFun(x, e.checkType());
+        return new TForall(x, e.checkType());
     }
     public boolean checkApply(Val v) {
         return e.checkApply(v);
@@ -164,9 +164,9 @@ class AppT implements Expr {
     public Type checkType() 
         	throws BadTypeException {
         Type te = e.checkType();
-        if (te instanceof TFun) // 填入类型参数
-            return ((TFun) te).e
-                   .apply(((TFun) te).x, t);
+        if (te instanceof TForall) // 填入类型参数
+            return ((TForall) te).e
+                   .apply(((TForall) te).x, t);
         throw new BadTypeException();
     }
     public boolean checkApply(Val v) {
@@ -197,7 +197,7 @@ public interface SystemF {
         new Val("x", new TVal("a")),
         new Fun(new Val("y", new TVal("a")),
             new Val("y", new TVal("a"))))).genUUID();
-    Type Bool = new TFun("x", new TArr(
+    Type Bool = new TForall("x", new TArr(
         new TVal("x"),
         new TArr(new TVal("x"), new TVal("x")))).genUUID();
     Expr IF = new Forall("a", new Fun(

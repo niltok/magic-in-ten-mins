@@ -12,7 +12,9 @@ class Just<T> {
 }
 ```
 
-`Just` 就是个能接受类型参数 `T` 的类型，它被称为类型构造器（Type Constructor）。在系统 F 中加入类型构造器后它被称为系统 F ω （System F ω）。实际上这相当于在类型系统中嵌入了一个完整的 λ 演算解释器，所以我们需要在系统 F 的类型系统中加入 `TApp` 来应用一个类型函数：
+`Just` 就是个能接受类型参数 `T` 的类型，它被称为类型构造器（Type Constructor）。在系统 F 中加入类型构造器后它被称为系统 F ω （System F ω）。加入了类型构造器后就可以在 λ 演算中构造泛型容器了，比如构造泛型的 List 。
+
+实际上这相当于在类型系统中嵌入了一个完整的 λ 演算解释器，所以我们需要在系统 F 的类型系统中加入 `TFun` 来定义一个类型函数 `TApp` 来应用一个类型函数：
 
 ```java
 interface Type {
@@ -33,6 +35,10 @@ class TFun implements Type {
 class TApp implements Type {
     Type f, x;
 }
+class TForall implements Type {
+    TVal x;
+    Type t;
+}
 class TArr implements Type {
     Type a, b;
     public Type reduce() {
@@ -50,7 +56,7 @@ class TArr implements Type {
 }
 ```
 
-其中 `TVal` 、 `TFun` 和 `TApp` 的函数实现和无类型 λ 演算中的表达式基本一致， `fullReduce` 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 `TArr` 的实现也只是简单进行递归调用，非常简单。
+其中 `TVal` 、 `TFun` 和 `TApp` 的函数实现和无类型 λ 演算中的表达式基本一致， `fullReduce` 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 `TForall` 的实现可以参考 System F 和 `TFun` ， `TArr` 的实现也只是简单进行递归调用，非常简单。
 
 而表达式相比系统 F 需要的改动是 `TVal` 在检查类型时需要先调用 `fullReduce` 来化简类型：
 
@@ -102,8 +108,8 @@ class AppT implements Expr {
 
 ```java
 public interface TypeCons {
-    // List = ∀ X. ∀ R. (X → (R → R)) → (R → R)
-    Type List = new TFun("X", new TFun("R", new TArr(
+    // List = λ X. ∀ R. (X → (R → R)) → (R → R)
+    Type List = new TFun("X", new TForall("R", new TArr(
         new TArr(new TVal("X"), new TArr(new TVal("R"), new TVal("R"))),
         new TArr(new TVal("R"), new TVal("R"))))).genUUID();
     // nil  = Λ X. (Λ R. λ c: X → (R → R). λ n: R. n)
