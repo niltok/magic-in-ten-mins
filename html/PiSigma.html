@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFC; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; color: #EF96AB; }
+h2 { margin-top: 2em; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
+code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; }
+pre { overflow-x: auto; padding: 10px; }
+a { color: #02AEF1; text-decoration: none; }
+@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
+@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
+.hljs-keyword { color: #F288AF; }
+.hljs-comment { color: #929CA6; }
+.hljs-string { color: #0594A6; }
+.hljs-title { color: #4581D9 }
+</style>
+</head>
+<body>
+<p>
+<a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
+<h1 id="十分钟魔法练习：π-类型和-σ-类型">十分钟魔法练习：π 类型和 Σ 类型</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：ADT，构造演算</p>
+</blockquote>
+<h2 id="π-类型">π 类型</h2>
+<p>构造演算中包含一种 <code>* → □</code> 的函数，这种函数的类型被称为 π 类型。名字很奇怪，这个类型和 π 毫无关系的啊。实际上这个名字是这么来的：</p>
+<p>首先构造一个 π 类型的函数 <code>F: T → U</code> ，在其定义域 <code>T</code> 中任取一个值 <code>x</code> 那么可以构造类型 <code>F(x)</code> ，那么实际上可以对定义域中每个值都这么操作并且把构造出的类型全部统统放入一个有名元组中 </p>
+<pre><code>(x_0: F(x_0), x_1: F(x_1), ... , x_n: F(x_n))</code></pre>
+<p>这样的定义实际上是和原来的函数等价的，而且这个元组的类型实际上就是一个 ADT 中的积类型</p>
+<pre><code>F(x_0) * F(x_1) * ... * F(x_n)</code></pre>
+<p>用数学的连乘符号可以表示为</p>
+<pre><code>π_{x: T} F(x)</code></pre>
+<p>这里有个 π 所以它就被称为 π 类型。</p>
+<h2 id="σ-类型">Σ 类型</h2>
+<p>设值 <code>x: T</code> ，和 π 类型函数 <code>F: T → U</code> 那么元组 <code>(x, F(x))</code> 的类型就是 Σ 类型。实际上有了上面的例子，这里也挺好理解的，对于类型 <code>T</code> 的所有 <code>x</code> 可以构造出</p>
+<pre><code>x_0: F(x_0) | x_1: F(x_1) | ... | x_n: F(x_n)</code></pre>
+<p>这个类型和那个元组的类型是等价的，而它就是 ADT 中的和类型</p>
+<pre><code>F(x_0) + F(x_1) + ... + F(x_n)</code></pre>
+<p>用数学的求和符号可以表示为</p>
+<pre><code>Σ_{x: T} F(x)</code></pre>
+<p>所以它就被称为 Σ 类型。</p>
+<blockquote>
+<p>题外话：个人感觉这样命名类型挺离谱的，拿个符号就来命名，本来符号意思就多，放在这里一眼看上去真猜不出来是啥意思，我觉得叫总积/求和类型都看上去好理解些。</p>
+</blockquote>
+</body>
+</html>

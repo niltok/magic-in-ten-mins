@@ -54,6 +54,14 @@ QQ群：1070975853 |
 [Markdown](doc/SysFO.md) | 
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/SysFO.html)
 
+较难 | 构造演算(Calculus of Construction)[Java 基础，ADT，系统 F ω] |
+[Markdown](doc/CoC.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/CoC.html)
+
+偏易 | π 类型和 Σ 类型(Pi type & Sigma type)[ADT，构造演算] |
+[Markdown](doc/PiSigma.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/PiSigma.html)
+
 ## 计算理论
 
 较难 | λ 演算(Lambda Calculus)[Java基础，ADT] |

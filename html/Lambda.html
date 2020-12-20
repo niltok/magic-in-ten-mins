@@ -76,9 +76,6 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(λ &quot;</span> + x + <span class="hljs-string">&quot;. &quot;</span> + e + <span class="hljs-string">&quot;)&quot;</span>;
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object obj)</span> </span>{
-        <span class="hljs-comment">// ...</span>
-    }
 }
 <span class="hljs-comment">// Apply 函数应用</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
@@ -89,9 +86,6 @@ a { color: #02AEF1; text-decoration: none; }
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + f + <span class="hljs-string">&quot; &quot;</span> + x + <span class="hljs-string">&quot;)&quot;</span>;
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object obj)</span> </span>{
-        <span class="hljs-comment">// ...</span>
     }
 }</code></pre>
 <blockquote>

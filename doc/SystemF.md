@@ -101,6 +101,12 @@ class TForall implements Type {
         if (!x.x.equals(v.x))
             e.applyUUID(v);
     }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TForall tForall = (TForall) o;
+        return Objects.equals(e, tForall.e.apply(tForall.x, x));
+    }
 }
 class TArr implements Type {
     public Type apply(TVal x, Type t) {
@@ -119,7 +125,7 @@ class TArr implements Type {
 }
 ```
 
-这里的实现和无类型 λ 演算很像。
+这里的实现和无类型 λ 演算很像。不过要注意 `TForall` 的 `equals` 函数实现，在比较前需要先把变量统一一下。
 
 再在简单类型 λ 演算的基础上给表达式加上类型函数定义和类型函数应用，同时还需要协助类型系统生成类型的 `UUID` ：
 

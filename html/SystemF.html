@@ -99,6 +99,12 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">if</span> (!x.x.equals(v.x))
             e.applyUUID(v);
     }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span> == o) <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+        <span class="hljs-keyword">if</span> (o == <span class="hljs-keyword">null</span> || getClass() != o.getClass()) <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        TForall tForall = (TForall) o;
+        <span class="hljs-keyword">return</span> Objects.equals(e, tForall.e.apply(tForall.x, x));
+    }
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">apply</span><span class="hljs-params">(TVal x, Type t)</span> </span>{
@@ -115,7 +121,7 @@ a { color: #02AEF1; text-decoration: none; }
         b.applyUUID(v);
     }
 }</code></pre>
-<p>这里的实现和无类型 λ 演算很像。</p>
+<p>这里的实现和无类型 λ 演算很像。不过要注意 <code>TForall</code> 的 <code>equals</code> 函数实现，在比较前需要先把变量统一一下。</p>
 <p>再在简单类型 λ 演算的基础上给表达式加上类型函数定义和类型函数应用，同时还需要协助类型系统生成类型的 <code>UUID</code> ：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;

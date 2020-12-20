@@ -28,12 +28,18 @@ class TVal implements Type {
     public String toString() {
         return name;
     }
+    public boolean equals(Object o) {
+        // ...
+    }
 }
 // FunctionType
 class TArr implements Type {
     Type src, tar;
     public String toString() {
         return "(" + src + " → " + tar + ")";
+    }
+    public boolean equals(Object o) {
+        // ...
     }
 }
 ```

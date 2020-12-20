@@ -72,7 +72,7 @@ a { color: #02AEF1; text-decoration: none; }
                         b.apply(v, t));
     }
 }</code></pre>
-<p>其中 <code>TVal</code> 、 <code>TFun</code> 和 <code>TApp</code> 的函数实现和无类型 λ 演算中的表达式基本一致， <code>fullReduce</code> 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 <code>TForall</code> 的实现可以参考 System F 和 <code>TFun</code> ， <code>TArr</code> 的实现也只是简单进行递归调用，非常简单。</p>
+<p>其中 <code>TVal</code> 、 <code>TFun</code> 和 <code>TApp</code> 的函数实现和无类型 λ 演算中的表达式基本一致，不过注意要加上 <code>equals</code> 函数的实现，并且 <code>TFun</code> 在比较前需要把变量替换成一样的， <code>fullReduce</code> 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 <code>TForall</code> 的实现可以参考 System F ， <code>TArr</code> 的实现也只是简单进行递归调用，非常简单。</p>
 <p>而表达式相比系统 F 需要的改动是 <code>TVal</code> 在检查类型时需要先调用 <code>fullReduce</code> 来化简类型：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;

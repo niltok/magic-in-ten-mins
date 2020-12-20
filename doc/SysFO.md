@@ -56,7 +56,7 @@ class TArr implements Type {
 }
 ```
 
-其中 `TVal` 、 `TFun` 和 `TApp` 的函数实现和无类型 λ 演算中的表达式基本一致， `fullReduce` 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 `TForall` 的实现可以参考 System F 和 `TFun` ， `TArr` 的实现也只是简单进行递归调用，非常简单。
+其中 `TVal` 、 `TFun` 和 `TApp` 的函数实现和无类型 λ 演算中的表达式基本一致，不过注意要加上 `equals` 函数的实现，并且 `TFun` 在比较前需要把变量替换成一样的， `fullReduce` 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 `TForall` 的实现可以参考 System F ， `TArr` 的实现也只是简单进行递归调用，非常简单。
 
 而表达式相比系统 F 需要的改动是 `TVal` 在检查类型时需要先调用 `fullReduce` 来化简类型：
 

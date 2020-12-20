@@ -63,9 +63,6 @@ class Fun implements Expr {
     public String toString() {
         return "(λ " + x + ". " + e + ")";
     }
-    public boolean equals(Object obj) {
-        // ...
-    }
 }
 // Apply 函数应用
 class App implements Expr {
@@ -76,9 +73,6 @@ class App implements Expr {
     }
     public String toString() {
         return "(" + f + " " + x + ")";
-    }
-    public boolean equals(Object obj) {
-        // ...
     }
 }
 ```
