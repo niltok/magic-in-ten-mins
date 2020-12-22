@@ -1,7 +1,8 @@
 # 十分钟魔法练习
 
 [Rust版-光量子](https://github.com/PhotonQuantum/magic-in-ten-mins-rs) |
-[C++版-图斯卡蓝瑟](https://github.com/tusikalanse/magic-in-ten-mins-cpp)
+[C++版-图斯卡蓝瑟](https://github.com/tusikalanse/magic-in-ten-mins-cpp) |
+[C#版-CWKSC](https://github.com/CWKSC/magic-in-ten-mins-csharp)
 
 抽象与组合
 
