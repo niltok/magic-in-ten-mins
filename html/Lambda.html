@@ -52,6 +52,10 @@ a { color: #02AEF1; text-decoration: none; }
     Val(String s) {
         x = s;
     }
+    Val(String s, UUID id) {
+        x = s;
+        <span class="hljs-keyword">this</span>.id = id;
+    }
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> x;
     }
@@ -107,7 +111,7 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function">Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">apply</span><span class="hljs-params">(Val v, Expr ex)</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val v)</span></span>;
+    <span class="hljs-function">Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val v)</span></span>;
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
@@ -119,8 +123,9 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val a)</span> </span>{
-        <span class="hljs-keyword">if</span> (x.equals(a.x)) id = a.id;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val a)</span> </span>{
+        <span class="hljs-keyword">if</span> (x.equals(a.x)) <span class="hljs-keyword">return</span> a;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
     }
 }
 
@@ -132,15 +137,14 @@ a { color: #02AEF1; text-decoration: none; }
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">if</span> (x.id == <span class="hljs-keyword">null</span>) {
-            x.id = UUID.randomUUID();
-            e.applyUUID(x);
+            Val v = <span class="hljs-keyword">new</span> Val(x.x, UUID.randomUUID());
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(v, e.applyUUID(v).genUUID());
         }
-        e.genUUID();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(x, e.genUUID());
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">if</span> (!x.x.equals(v.x))
-            e.applyUUID(v);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val v)</span> </span>{
+        <span class="hljs-keyword">if</span> (x.x.equals(v.x)) <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(x, e.applyUUID(v));
     }
 }
 
@@ -149,8 +153,7 @@ a { color: #02AEF1; text-decoration: none; }
         Expr fr = f.reduce();
         <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Fun) {
             Fun fun = (Fun) fr;
-            <span class="hljs-keyword">return</span> fun.e.apply(
-                fun.x, x).reduce();
+            <span class="hljs-keyword">return</span> fun.e.apply(fun.x, x).reduce();
         }
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr, x);
     }
@@ -159,13 +162,10 @@ a { color: #02AEF1; text-decoration: none; }
                        x.apply(v, ex));
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
-        f.genUUID();
-        x.genUUID();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(f.genUUID(), x.genUUID());
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val v)</span> </span>{
-        f.applyUUID(v);
-        x.applyUUID(v);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val v)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(f.applyUUID(v), x.applyUUID(v));
     }
 }
 </code></pre>

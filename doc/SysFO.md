@@ -22,7 +22,7 @@ interface Type {
     Type fullReduce();
     Type apply(TVal v, Type t);
     Type genUUID();
-    void applyUUID(TVal v);
+    Type applyUUID(TVal v);
 }
 class TVal implements Type {
     String x;
@@ -65,7 +65,7 @@ interface Expr {
     Type checkType() throws BadTypeException;
     boolean checkApply(Val v);
     Expr genUUID();
-    void applyUUID(TVal v);
+    Expr applyUUID(TVal v);
 }
 class Val implements Expr {
     String x;
@@ -139,5 +139,5 @@ public interface TypeCons {
 
 这个列表的构造类似于自然数，每次在原列表的外面套一层来增加一项。
 
-注意上面的类型系统中是个无类型的 λ 演算，实际上类型也是可以拥有类型的，被称为种类（Kind）。基础类型和函数类型的种类是 `*` ，而类型构造器的种类是 `* → *` 。而为了增强类型检查器的能力我们也可以先进行种类检查，不过这里省略了种类检查的实现。
+注意上面的类型系统中是个无类型的 λ 演算，实际上类型也是可以拥有类型的，被称为种类（Kind）。基础类型和函数类型的种类是 `*` ，而类型构造器的种类是 `* → *` 。而为了增强类型检查器的能力我们也可以先进行种类检查，不过这里并没实现。
 

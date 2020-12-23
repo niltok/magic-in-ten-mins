@@ -40,7 +40,7 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function">Type <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Type <span class="hljs-title">apply</span><span class="hljs-params">(TVal v, Type t)</span></span>;
     <span class="hljs-function">Type <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
+    <span class="hljs-function">Type <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     String x;
@@ -78,7 +78,7 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
     <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
+    <span class="hljs-function">Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     String x;
@@ -145,6 +145,6 @@ a { color: #02AEF1; text-decoration: none; }
     }
 }</code></pre>
 <p>这个列表的构造类似于自然数，每次在原列表的外面套一层来增加一项。</p>
-<p>注意上面的类型系统中是个无类型的 λ 演算，实际上类型也是可以拥有类型的，被称为种类（Kind）。基础类型和函数类型的种类是 <code>*</code> ，而类型构造器的种类是 <code>* → *</code> 。而为了增强类型检查器的能力我们也可以先进行种类检查，不过这里省略了种类检查的实现。</p>
+<p>注意上面的类型系统中是个无类型的 λ 演算，实际上类型也是可以拥有类型的，被称为种类（Kind）。基础类型和函数类型的种类是 <code>*</code> ，而类型构造器的种类是 <code>* → *</code> 。而为了增强类型检查器的能力我们也可以先进行种类检查，不过这里并没实现。</p>
 </body>
 </html>

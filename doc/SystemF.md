@@ -72,7 +72,7 @@ class TArr implements Type {
 interface Type {
     Type apply(TVal x, Type t);
     Type genUUID();
-    void applyUUID(TVal v);
+    Type applyUUID(TVal v);
 }
 class TVal implements Type {
     public Type apply(TVal x, Type t) {
@@ -80,8 +80,9 @@ class TVal implements Type {
         else return this; 
     }
     public Type genUUID() { return this; }
-    public void applyUUID(TVal v) {
-        if (x.equals(v.x)) id = v.id;
+    public Type applyUUID(TVal v) {
+        if (x.equals(v.x)) return v;
+        return this;
     }
 }
 class TForall implements Type {
@@ -91,21 +92,21 @@ class TForall implements Type {
     }
     public Type genUUID() {
         if (x.id == null) {
-            x.id = UUID.randomUUID();
-            e.applyUUID(x);
+            TVal v = new TVal(x.x, UUID.randomUUID());
+            return new TForall(v, e.applyUUID(v).genUUID());
         }
-        e.genUUID();
-        return this;
+        return new TForall(x, e.genUUID());
     }
-    public void applyUUID(TVal v) {
-        if (!x.x.equals(v.x))
-            e.applyUUID(v);
+    public Type applyUUID(TVal v) {
+        if (x.x.equals(v.x)) return this;
+        return new TForall(x, e.applyUUID(v));
     }
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TForall tForall = (TForall) o;
         return Objects.equals(e, tForall.e.apply(tForall.x, x));
+        //               Notice: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     }
 }
 class TArr implements Type {
@@ -114,13 +115,10 @@ class TArr implements Type {
                         b.apply(x, t));
     }
     public Type genUUID() {
-        a.genUUID();
-        b.genUUID();
-        return this;
+        return new TArr(a.genUUID(), b.genUUID());
     }
-    public void applyUUID(TVal v) {
-        a.applyUUID(v);
-        b.applyUUID(v);
+    public Type applyUUID(TVal v) {
+        return new TArr(a.applyUUID(v), b.applyUUID(v));
     }
 }
 ```
@@ -134,14 +132,14 @@ interface Expr {
     Type checkType() throws BadTypeException;
     boolean checkApply(Val v);
     Expr genUUID();
-    void applyUUID(TVal v);
+    Expr applyUUID(TVal v);
 }
 class Val implements Expr { /* ... */ }
 class Fun implements Expr { /* ... */ }
 class App implements Expr { /* ... */ }
 // 类型函数定义
 class Forall implements Expr {
-    String x;
+    TVal x;
     Expr e;
     public Type checkType() 
         	throws BadTypeException {
@@ -152,15 +150,14 @@ class Forall implements Expr {
     }
     public Expr genUUID() {
         if (x.id == null) {
-            x.id = UUID.randomUUID();
-            e.applyUUID(x);
+            TVal v = new TVal(x.x, UUID.randomUUID);
+            return new Forall(v, e.applyUUID(v).genUUID());
         }
-        e.genUUID();
-        return this;
+        return new Forall(x, e.genUUID());
     }
-    public void applyUUID(TVal v) {
-        if (!x.x.equals(v.x))
-            e.applyUUID(v);
+    public Expr applyUUID(TVal v) {
+        if (x.x.equals(v.x)) return this;
+        return new Forall(x, e.applyUUID(v));
     }
 }
 // 类型函数应用
@@ -179,12 +176,10 @@ class AppT implements Expr {
         return e.checkApply(v);
     }
     public Expr genUUID() {
-        e.genUUID();
-        return this;
+        return new AppT(e.genUUID(), t.genUUID());
     }
-    public void applyUUID(TVal v) {
-        e.applyUUID(v);
-        t.applyUUID(v);
+    public Expr applyUUID(TVal v) {
+        return new AppT(e.applyUUID(v), t.applyUUID(v));
     }
 }
 ```

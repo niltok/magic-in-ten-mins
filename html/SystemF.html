@@ -70,7 +70,7 @@ a { color: #02AEF1; text-decoration: none; }
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{
     <span class="hljs-function">Type <span class="hljs-title">apply</span><span class="hljs-params">(TVal x, Type t)</span></span>;
     <span class="hljs-function">Type <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
+    <span class="hljs-function">Type <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">apply</span><span class="hljs-params">(TVal x, Type t)</span> </span>{
@@ -78,8 +78,9 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>; 
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>; }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
-        <span class="hljs-keyword">if</span> (x.equals(v.x)) id = v.id;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
+        <span class="hljs-keyword">if</span> (x.equals(v.x)) <span class="hljs-keyword">return</span> v;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
     }
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TForall</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
@@ -89,21 +90,21 @@ a { color: #02AEF1; text-decoration: none; }
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">if</span> (x.id == <span class="hljs-keyword">null</span>) {
-            x.id = UUID.randomUUID();
-            e.applyUUID(x);
+            TVal v = <span class="hljs-keyword">new</span> TVal(x.x, UUID.randomUUID());
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TForall(v, e.applyUUID(v).genUUID());
         }
-        e.genUUID();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TForall(x, e.genUUID());
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
-        <span class="hljs-keyword">if</span> (!x.x.equals(v.x))
-            e.applyUUID(v);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
+        <span class="hljs-keyword">if</span> (x.x.equals(v.x)) <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TForall(x, e.applyUUID(v));
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
         <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span> == o) <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
         <span class="hljs-keyword">if</span> (o == <span class="hljs-keyword">null</span> || getClass() != o.getClass()) <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
         TForall tForall = (TForall) o;
         <span class="hljs-keyword">return</span> Objects.equals(e, tForall.e.apply(tForall.x, x));
+        <span class="hljs-comment">//               Notice: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
     }
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
@@ -112,13 +113,10 @@ a { color: #02AEF1; text-decoration: none; }
                         b.apply(x, t));
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
-        a.genUUID();
-        b.genUUID();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.genUUID(), b.genUUID());
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
-        a.applyUUID(v);
-        b.applyUUID(v);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.applyUUID(v), b.applyUUID(v));
     }
 }</code></pre>
 <p>这里的实现和无类型 λ 演算很像。不过要注意 <code>TForall</code> 的 <code>equals</code> 函数实现，在比较前需要先把变量统一一下。</p>
@@ -127,14 +125,14 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
     <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
+    <span class="hljs-function">Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{ <span class="hljs-comment">/* ... */</span> }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{ <span class="hljs-comment">/* ... */</span> }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{ <span class="hljs-comment">/* ... */</span> }
 <span class="hljs-comment">// 类型函数定义</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Forall</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    String x;
+    TVal x;
     Expr e;
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
             <span class="hljs-keyword">throws</span> BadTypeException </span>{
@@ -145,15 +143,14 @@ a { color: #02AEF1; text-decoration: none; }
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">if</span> (x.id == <span class="hljs-keyword">null</span>) {
-            x.id = UUID.randomUUID();
-            e.applyUUID(x);
+            TVal v = <span class="hljs-keyword">new</span> TVal(x.x, UUID.randomUUID);
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Forall(v, e.applyUUID(v).genUUID());
         }
-        e.genUUID();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Forall(x, e.genUUID());
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
-        <span class="hljs-keyword">if</span> (!x.x.equals(v.x))
-            e.applyUUID(v);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
+        <span class="hljs-keyword">if</span> (x.x.equals(v.x)) <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Forall(x, e.applyUUID(v));
     }
 }
 <span class="hljs-comment">// 类型函数应用</span>
@@ -172,12 +169,10 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">return</span> e.checkApply(v);
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
-        e.genUUID();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> AppT(e.genUUID(), t.genUUID());
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
-        e.applyUUID(v);
-        t.applyUUID(v);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> AppT(e.applyUUID(v), t.applyUUID(v));
     }
 }</code></pre>
 <p>其中 <code>Val</code>, <code>Fun</code>, <code>App</code> 的定义和简单类型 λ 演算中基本一致，这里不作展示。他们的 <code>UUID</code> 生成只需要想 <code>AppT</code> 那样递归就可以，无需特殊操作。</p>

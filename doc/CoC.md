@@ -25,12 +25,12 @@
 
 ## 构造演算
 
-在 λ 立方的顶端放着 λC ，也叫构造演算（Calculus of Construction, CoC）。在构造演算中类型可以作为函数的输入，也可以作为函数的输出，那么实际上我们可以把项和函数作为相同的东西，不再加以区分。这样四种不同的函数也可以不加以区分放在一起，同时加入类别（Sort）来表达类型和类型的类型。而且因为 `A → B` 等价于 `∀ _: A. B` ，那么系统 F ω 中的 `TForall` 和 `TArr` 也可以合并。这样 CoC 的语法树表示如下：
+在 λ 立方的顶端放着 λC ，也叫构造演算（Calculus of Construction, CoC），它的类型系统被称为纯类型系统（Pure Type System, PTS）。在构造演算中类型可以作为函数的输入，也可以作为函数的输出，那么实际上我们可以把项和函数作为相同的东西，不再加以区分。这样四种不同的函数也可以不加以区分放在一起，同时加入类别（Sort）来表达类型和类型的类型。而且因为 `A → B` 等价于 `∀ _: A. B` ，那么系统 F ω 中的 `TForall` 和 `TArr` 也可以合并。这样 CoC 的语法树表示如下：
 
 ```java
 interface Expr {
     Expr genUUID();
-    void applyUUID(Val v);
+    Expr applyUUID(Val v);
 
     Expr reduce();
     Expr fullReduce();

@@ -39,6 +39,10 @@ class Val implements Expr {
     Val(String s) {
         x = s;
     }
+    Val(String s, UUID id) {
+        x = s;
+        this.id = id;
+    }
     public String toString() {
         return x;
     }
@@ -112,7 +116,7 @@ interface Expr {
     Expr reduce();
     Expr apply(Val v, Expr ex);
     Expr genUUID();
-    void applyUUID(Val v);
+    Expr applyUUID(Val v);
 }
 
 class Val implements Expr {
@@ -124,8 +128,9 @@ class Val implements Expr {
     public Expr genUUID() {
         return this;
     }
-    public void applyUUID(Val a) {
-        if (x.equals(a.x)) id = a.id;
+    public Expr applyUUID(Val a) {
+        if (x.equals(a.x)) return a;
+        return this;
     }
 }
 
@@ -137,15 +142,14 @@ class Fun implements Expr {
     }
     public Expr genUUID() {
         if (x.id == null) {
-            x.id = UUID.randomUUID();
-            e.applyUUID(x);
+            Val v = new Val(x.x, UUID.randomUUID());
+            return new Fun(v, e.applyUUID(v).genUUID());
         }
-        e.genUUID();
-        return this;
+        return new Fun(x, e.genUUID());
     }
-    public void applyUUID(Val v) {
-        if (!x.x.equals(v.x))
-            e.applyUUID(v);
+    public Expr applyUUID(Val v) {
+        if (x.x.equals(v.x)) return this;
+        return new Fun(x, e.applyUUID(v));
     }
 }
 
@@ -154,8 +158,7 @@ class App implements Expr {
         Expr fr = f.reduce();
         if (fr instanceof Fun) {
             Fun fun = (Fun) fr;
-            return fun.e.apply(
-                fun.x, x).reduce();
+            return fun.e.apply(fun.x, x).reduce();
         }
         return new App(fr, x);
     }
@@ -164,13 +167,10 @@ class App implements Expr {
                        x.apply(v, ex));
     }
     public Expr genUUID() {
-        f.genUUID();
-        x.genUUID();
-        return this;
+        return new Fun(f.genUUID(), x.genUUID());
     }
-    public void applyUUID(Val v) {
-        f.applyUUID(v);
-        x.applyUUID(v);
+    public Expr applyUUID(Val v) {
+        return new Fun(f.applyUUID(v), x.applyUUID(v));
     }
 }
 
