@@ -81,7 +81,7 @@ class TVal implements Type {
     }
     public Type genUUID() { return this; }
     public Type applyUUID(TVal v) {
-        if (x.equals(v.x)) return v;
+        if (x.equals(v.x)) return new TVal(x, v.id);
         return this;
     }
 }

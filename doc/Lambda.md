@@ -129,7 +129,7 @@ class Val implements Expr {
         return this;
     }
     public Expr applyUUID(Val a) {
-        if (x.equals(a.x)) return a;
+        if (x.equals(a.x)) return new Val(x, a.id);
         return this;
     }
 }
