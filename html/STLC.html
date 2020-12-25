@@ -44,18 +44,12 @@ FunctionType = Type * Type</code></pre>
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> name;
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
-        <span class="hljs-comment">// ...</span>
-    }
 }
 <span class="hljs-comment">// FunctionType</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     Type src, tar;
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + src + <span class="hljs-string">&quot; → &quot;</span> + tar + <span class="hljs-string">&quot;)&quot;</span>;
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
-        <span class="hljs-comment">// ...</span>
     }
 }</code></pre>
 <h2 id="年轻人的第一个-typechecker">年轻人的第一个 TypeChecker</h2>
@@ -72,81 +66,63 @@ FunctionType = Type * Type</code></pre>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Expr f, x;
 }</code></pre>
-<p>注意只有变量和函数定义的变量需要标记类型，表达式的类型是可以被简单推导出的。</p>
-<p>而对于这样简单的模型，类型检查只需要判断 <code>F X</code> 中的 <code>F</code> 需要是函数类型，并且 <code>λ x. E</code> 中 <code>E</code> 里所有的 <code>x</code> 类型匹配，并且 <code>(λ x. F) E</code> 中 <code>x</code> 的类型和 <code>E</code> 的类型一致。</p>
+<p>注意只有函数定义的变量需要标记类型，表达式的类型是可以被简单推导出的。同时还需要一个环境来保存定义变量的类型（其实是一个不可变链表）：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Env</span> </span>{
+    <span class="hljs-function">Type <span class="hljs-title">lookup</span><span class="hljs-params">(String s)</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NilEnv</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Env</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">lookup</span><span class="hljs-params">(String s)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsEnv</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Env</span> </span>{
+    Val v;
+    Env next;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">lookup</span><span class="hljs-params">(String s)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">if</span> (s.equals(v.x)) <span class="hljs-keyword">return</span> v.type;
+        <span class="hljs-keyword">return</span> next.lookup(s);
+    }
+}</code></pre>
+<p>而对于这样简单的模型，类型检查只需要判断 <code>F X</code> 中的 <code>F</code> 需要是函数类型，并且 <code>(λ x. F) E</code> 中 <code>x</code> 的类型和 <code>E</code> 的类型一致。</p>
 <p>而类型推导也很简单：变量的类型就是它被标记的类型；函数定义的类型就是以它变量的标记类型为源，它函数体的类型为目标的函数类型；而函数应用的类型就是函数的目标类型，在能通过类型检查的情况下。</p>
 <p>以上用 Java 代码描述就是：</p>
 <pre><code class="language-java"><span class="hljs-comment">// 构造函数， toString 已省去</span>
 <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
-        <span class="hljs-keyword">throws</span> BadTypeException</span>;
-
-    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span></span>;
+    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
 }
-
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> type;
-    }
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span> </span>{
-        <span class="hljs-keyword">if</span> (x.equals(val.x))
-            <span class="hljs-keyword">return</span> type.equals(val.type);
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">if</span> (type != <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> type;
+        <span class="hljs-keyword">return</span> env.lookup(x);
     }
 }
-
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
-            <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        <span class="hljs-keyword">if</span> (e.checkApply(x))
-            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(x.type, 
-                            e.checkType());
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
-    }
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span> </span>{
-        <span class="hljs-keyword">if</span> (x.x.equals(val.x)) <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
-        <span class="hljs-keyword">return</span> e.checkApply(val);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(x.type, e.checkType(<span class="hljs-keyword">new</span> ConsEnv(x, env)));
     }
 }
-
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
-            <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        Type tf = f.checkType();
-
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Type tf = f.checkType(env);
         <span class="hljs-keyword">if</span> (tf <span class="hljs-keyword">instanceof</span> TArr &amp;&amp;
-                ((TArr) tf).src
-                .equals(x.checkType()))
+                ((TArr) tf).src.equals(x.checkType(env)))
             <span class="hljs-keyword">return</span> ((TArr) tf).tar;
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val val)</span> </span>{
-        <span class="hljs-keyword">return</span> f.checkApply(val) 
-            &amp;&amp; x.checkApply(val);
-    }
 }</code></pre>
 <p>下面的测试代码对</p>
-<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (y: bool → <span class="hljs-keyword">int</span>)) (<span class="hljs-number">1</span>: <span class="hljs-keyword">int</span>)</code></pre>
-<p>进行了类型检查，会打印输出 <code>(bool → int)</code> ：</p>
+<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (λ (y: <span class="hljs-keyword">int</span> → bool). (y x)))</code></pre>
+<p>进行了类型检查，会打印输出 <code>(int → ((int → bool) → bool))</code> ：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">STLambda</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> 
-    <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        System.out.println(<span class="hljs-keyword">new</span> App(
-            <span class="hljs-keyword">new</span> Fun(
-                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, 
-                    <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;int&quot;</span>)),
-                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TArr(
-                    <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;bool&quot;</span>),
-                    <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;int&quot;</span>)))),
-            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;int&quot;</span>))
-        ).checkType());
+    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        System.out.println(
+            <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;int&quot;</span>)),
+            <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;int&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;bool&quot;</span>))),
+                <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>), <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>)))).checkType(<span class="hljs-keyword">new</span> NilEnv()));
     }
 }</code></pre>
 <p>而如果对</p>
-<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (x: bool → <span class="hljs-keyword">int</span>)) (<span class="hljs-number">1</span>: <span class="hljs-keyword">int</span>)</code></pre>
+<pre><code>(λ (x: bool). (λ (y: <span class="hljs-keyword">int</span> → bool). (y x)))</code></pre>
 <p>进行类型检查就会抛出 <code>BadTypeException</code> 。</p>
 </body>
 </html>

@@ -28,18 +28,12 @@ class TVal implements Type {
     public String toString() {
         return name;
     }
-    public boolean equals(Object o) {
-        // ...
-    }
 }
 // FunctionType
 class TArr implements Type {
     Type src, tar;
     public String toString() {
         return "(" + src + " → " + tar + ")";
-    }
-    public boolean equals(Object o) {
-        // ...
     }
 }
 ```
@@ -63,9 +57,28 @@ class App implements Expr {
 }
 ```
 
-注意只有变量和函数定义的变量需要标记类型，表达式的类型是可以被简单推导出的。
+注意只有函数定义的变量需要标记类型，表达式的类型是可以被简单推导出的。同时还需要一个环境来保存定义变量的类型（其实是一个不可变链表）：
 
-而对于这样简单的模型，类型检查只需要判断 `F X` 中的 `F` 需要是函数类型，并且 `λ x. E` 中 `E` 里所有的 `x` 类型匹配，并且 `(λ x. F) E` 中 `x` 的类型和 `E` 的类型一致。
+```java
+interface Env {
+    Type lookup(String s) throws BadTypeException;
+}
+class NilEnv implements Env {
+    public Type lookup(String s) throws BadTypeException {
+        throw new BadTypeException();
+    }
+}
+class ConsEnv implements Env {
+    Val v;
+    Env next;
+    public Type lookup(String s) throws BadTypeException {
+        if (s.equals(v.x)) return v.type;
+        return next.lookup(s);
+    }
+}
+```
+
+而对于这样简单的模型，类型检查只需要判断 `F X` 中的 `F` 需要是函数类型，并且 `(λ x. F) E` 中 `x` 的类型和 `E` 的类型一致。
 
 而类型推导也很简单：变量的类型就是它被标记的类型；函数定义的类型就是以它变量的标记类型为源，它函数体的类型为目标的函数类型；而函数应用的类型就是函数的目标类型，在能通过类型检查的情况下。
 
@@ -74,54 +87,26 @@ class App implements Expr {
 ```java
 // 构造函数， toString 已省去
 interface Expr {
-    Type checkType() 
-        throws BadTypeException;
-
-    boolean checkApply(Val val);
+    Type checkType(Env env) throws BadTypeException;
 }
-
 class Val implements Expr {
-    public Type checkType() {
-        return type;
-    }
-
-    public boolean checkApply(Val val) {
-        if (x.equals(val.x))
-            return type.equals(val.type);
-        else return true;
+    public Type checkType(Env env) throws BadTypeException {
+        if (type != null) return type;
+        return env.lookup(x);
     }
 }
-
 class Fun implements Expr {
-    public Type checkType() 
-            throws BadTypeException {
-        if (e.checkApply(x))
-            return new TArr(x.type, 
-                            e.checkType());
-        else throw new BadTypeException();
-    }
-
-    public boolean checkApply(Val val) {
-        if (x.x.equals(val.x)) return true;
-        return e.checkApply(val);
+    public Type checkType(Env env) throws BadTypeException {
+    	return new TArr(x.type, e.checkType(new ConsEnv(x, env)));
     }
 }
-
 class App implements Expr {
-    public Type checkType() 
-            throws BadTypeException {
-        Type tf = f.checkType();
-        
+    public Type checkType(Env env) throws BadTypeException {
+        Type tf = f.checkType(env);
         if (tf instanceof TArr &&
-                ((TArr) tf).src
-                .equals(x.checkType()))
+                ((TArr) tf).src.equals(x.checkType(env)))
             return ((TArr) tf).tar;
         else throw new BadTypeException();
-    }
-
-    public boolean checkApply(Val val) {
-        return f.checkApply(val) 
-            && x.checkApply(val);
     }
 }
 ```
@@ -129,24 +114,18 @@ class App implements Expr {
 下面的测试代码对
 
  ````
-(λ (x: int). (y: bool → int)) (1: int)
+(λ (x: int). (λ (y: int → bool). (y x)))
  ````
 
-进行了类型检查，会打印输出 `(bool → int)` ：
+进行了类型检查，会打印输出 `(int → ((int → bool) → bool))` ：
 
 ```java
 public interface STLambda {
-    static void main(String[] args) 
-    throws BadTypeException {
-        System.out.println(new App(
-            new Fun(
-                new Val("x", 
-                    new TVal("int")),
-                new Val("y", new TArr(
-                    new TVal("bool"),
-                    new TVal("int")))),
-            new Val("1", new TVal("int"))
-        ).checkType());
+    static void main(String[] args) throws BadTypeException {
+        System.out.println(
+            new Fun(new Val("x", new TVal("int")),
+            new Fun(new Val("y", new TArr(new TVal("int"), new TVal("bool"))),
+                new App(new Val("y"), new Val("x")))).checkType(new NilEnv()));
     }
 }
 ```
@@ -154,7 +133,7 @@ public interface STLambda {
 而如果对
 
 ```
-(λ (x: int). (x: bool → int)) (1: int)
+(λ (x: bool). (λ (y: int → bool). (y x)))
 ```
 
 进行类型检查就会抛出 `BadTypeException` 。

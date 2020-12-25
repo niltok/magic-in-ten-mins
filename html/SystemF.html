@@ -122,8 +122,7 @@ a { color: #02AEF1; text-decoration: none; }
 <p>这里的实现和无类型 λ 演算很像。不过要注意 <code>TForall</code> 的 <code>equals</code> 函数实现，在比较前需要先把变量统一一下。</p>
 <p>再在简单类型 λ 演算的基础上给表达式加上类型函数定义和类型函数应用，同时还需要协助类型系统生成类型的 <code>UUID</code> ：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
-    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span></span>;
+    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
     <span class="hljs-function">Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
 }
@@ -134,16 +133,12 @@ a { color: #02AEF1; text-decoration: none; }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Forall</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     TVal x;
     Expr e;
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
-            <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TForall(x, e.checkType());
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">return</span> e.checkApply(v);
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TForall(x, e.checkType(env));
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">if</span> (x.id == <span class="hljs-keyword">null</span>) {
-            TVal v = <span class="hljs-keyword">new</span> TVal(x.x, UUID.randomUUID);
+            TVal v = <span class="hljs-keyword">new</span> TVal(x.x, UUID.randomUUID());
             <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Forall(v, e.applyUUID(v).genUUID());
         }
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Forall(x, e.genUUID());
@@ -157,16 +152,11 @@ a { color: #02AEF1; text-decoration: none; }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppT</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Expr e;
     Type t;
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
-            <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        Type te = e.checkType();
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Type te = e.checkType(env);
         <span class="hljs-keyword">if</span> (te <span class="hljs-keyword">instanceof</span> TForall) <span class="hljs-comment">// 填入类型参数</span>
-            <span class="hljs-keyword">return</span> ((TForall) te).e
-                   .apply(((TForall) te).x, t);
+            <span class="hljs-keyword">return</span> ((TForall) te).e.apply(((TForall) te).x, t);
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">return</span> e.checkApply(v);
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> AppT(e.genUUID(), t.genUUID());
@@ -181,11 +171,11 @@ a { color: #02AEF1; text-decoration: none; }
     Expr T = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-keyword">new</span> Fun(
         <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
         <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
-            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>))))).genUUID();
+            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>)))).genUUID();
     Expr F = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-keyword">new</span> Fun(
         <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
         <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
-            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>))))).genUUID();
+            <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>)))).genUUID();
     Type Bool = <span class="hljs-keyword">new</span> TForall(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TArr(
         <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;x&quot;</span>),
         <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;x&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;x&quot;</span>)))).genUUID();
@@ -194,12 +184,11 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)), <span class="hljs-keyword">new</span> Fun(
             <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
             <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> App(
-                <span class="hljs-keyword">new</span> AppT(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;b&quot;</span>, Bool), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
-                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>))),
-                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>))))))).genUUID();
+                <span class="hljs-keyword">new</span> AppT(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;b&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;a&quot;</span>)),
+                <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>)), <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>)))))).genUUID();
     <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        System.out.println(T.checkType());
-        System.out.println(IF.checkType());
+        System.out.println(T.checkType(<span class="hljs-keyword">new</span> NilEnv()));
+        System.out.println(IF.checkType(<span class="hljs-keyword">new</span> NilEnv()));
     }
 }</code></pre>
 <p>运行会输出：</p>

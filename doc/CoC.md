@@ -36,21 +36,24 @@ interface Expr {
     Expr fullReduce();
     Expr apply(Val v, Expr e);
 
-    Expr checkType() throws BadTypeException;
-    boolean checkApply(Val v);
+    Expr checkType(Env env) throws BadTypeException;
 }
+
 class Sort implements Expr {
     int x; // 1 为 * ， 2 为 □
 }
+
 class Val implements Expr {
     String x;
     UUID id;
     Expr t; // 类型
 }
+
 class Fun implements Expr {
     Val x;
     Expr e;
 }
+
 class App implements Expr {
     Expr f, x;
 }
@@ -65,68 +68,51 @@ class Pi implements Expr {
 
 ```java
 class Sort implements Expr {
-    public Expr checkType() {
+    public Expr checkType(Env env) {
         return new Sort(x + 1);
-    }
-    public boolean checkApply(Val v) {
-        return true;
     }
 }
 
 class Val implements Expr {
-    public Expr checkType() {
+    public Expr checkType(Env env) throws BadTypeException {
+        if (t == null) return env.lookup(id);
         return t.fullReduce();
-    }
-    public boolean checkApply(Val v) {
-        if (equals(v))
-            return checkType().equals(v.checkType());
-        return t.checkApply(v);
     }
 }
 
 class Fun implements Expr {
-    public Expr checkType() throws BadTypeException {
-        Expr pi = new Pi(x, e.checkType());
-        if (pi.checkType() instanceof Sort)
+    public Expr checkType(Env env) throws BadTypeException {
+        Expr pi = new Pi(x, e.checkType(new ConsEnv(x, env)));
+        if (pi.checkType(env) instanceof Sort)
             return pi;
         throw new BadTypeException();
-    }
-    public boolean checkApply(Val v) {
-        return x.checkApply(v) &&
-                e.checkApply(v);
     }
 }
 
 class App implements Expr {
-    public Expr checkType() throws BadTypeException {
-        Expr tf = f.checkType();
+    public Expr checkType(Env env) throws BadTypeException {
+        Expr tf = f.checkType(env);
         if (tf instanceof Pi) {
             Pi pi = (Pi) tf;
-            if (x.checkType().equals(pi.x.checkType()))
+            if (x.checkType(env).equals(pi.x.checkType(env)))
                 return pi.e.apply(pi.x, x);
         }
         throw new BadTypeException();
     }
-    public boolean checkApply(Val v) {
-        return f.checkApply(v) && x.checkApply(v);
-    }
 }
 
 class Pi implements Expr {
-    public Expr checkType() throws BadTypeException {
-        Expr ta = x.checkType().checkType(); // x.t 的类型
-        Expr tb = e.checkType();
+    public Expr checkType(Env env) throws BadTypeException {
+        Expr ta = x.checkType(env).checkType(env); // x.t 的类型
+        Expr tb = e.checkType(new ConsEnv(x, env));
         if (ta instanceof Sort && tb instanceof Sort) {
             return tb;
         }
         throw new BadTypeException();
     }
-    public boolean checkApply(Val v) {
-        return x.checkApply(v) && e.checkApply(v);
-    }
 }
 ```
 
-所以实际上 `Pi` 就是一个类型检查期的标识，并不参与最终值的演算。
+所以实际上 `Pi` 就是一个类型检查期的标识，并不参与最终值的演算。因为不区分值和类型，其中 `Env` 保存的内容改为 `Val` ，并且 `lookup` 改为用 `UUID` 检索。
 
 这样就构造出了一个相当强大的类型系统，它的表现力已经超越了几乎所有常见语言的类型系统。之后将会介绍如何利用这个强大的类型系统表达复杂的类型，做一些常见类型系统做不到的事情。

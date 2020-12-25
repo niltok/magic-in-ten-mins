@@ -40,7 +40,6 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function">Type <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Type <span class="hljs-title">apply</span><span class="hljs-params">(TVal v, Type t)</span></span>;
     <span class="hljs-function">Type <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
-    <span class="hljs-function">Type <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TVal</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     String x;
@@ -60,48 +59,35 @@ a { color: #02AEF1; text-decoration: none; }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TArr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Type</span> </span>{
     Type a, b;
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.reduce(), 
-                        b.reduce());
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.reduce(), b.reduce());
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.fullReduce(), 
-                        b.fullReduce());
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.fullReduce(), b.fullReduce());
     }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">apply</span><span class="hljs-params">(TVal v, Type t)</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.apply(v, t), 
-                        b.apply(v, t));
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.apply(v, t), b.apply(v, t));
     }
 }</code></pre>
 <p>其中 <code>TVal</code> 、 <code>TFun</code> 和 <code>TApp</code> 的函数实现和无类型 λ 演算中的表达式基本一致，不过注意要加上 <code>equals</code> 函数的实现，并且 <code>TFun</code> 在比较前需要把变量替换成一样的， <code>fullReduce</code> 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 <code>TForall</code> 的实现可以参考 System F ， <code>TArr</code> 的实现也只是简单进行递归调用，非常简单。</p>
 <p>而表达式相比系统 F 需要的改动是 <code>TVal</code> 在检查类型时需要先调用 <code>fullReduce</code> 来化简类型：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
-    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span></span>;
+    <span class="hljs-function">Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
     <span class="hljs-function">Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span></span>;
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     String x;
     Type t;
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> </span>{
+        <span class="hljs-keyword">if</span> (t == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> env.lookup(x);
         <span class="hljs-keyword">return</span> t.fullReduce();
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">if</span> (x.equals(v.x))
-            <span class="hljs-keyword">return</span> t.fullReduce()
-                   .equals(v.t.fullReduce());
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
     }
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Val x;
     Expr e;
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">()</span> 
-            <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        <span class="hljs-keyword">if</span> (e.checkApply(x)) 
-            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(x.checkType(), 
-                            e.checkType());
-        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(x.checkType(env), e.checkType(env));
     }
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
@@ -124,20 +110,17 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-comment">// nil  = Λ X. (Λ R. λ c: X → (R → R). λ n: R. n)</span>
     Expr nil = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;X&quot;</span>, <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;R&quot;</span>, <span class="hljs-keyword">new</span> Fun(
         <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>), <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)))),
-        <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;n&quot;</span> , <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)), <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;n&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)))))).genUUID();
+        <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;n&quot;</span> , <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)), <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;n&quot;</span>))))).genUUID();
     <span class="hljs-comment">// cons = Λ X. λ h: X. λ t: List X. (Λ R. λ c: X → R → R. λ n: R. c h (t R c n))</span>
     Expr cons = <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;X&quot;</span>, <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;h&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>)), <span class="hljs-keyword">new</span> Fun(
         <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;t&quot;</span>, <span class="hljs-keyword">new</span> TApp(List, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>))),
         <span class="hljs-keyword">new</span> Forall(<span class="hljs-string">&quot;R&quot;</span>, <span class="hljs-keyword">new</span> Fun(
             <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>), <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)))),
             <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;n&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)), <span class="hljs-keyword">new</span> App(
-                <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>), <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)))),
-                    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;h&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>))),
-                <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> AppT(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;t&quot;</span>, <span class="hljs-keyword">new</span> TApp(List, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>))), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)),
-                    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;X&quot;</span>), <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>))))),
-                    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;n&quot;</span>, <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)))))))))).genUUID();
-    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> 
-            <span class="hljs-keyword">throws</span> BadTypeException </span>{
+                <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;c&quot;</span>), <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;h&quot;</span>)),
+                <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> AppT(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;t&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;R&quot;</span>)),
+                    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;c&quot;</span>)), <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;n&quot;</span>))))))))).genUUID();
+    <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
         <span class="hljs-comment">// (∀ X. (∀ R. ((X → (R → R)) → (R → R))))</span>
         System.out.println(nil.checkType());
         <span class="hljs-comment">// (∀ X. (X → ((∀ R. ((X → (R → R)) → (R → R))) → (∀ R. ((X → (R → R)) → (R → R))))))</span>

@@ -129,8 +129,7 @@ class TArr implements Type {
 
 ```java
 interface Expr {
-    Type checkType() throws BadTypeException;
-    boolean checkApply(Val v);
+    Type checkType(Env env) throws BadTypeException;
     Expr genUUID();
     Expr applyUUID(TVal v);
 }
@@ -141,16 +140,12 @@ class App implements Expr { /* ... */ }
 class Forall implements Expr {
     TVal x;
     Expr e;
-    public Type checkType() 
-        	throws BadTypeException {
-        return new TForall(x, e.checkType());
-    }
-    public boolean checkApply(Val v) {
-        return e.checkApply(v);
+    public Type checkType() throws BadTypeException {
+        return new TForall(x, e.checkType(env));
     }
     public Expr genUUID() {
         if (x.id == null) {
-            TVal v = new TVal(x.x, UUID.randomUUID);
+            TVal v = new TVal(x.x, UUID.randomUUID());
             return new Forall(v, e.applyUUID(v).genUUID());
         }
         return new Forall(x, e.genUUID());
@@ -164,16 +159,11 @@ class Forall implements Expr {
 class AppT implements Expr {
     Expr e;
     Type t;
-    public Type checkType() 
-        	throws BadTypeException {
-        Type te = e.checkType();
+    public Type checkType(Env env) throws BadTypeException {
+        Type te = e.checkType(env);
         if (te instanceof TForall) // 填入类型参数
-            return ((TForall) te).e
-                   .apply(((TForall) te).x, t);
+            return ((TForall) te).e.apply(((TForall) te).x, t);
         throw new BadTypeException();
-    }
-    public boolean checkApply(Val v) {
-        return e.checkApply(v);
     }
     public Expr genUUID() {
         return new AppT(e.genUUID(), t.genUUID());
@@ -193,11 +183,11 @@ public interface SystemF {
     Expr T = new Forall("a", new Fun(
         new Val("x", new TVal("a")),
         new Fun(new Val("y", new TVal("a")),
-            new Val("x", new TVal("a"))))).genUUID();
+            new Val("x")))).genUUID();
     Expr F = new Forall("a", new Fun(
         new Val("x", new TVal("a")),
         new Fun(new Val("y", new TVal("a")),
-            new Val("y", new TVal("a"))))).genUUID();
+            new Val("y")))).genUUID();
     Type Bool = new TForall("x", new TArr(
         new TVal("x"),
         new TArr(new TVal("x"), new TVal("x")))).genUUID();
@@ -206,12 +196,11 @@ public interface SystemF {
         new Fun(new Val("x", new TVal("a")), new Fun(
             new Val("y", new TVal("a")),
             new App(new App(
-                new AppT(new Val("b", Bool), new TVal("a")),
-                new Val("x", new TVal("a"))),
-                new Val("y", new TVal("a"))))))).genUUID();
+                new AppT(new Val("b"), new TVal("a")),
+                new Val("x")), new Val("y")))))).genUUID();
     static void main(String[] args) throws BadTypeException {
-        System.out.println(T.checkType());
-        System.out.println(IF.checkType());
+        System.out.println(T.checkType(new NilEnv()));
+        System.out.println(IF.checkType(new NilEnv()));
     }
 }
 ```

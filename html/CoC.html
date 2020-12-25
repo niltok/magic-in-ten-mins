@@ -50,21 +50,24 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function">Expr <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">apply</span><span class="hljs-params">(Val v, Expr e)</span></span>;
 
-    <span class="hljs-function">Expr <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
-    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span></span>;
+    <span class="hljs-function">Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
 }
+
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Sort</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-keyword">int</span> x; <span class="hljs-comment">// 1 为 * ， 2 为 □</span>
 }
+
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     String x;
     UUID id;
     Expr t; <span class="hljs-comment">// 类型</span>
 }
+
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Val x;
     Expr e;
 }
+
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Expr f, x;
 }
@@ -75,67 +78,50 @@ a { color: #02AEF1; text-decoration: none; }
 }</code></pre>
 <p>其中 <code>Expr</code> 的接口的函数被分成了三组，第一组是预生成 <code>id</code> 只需要简单递归生成就可以，之前也展示过；第二组是对表达式的化简，只需注意 <code>App</code> 在化简时只应用 <code>Fun</code> 应该忽略 <code>Pi</code> ，并且递归化简时别忘了变量部分的类型也是一个表达式；第三组就是类型检查部分了， <code>Fun</code> 的类型是 <code>Pi</code> ， <code>Pi</code> 的类型是 <code>e</code> 的类型， <code>App</code> 把表达式应用到 <code>Pi</code> 上：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Sort</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Sort(x + <span class="hljs-number">1</span>);
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
     }
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Val</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        <span class="hljs-keyword">if</span> (t == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> env.lookup(id);
         <span class="hljs-keyword">return</span> t.fullReduce();
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">if</span> (equals(v))
-            <span class="hljs-keyword">return</span> checkType().equals(v.checkType());
-        <span class="hljs-keyword">return</span> t.checkApply(v);
     }
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        Expr pi = <span class="hljs-keyword">new</span> Pi(x, e.checkType());
-        <span class="hljs-keyword">if</span> (pi.checkType() <span class="hljs-keyword">instanceof</span> Sort)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Expr pi = <span class="hljs-keyword">new</span> Pi(x, e.checkType(<span class="hljs-keyword">new</span> ConsEnv(x, env)));
+        <span class="hljs-keyword">if</span> (pi.checkType(env) <span class="hljs-keyword">instanceof</span> Sort)
             <span class="hljs-keyword">return</span> pi;
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
-    }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">return</span> x.checkApply(v) &amp;&amp;
-                e.checkApply(v);
     }
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        Expr tf = f.checkType();
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Expr tf = f.checkType(env);
         <span class="hljs-keyword">if</span> (tf <span class="hljs-keyword">instanceof</span> Pi) {
             Pi pi = (Pi) tf;
-            <span class="hljs-keyword">if</span> (x.checkType().equals(pi.x.checkType()))
+            <span class="hljs-keyword">if</span> (x.checkType(env).equals(pi.x.checkType(env)))
                 <span class="hljs-keyword">return</span> pi.e.apply(pi.x, x);
         }
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">return</span> f.checkApply(v) &amp;&amp; x.checkApply(v);
-    }
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Pi</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        Expr ta = x.checkType().checkType(); <span class="hljs-comment">// x.t 的类型</span>
-        Expr tb = e.checkType();
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Expr ta = x.checkType(env).checkType(env); <span class="hljs-comment">// x.t 的类型</span>
+        Expr tb = e.checkType(<span class="hljs-keyword">new</span> ConsEnv(x, env));
         <span class="hljs-keyword">if</span> (ta <span class="hljs-keyword">instanceof</span> Sort &amp;&amp; tb <span class="hljs-keyword">instanceof</span> Sort) {
             <span class="hljs-keyword">return</span> tb;
         }
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">checkApply</span><span class="hljs-params">(Val v)</span> </span>{
-        <span class="hljs-keyword">return</span> x.checkApply(v) &amp;&amp; e.checkApply(v);
-    }
 }</code></pre>
-<p>所以实际上 <code>Pi</code> 就是一个类型检查期的标识，并不参与最终值的演算。</p>
+<p>所以实际上 <code>Pi</code> 就是一个类型检查期的标识，并不参与最终值的演算。因为不区分值和类型，其中 <code>Env</code> 保存的内容改为 <code>Val</code> ，并且 <code>lookup</code> 改为用 <code>UUID</code> 检索。</p>
 <p>这样就构造出了一个相当强大的类型系统，它的表现力已经超越了几乎所有常见语言的类型系统。之后将会介绍如何利用这个强大的类型系统表达复杂的类型，做一些常见类型系统做不到的事情。</p>
 </body>
 </html>

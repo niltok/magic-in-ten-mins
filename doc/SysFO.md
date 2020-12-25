@@ -22,7 +22,6 @@ interface Type {
     Type fullReduce();
     Type apply(TVal v, Type t);
     Type genUUID();
-    Type applyUUID(TVal v);
 }
 class TVal implements Type {
     String x;
@@ -42,16 +41,13 @@ class TForall implements Type {
 class TArr implements Type {
     Type a, b;
     public Type reduce() {
-        return new TArr(a.reduce(), 
-                        b.reduce());
+        return new TArr(a.reduce(), b.reduce());
     }
     public Type fullReduce() {
-        return new TArr(a.fullReduce(), 
-                        b.fullReduce());
+        return new TArr(a.fullReduce(), b.fullReduce());
     }
     public Type apply(TVal v, Type t) {
-        return new TArr(a.apply(v, t), 
-                        b.apply(v, t));
+        return new TArr(a.apply(v, t), b.apply(v, t));
     }
 }
 ```
@@ -62,33 +58,23 @@ class TArr implements Type {
 
 ```java
 interface Expr {
-    Type checkType() throws BadTypeException;
-    boolean checkApply(Val v);
+    Type checkType(Env env) throws BadTypeException;
     Expr genUUID();
     Expr applyUUID(TVal v);
 }
 class Val implements Expr {
     String x;
     Type t;
-    public Type checkType() {
+    public Type checkType(Env env) {
+        if (t == null) return env.lookup(x);
         return t.fullReduce();
-    }
-    public boolean checkApply(Val v) {
-        if (x.equals(v.x))
-            return t.fullReduce()
-                   .equals(v.t.fullReduce());
-        return true;
     }
 }
 class Fun implements Expr {
     Val x;
     Expr e;
-    public Type checkType() 
-        	throws BadTypeException {
-        if (e.checkApply(x)) 
-            return new TArr(x.checkType(), 
-                            e.checkType());
-        throw new BadTypeException();
+    public Type checkType(Env env) throws BadTypeException {
+        return new TArr(x.checkType(env), e.checkType(env));
     }
 }
 class App implements Expr {
@@ -115,20 +101,17 @@ public interface TypeCons {
     // nil  = Λ X. (Λ R. λ c: X → (R → R). λ n: R. n)
     Expr nil = new Forall("X", new Forall("R", new Fun(
         new Val("c", new TArr(new TVal("X"), new TArr(new TVal("R"), new TVal("R")))),
-        new Fun(new Val("n" , new TVal("R")), new Val("n", new TVal("R")))))).genUUID();
+        new Fun(new Val("n" , new TVal("R")), new Val("n"))))).genUUID();
     // cons = Λ X. λ h: X. λ t: List X. (Λ R. λ c: X → R → R. λ n: R. c h (t R c n))
     Expr cons = new Forall("X", new Fun(new Val("h", new TVal("X")), new Fun(
         new Val("t", new TApp(List, new TVal("X"))),
         new Forall("R", new Fun(
             new Val("c", new TArr(new TVal("X"), new TArr(new TVal("R"), new TVal("R")))),
             new Fun(new Val("n", new TVal("R")), new App(
-                new App(new Val("c", new TArr(new TVal("X"), new TArr(new TVal("R"), new TVal("R")))),
-                    new Val("h", new TVal("X"))),
-                new App(new App(new AppT(new Val("t", new TApp(List, new TVal("X"))), new TVal("R")),
-                    new Val("c", new TArr(new TVal("X"), new TArr(new TVal("R"), new TVal("R"))))),
-                    new Val("n", new TVal("R")))))))))).genUUID();
-    static void main(String[] args) 
-        	throws BadTypeException {
+                new App(new Val("c"), new Val("h")),
+                new App(new App(new AppT(new Val("t"), new TVal("R")),
+                    new Val("c")), new Val("n"))))))))).genUUID();
+    static void main(String[] args) throws BadTypeException {
         // (∀ X. (∀ R. ((X → (R → R)) → (R → R))))
         System.out.println(nil.checkType());
         // (∀ X. (X → ((∀ R. ((X → (R → R)) → (R → R))) → (∀ R. ((X → (R → R)) → (R → R))))))
