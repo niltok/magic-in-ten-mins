@@ -67,7 +67,7 @@ class Val implements Expr {
     Type t;
     public Type checkType(Env env) {
         if (t == null) return env.lookup(x);
-        return t.fullReduce();
+        return t;
     }
 }
 class Fun implements Expr {

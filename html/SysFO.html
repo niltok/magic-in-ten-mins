@@ -80,7 +80,7 @@ a { color: #02AEF1; text-decoration: none; }
     Type t;
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> </span>{
         <span class="hljs-keyword">if</span> (t == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> env.lookup(x);
-        <span class="hljs-keyword">return</span> t.fullReduce();
+        <span class="hljs-keyword">return</span> t;
     }
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
