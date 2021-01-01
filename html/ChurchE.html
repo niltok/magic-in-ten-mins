@@ -24,7 +24,7 @@ a { color: #02AEF1; text-decoration: none; }
 <body>
 <p>
 <a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
-<h1 id="十分钟魔法练习：编码">十分钟魔法练习：编码</h1>
+<h1 id="十分钟魔法练习：丘奇编码">十分钟魔法练习：丘奇编码</h1>
 <h3 id="by-「玩火」">By 「玩火」</h3>
 <blockquote>
 <p>前置技能：λ演算</p>
@@ -32,13 +32,13 @@ a { color: #02AEF1; text-decoration: none; }
 <h2 id="intro">Intro</h2>
 <p>众所周知， λ 演算是一个图灵完备的计算模型，它能计算任何图灵机能算的东西。那么很显然它也能表示任何我们平时所用的 C 、 Java 能表示的数据结构。虽然这听起来挺不可思议的，毕竟 λ 演算中本身只有变量、函数定义、函数应用三种结构。</p>
 <p>信息的编码大概是计算机科学中最为接近魔法的内容，凝结了最强的人类的智慧结晶。同一个量的不同表现形式，同构、抽象与组合都让人感到惊叹不已。</p>
-<p>为了方便起见，这里引入一个语法糖来<strong>命名</strong>表达式：</p>
+<p>为了方便起见，这里引入一个语法糖 let 绑定（let-binding）来<strong>命名</strong>表达式：</p>
 <pre><code>x = E
 ...后续代码</code></pre>
 <p>它解糖（Desugar）后等价于：</p>
 <pre><code>(λ x. ...后续代码) E</code></pre>
 <h2 id="布尔">布尔</h2>
-<p>通常来说布尔表达为：</p>
+<p>通常来说丘奇编码（Church Encoding）的布尔表达为：</p>
 <pre><code><span class="hljs-keyword">true</span>  = λ x. λ y. x
 <span class="hljs-keyword">false</span> = λ x. λ y. y</code></pre>
 <p>理论上这两个量的定义互相替换后和这种表达也是同构的，不过通常来说大家约定这种表示因为它更符合直觉。</p>
