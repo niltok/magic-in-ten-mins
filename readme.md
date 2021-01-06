@@ -77,13 +77,17 @@ QQ群：1070975853 |
 [Markdown](doc/ChurchE.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/ChurchE.html)
 
-很难 | 斯科特编码(Scott Encoding)[构造演算， ADT] |
+很难 | 斯科特编码(Scott Encoding)[构造演算， ADT ， μ] |
 [Markdown](doc/ScottE.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/ScottE.html)
 
 中等 | Y 组合子(Y Combinator)[Java 基础，λ 演算，λ 演算编码] |
 [Markdown](doc/YCombinator.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/YCombinator.html)
+
+中等 | μ(Mu)[Java 基础，构造演算， Y 组合子] |
+[Markdown](doc/Mu.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/Mu.html)
 
 ## 编程范式
 

@@ -115,7 +115,7 @@ a { color: #02AEF1; text-decoration: none; }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Pi</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        Expr ta = x.checkType(env).checkType(env); <span class="hljs-comment">// x.t 的类型</span>
+        Expr ta = x.t.checkType(env); <span class="hljs-comment">// x.t 的类型</span>
         Expr tb = e.checkType(<span class="hljs-keyword">new</span> ConsEnv(x, env));
         <span class="hljs-keyword">if</span> (ta <span class="hljs-keyword">instanceof</span> Sort &amp;&amp; tb <span class="hljs-keyword">instanceof</span> Sort) {
             <span class="hljs-keyword">return</span> tb;

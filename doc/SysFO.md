@@ -74,7 +74,7 @@ class Fun implements Expr {
     Val x;
     Expr e;
     public Type checkType(Env env) throws BadTypeException {
-        return new TArr(x.checkType(env), e.checkType(env));
+        return new TArr(x.t, e.checkType(new ConsEnv(x, env)));
     }
 }
 class App implements Expr {

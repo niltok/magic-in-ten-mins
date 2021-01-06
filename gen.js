@@ -25,7 +25,7 @@ const scenter = 'h1, h2, h3 { text-align: center; }\n'
 const squote = 'blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }\n'
 const scode = 'code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; }\n'
 const spre = 'pre { overflow-x: auto; padding: 10px; }\n'
-const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { display: none; }\n'
+const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { opacity: 0.5; }\n'
 const sa = 'a { color: #02AEF1; text-decoration: none; }\n'
 
 const sdarkbody = '@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }\n'

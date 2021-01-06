@@ -1,0 +1,131 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFC; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; color: #EF96AB; }
+h2 { margin-top: 2em; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
+code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; }
+pre { overflow-x: auto; padding: 10px; }
+a { color: #02AEF1; text-decoration: none; }
+@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
+@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
+.hljs-keyword { color: #F288AF; }
+.hljs-comment { color: #929CA6; }
+.hljs-string { color: #0594A6; }
+.hljs-title { color: #4581D9 }
+</style>
+</head>
+<body>
+<p>
+<a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
+<h1 id="十分钟魔法练习：-μ">十分钟魔法练习： μ</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java 基础，构造演算， Y 组合子</p>
+</blockquote>
+<h2 id="y-组合子的类型">Y 组合子的类型</h2>
+<p>Y 组合子在无类型 λ 演算中是这样定义的</p>
+<pre><code>Y = λ f. (λ x. f (x x)) (λ x. f (x x))</code></pre>
+<p>但是它的类型是什么呢？实际上我们可以构造如下式子来分析：</p>
+<pre><code>Y f = f (Y f)</code></pre>
+<p>假设 <code>f</code> 的类型为 <code>A</code> ， <code>Y</code> 的类型为 <code>A → B</code> ，那么 <code>Y f</code> 的类型就是 <code>B</code> ，所以等式右边的类型也应该为 <code>B</code> ，那么 <code>f</code> 的类型就应当是 <code>A = B → B</code> ，解得 <code>Y</code> 的类型为 <code>(B → B) → B</code> 。这就解得了 Y 组合子的宏观上的类型 <code>π T: *. (T → T) → T</code> 。</p>
+<p>不过如果想完整地写出 Y 组合子中每个变量的类型就会遇到困难， <code>x</code> 的类型是什么呢？如果假设 <code>x</code> 的类型是 <code>A → B</code> 那么考虑到存在 <code>x x</code> 这样的结构， <code>A</code> 应该就是 <code>A → B</code> ，但这样又回到了最开始的问题，假设 <code>x</code> 的类型是 <code>(A → B) → B</code> 。显然这样最后并不收敛， <code>x</code> 的类型没有解。</p>
+<p>既然 Y 组合子中有些变量的类型无法解出那么实际上在 Lambda Cube 中的各个类型系统都是无法构造 Y 组合子的，这就意味着这些类型系统没有办法递归，而通过这些类型系统检查的程序是一定会停机的。换句话说其实这些演算是不图灵完备的。</p>
+<h2 id="μ">μ</h2>
+<p>所以实际上虽然看上去类似 Y 的不动点组合子是存在的但是无法给出具体实现，这时候就需要在构造演算中开个洞来获得不动点组合子。在表达式中增加 <code>μ x: A. e</code> 的结构，等价于 <code>Y (λ x: A. e)</code> ，注意 <code>Y</code> 的类型是 <code>(A → A) → A</code>  ，而对应的 <code>λ x: A. e</code> 的类型是 <code>A → A</code> ，也就是说 <code>e</code> 的类型是 <code>A</code> 。调用 <code>μ</code> 的 <code>reduce</code> 得到 <code>e[x → μ x: A. e]</code> 。</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mu</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Val x;
+    Expr e;
+
+    <span class="hljs-function">Expr <span class="hljs-title">open</span><span class="hljs-params">()</span> </span>{ <span class="hljs-comment">// unfold</span>
+        <span class="hljs-keyword">return</span> e.apply(x, <span class="hljs-keyword">this</span>);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Pi pi = <span class="hljs-keyword">new</span> Pi(x, e.checkType(<span class="hljs-keyword">new</span> ConsEnv(x, env)));
+        <span class="hljs-keyword">if</span> (pi.checkType(env) <span class="hljs-keyword">instanceof</span> Sort &amp;&amp;
+                pi.e.fullReduce().equals(pi.x.t.fullReduce()))
+            <span class="hljs-keyword">return</span> pi.e;
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span> == o) <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+        <span class="hljs-keyword">if</span> (o == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        <span class="hljs-keyword">if</span> (getClass() != e.getClass()) 
+            <span class="hljs-keyword">return</span> Objects.equals(open(), e);
+        <span class="hljs-comment">//         ^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+        Mu mu = (Mu) o;
+        <span class="hljs-keyword">return</span> Objects.equals(e.apply(x, mu.x), mu.e);
+        <span class="hljs-comment">//                    ^^^^^^^^^^^^^^^^</span>
+    }
+}</code></pre>
+<p>注意在比较的时候如果类型不一致需要尝试展开再继续比较，而且对于其他所有的表达式元素在比较时都需要对 μ 特殊处理，这里拿 <code>Fun</code> 举个例子：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span> == o) <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+        <span class="hljs-keyword">if</span> (o == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        <span class="hljs-comment">// Or:                      equals(((Mu) o).open())</span>
+        <span class="hljs-keyword">if</span> (o <span class="hljs-keyword">instanceof</span> Mu) <span class="hljs-keyword">return</span> o.equals(<span class="hljs-keyword">this</span>);
+        <span class="hljs-comment">//  ^^^^^^^^^^^^^^^         ^^^^^^^^^^^^^^</span>
+        <span class="hljs-keyword">if</span> (getClass() != o.getClass()) <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        Fun fun = (Fun) o;
+        <span class="hljs-keyword">return</span> Objects.equals(e, fun.e.apply(fun.x, x));
+    }
+}</code></pre>
+<p>在 <code>App</code> 中碰到 μ 也要展开一下：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
+        Expr fr = f.reduce();
+        <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Mu) fr = ((Mu) fr).open();
+        <span class="hljs-comment">//  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^</span>
+        <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Fun) {
+            Fun fun = (Fun) fr;
+            <span class="hljs-keyword">return</span> fun.e.apply(fun.x, x).reduce();
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr.reduce(), x.reduce());
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span> </span>{
+        Expr fr = f.reduce();
+        <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Mu) fr = ((Mu) fr).open();
+        <span class="hljs-comment">//  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^</span>
+        <span class="hljs-keyword">if</span> (fr <span class="hljs-keyword">instanceof</span> Fun) {
+            Fun fun = (Fun) fr;
+            <span class="hljs-keyword">return</span> fun.e.apply(fun.x, x).fullReduce();
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr.fullReduce(), x.fullReduce());
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
+        Expr tf = f.checkType(env).fullReduce();
+        <span class="hljs-keyword">if</span> (tf <span class="hljs-keyword">instanceof</span> Mu) tf = ((Mu) tf).open();
+        <span class="hljs-comment">//  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^</span>
+        <span class="hljs-keyword">if</span> (tf <span class="hljs-keyword">instanceof</span> Pi) {
+            Pi pi = (Pi) tf;
+            <span class="hljs-keyword">if</span> (x.checkType(env).fullReduce().equals(pi.x.checkType(env).fullReduce()))
+                <span class="hljs-keyword">return</span> pi.e.apply(pi.x, x);
+        }
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
+    }
+}</code></pre>
+<p>μ 只在使用的时候才会展开一次，这是为了防止出现求值时无限递归的情况。</p>
+<blockquote>
+<p>实际上 μ 这个东西只是用来处理类型的，但是 CoC 里面不区分类型和项所以这里也用于项的递归了。</p>
+</blockquote>
+</body>
+</html>

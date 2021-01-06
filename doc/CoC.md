@@ -106,7 +106,7 @@ class App implements Expr {
 
 class Pi implements Expr {
     public Expr checkType(Env env) throws BadTypeException {
-        Expr ta = x.checkType(env).checkType(env); // x.t 的类型
+        Expr ta = x.t.checkType(env); // x.t 的类型
         Expr tb = e.checkType(new ConsEnv(x, env));
         if (ta instanceof Sort && tb instanceof Sort) {
             return tb;

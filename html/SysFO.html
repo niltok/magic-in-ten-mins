@@ -87,7 +87,7 @@ a { color: #02AEF1; text-decoration: none; }
     Val x;
     Expr e;
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(x.checkType(env), e.checkType(env));
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(x.t, e.checkType(<span class="hljs-keyword">new</span> ConsEnv(x, env)));
     }
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
