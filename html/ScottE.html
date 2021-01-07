@@ -57,7 +57,7 @@ map = λ A: *. λ B: *. λ f: A → B. μ m: List A → List B.
     (π Res: *. (A → Res) → (B → Res) → ... → (Z → Res) → Res)</code></pre>
 <p>并且两者可以互相嵌套从而构成复杂的类型。</p>
 <p>如果给和类型的每个分支取个名字，并且允许在解构调用的时候按照名字索引，随意改变分支顺序，在解糖阶段把解构函数调整成正确的顺序那么就可以得到很多函数式语言里面的模式匹配（Pattern match）。然后就可以像这样表示 <code>List</code> ：</p>
-<pre><code>List = λ T: *. (μ L: *. Nil | Cons T L)</code></pre>
+<pre><code>type List = λ T: *. (μ L: *. Nil | Cons T L)</code></pre>
 <p>像这样使用 <code>List</code> ：</p>
 <pre><code>map = λ A: *. λ B: *. λ f: A → B. μ m: List A → List B. 
     λ list: List A. 
