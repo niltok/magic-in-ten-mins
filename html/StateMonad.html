@@ -133,14 +133,16 @@ fib(Integer n) {
         <span class="hljs-keyword">new</span> StateM&lt;&gt;();
     <span class="hljs-keyword">if</span> (n == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> State.narrow(
              m.flatMap(m.get,
+        x -&gt; m.pure(x.first)));
+    <span class="hljs-keyword">if</span> (n == <span class="hljs-number">1</span>) <span class="hljs-keyword">return</span> State.narrow(
+             m.flatMap(m.get,
         x -&gt; m.pure(x.second)));
 
     <span class="hljs-keyword">return</span> State.narrow(
              m.flatMap(m.modify(x -&gt; 
                  <span class="hljs-keyword">new</span> Pair&lt;&gt;(x.second, 
                      x.first + x.second)),
-        v -&gt; fib(n - <span class="hljs-number">1</span>))
-    );
+        v -&gt; fib(n - <span class="hljs-number">1</span>)));
 }
 <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
     System.out.println(
@@ -162,10 +164,10 @@ fib n = <span class="hljs-function"><span class="hljs-keyword">do</span>
 <p>看到这里肯定有人会拍桌而起：求斐波那契数列我有更简单的写法！</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">fib</span><span class="hljs-params">(<span class="hljs-keyword">int</span> n)</span> </span>{
     <span class="hljs-keyword">int</span>[] a = {<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>};
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++)
-        a[(i + <span class="hljs-number">2</span>) % <span class="hljs-number">3</span>] = a[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">3</span>] + 
-                         a[i % <span class="hljs-number">3</span>];
-    <span class="hljs-keyword">return</span> a[(n + <span class="hljs-number">1</span>) % <span class="hljs-number">3</span>];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n - <span class="hljs-number">2</span>; i++)
+        a[(i + <span class="hljs-number">3</span>) % <span class="hljs-number">3</span>] = a[(i + <span class="hljs-number">2</span>) % <span class="hljs-number">3</span>] + 
+                         a[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">3</span>];
+    <span class="hljs-keyword">return</span> a[n % <span class="hljs-number">3</span>];
 }</code></pre>
 <p>但问题是你用变量了啊， <code>State Monad</code> 最妙的一点就是全程都是常量而模拟出了变量的感觉。</p>
 <p>更何况你这里用了数组而不是在递归，如果你递归就会需要在 <code>fib</code> 上加一个状态参数， <code>State Monad</code> 可以做到在不添加任何函数参数的情况下在函数之间传递参数。</p>

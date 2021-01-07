@@ -137,14 +137,16 @@ fib(Integer n) {
         new StateM<>();
     if (n == 0) return State.narrow(
              m.flatMap(m.get,
+        x -> m.pure(x.first)));
+    if (n == 1) return State.narrow(
+             m.flatMap(m.get,
         x -> m.pure(x.second)));
     
     return State.narrow(
              m.flatMap(m.modify(x -> 
                  new Pair<>(x.second, 
                      x.first + x.second)),
-        v -> fib(n - 1))
-    );
+        v -> fib(n - 1)));
 }
 public static void main(String[] args) {
     System.out.println(
@@ -176,10 +178,10 @@ fib n = do
 ```java
 static int fib(int n) {
     int[] a = {0, 1, 1};
-    for (int i = 0; i < n; i++)
-        a[(i + 2) % 3] = a[(i + 1) % 3] + 
-                         a[i % 3];
-    return a[(n + 1) % 3];
+    for (int i = 0; i < n - 2; i++)
+        a[(i + 3) % 3] = a[(i + 2) % 3] + 
+                         a[(i + 1) % 3];
+    return a[n % 3];
 }
 ```
 
