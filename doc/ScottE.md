@@ -13,7 +13,7 @@ Either<A, B> = Left<A> + Right<B>
 在构造演算中拥有类型：
 
 ```
-Either = λ A: *. λ B: *. (π C: *. (A → C) → (B → C) → C)
+Either = λ A: *. λ B: *. (C: *) → (A → C) → (B → C) → C
 ```
 
 它接受两个解构函数，分别用来处理 Left 分支和 Right 分支然后返回其中一个分支的处理结果。可以按照这个类型签名构造出以下两个类型构造器：
@@ -28,7 +28,7 @@ Right = λ A: *. λ B: *. λ val: B. (λ C: *. λ l: A → C. λ r: B → C. r v
 再举个 `List` 的例子：
 
 ```
-List = λ T: *. (μ L: *. (π R: *. R → (T → L → R) → R))
+List = λ T: *. (μ L: *. (R: *) → R → (T → L → R) → R)
 
 Nil  = λ T: *. (λ R: *. λ nil: R. λ cons: T → List T → R. nil)
 Cons = λ T: *. λ val: T. λ next: List T. 
@@ -44,15 +44,15 @@ map = λ A: *. λ B: *. λ f: A → B. μ m: List A → List B.
 也就是说，积类型 `A * B * ... * Z` 会被翻译为
 
 ```
-π A: *. π B: *. ... π Z: *. 
-    (π Res: *. (A → B → ... → Z → Res) → Res)
+(A: *) → (B: *) → ... → (Z: *) →
+    (Res: *) → (A → B → ... → Z → Res) → Res
 ```
 
 和类型 `A + B + ... + Z` 会被翻译为
 
 ```
-π A: *. π B: *. ... π Z: *. 
-    (π Res: *. (A → Res) → (B → Res) → ... → (Z → Res) → Res)
+(A: *) → (B: *) → ... → (Z: *) →
+    (Res: *) → (A → Res) → (B → Res) → ... → (Z → Res) → Res
 ```
 
 并且两者可以互相嵌套从而构成复杂的类型。
@@ -60,16 +60,18 @@ map = λ A: *. λ B: *. λ f: A → B. μ m: List A → List B.
 如果给和类型的每个分支取个名字，并且允许在解构调用的时候按照名字索引，随意改变分支顺序，在解糖阶段把解构函数调整成正确的顺序那么就可以得到很多函数式语言里面的模式匹配（Pattern match）。然后就可以像这样表示 `List` ：
 
 ```
-type List = λ T: *. (μ L: *. Nil | Cons T L)
+type List: * → * 
+| Nil: (T: *) → List T
+| Cons: (T: *) → T → List T → List T
 ```
 
-像这样使用 `List` ：
+解糖的时候利用类型签名可以重建构造函数。像这样使用 `List` ：
 
 ```
 map = λ A: *. λ B: *. λ f: A → B. μ m: List A → List B. 
     λ list: List A. 
     match list (List B)
-    | Cons → λ x: A. λ xs: List A. Cons B (f x) (m xs)
-    | Nil  → Nil B
+    | Cons _ x xs → Cons B (f x) (m xs)
+    | Nil  _      → Nil B
 ```
 

@@ -111,15 +111,11 @@ void callT() {
 首先最基本的想法是把每次调用 `try` 的 `catch` 函数保存起来，由于 `try` 可层层嵌套所以每次压入栈中，然后 `throw` 的时候将最近的 `catch` 函数取出来调用即可：
 
 ```java
-Stack<Consumer<Exception>> cs = 
-    new Stack<>();
+Stack<Consumer<Exception>> cs = new Stack<>();
 
-void Try(
-        Consumer<Runnable> body,
-        BiConsumer<Exception, Runnable> 
-                  handler,
-        Runnable cont) {
-    
+void Try(Consumer<Runnable> body,
+         BiConsumer<Exception, Runnable> handler,
+         Runnable cont) {
     cs.push(e -> handler.accept(e, cont));
     body.accept(cont);
     cs.pop();
@@ -139,8 +135,7 @@ void test(int t) {
     Try(
     cont -> {
         System.out.println("try");
-        if (t == 0) Throw(
-            new ArithmeticException());
+        if (t == 0) Throw(new ArithmeticException());
         else {
             System.out.println(100 / t);
             cont.run();

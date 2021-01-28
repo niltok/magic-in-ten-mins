@@ -36,7 +36,7 @@ a { color: #02AEF1; text-decoration: none; }
 <pre><code>Y f = f (Y f)</code></pre>
 <p>假设 <code>f</code> 的类型为 <code>A</code> ， <code>Y</code> 的类型为 <code>A → B</code> ，那么 <code>Y f</code> 的类型就是 <code>B</code> ，所以等式右边的类型也应该为 <code>B</code> ，那么 <code>f</code> 的类型就应当是 <code>A = B → B</code> ，解得 <code>Y</code> 的类型为 <code>(B → B) → B</code> 。这就解得了 Y 组合子的宏观上的类型 <code>π T: *. (T → T) → T</code> 。</p>
 <p>不过如果想完整地写出 Y 组合子中每个变量的类型就会遇到困难， <code>x</code> 的类型是什么呢？如果假设 <code>x</code> 的类型是 <code>A → B</code> 那么考虑到存在 <code>x x</code> 这样的结构， <code>A</code> 应该就是 <code>A → B</code> ，但这样又回到了最开始的问题，假设 <code>x</code> 的类型是 <code>(A → B) → B</code> 。显然这样最后并不收敛， <code>x</code> 的类型没有解。</p>
-<p>既然 Y 组合子中有些变量的类型无法解出那么实际上在 Lambda Cube 中的各个类型系统都是无法构造 Y 组合子的，这就意味着这些类型系统没有办法递归，而通过这些类型系统检查的程序是一定会停机的。换句话说其实这些演算是不图灵完备的。</p>
+<p>既然 Y 组合子中有些变量的类型无法解出那么实际上在 Lambda Cube 中的各个类型系统都是无法构造 Y 组合子的，这就意味着这些类型系统没有办法递归，而通过这些类型系统检查的程序是一定会停机的。而实际上停机是好的，如果想让带 μ 结构的程序保证停机就需要做停机检查，当然停机问题是不可判定的所以停机检查只能通过一定能停机的程序子集。</p>
 <h2 id="μ">μ</h2>
 <p>所以实际上虽然看上去类似 Y 的不动点组合子是存在的但是无法给出具体实现，这时候就需要在构造演算中开个洞来获得不动点组合子。在表达式中增加 <code>μ x: A. e</code> 的结构，等价于 <code>Y (λ x: A. e)</code> ，注意 <code>Y</code> 的类型是 <code>(A → A) → A</code>  ，而对应的 <code>λ x: A. e</code> 的类型是 <code>A → A</code> ，也就是说 <code>e</code> 的类型是 <code>A</code> 。调用 <code>μ</code> 的 <code>reduce</code> 得到 <code>e[x → μ x: A. e]</code> 。</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mu</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{

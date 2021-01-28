@@ -42,7 +42,7 @@ a { color: #02AEF1; text-decoration: none; }
 <p>左下角的 λ→ 就是简单类型 λ 演算，和它相连的三条边对应在其基础上分别添加了三种不同函数的 λ 演算。 λ2 就是系统 F ，包含 <code>(□, *)</code> 函数。 λ<u>ω</u> 就是去除了系统 F 对应特性的系统 F ω ，也叫系统 F <u>ω</u> 。右下的 λP 就是在简单类型 λ 中加入了 <code>(*, □)</code> 的 λ 演算，而这样的类型系统中类型依赖值所以也叫依赖类型系统（Dependent Type System），在 C++ 中模板可以有值参数所以实际上 C++ 的类型系统中包括依赖类型（Dependent Type）。</p>
 <p>这个立方体就被称为 λ 立方（Lambda Cube）。</p>
 <h2 id="构造演算">构造演算</h2>
-<p>在 λ 立方的顶端放着 λC ，也叫构造演算（Calculus of Construction, CoC）。在构造演算中类型可以作为函数的输入，也可以作为函数的输出，那么实际上我们可以把项和函数作为相同的东西，不再加以区分。这样四种不同的函数也可以不加以区分放在一起，同时加入类别（Sort）来表达类型和类型的类型。而且因为 <code>A → B</code> 等价于 <code>∀ _: A. B</code> ，那么系统 F ω 中的 <code>TForall</code> 和 <code>TArr</code> 也可以合并。这样 CoC 的语法树表示如下：</p>
+<p>在 λ 立方的顶端放着 λC ，也叫构造演算（Calculus of Construction, CoC）。在构造演算中类型可以作为函数的输入，也可以作为函数的输出，那么实际上我们可以把项和函数作为相同的东西 <code>Fun</code> ，不再加以区分。这样四种不同的函数也可以不加以区分放在一起，同时加入类别（Sort）来表达类型和类型的类型。而且因为 <code>A → B</code> 等价于 <code>∀ _: A. B</code> ，那么系统 F ω 中的 <code>TForall</code> 和 <code>TArr</code> 也可以合并为 <code>Pi</code> 。这样 CoC 的语法树表示如下：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function">Expr <span class="hljs-title">genUUID</span><span class="hljs-params">()</span></span>;
     <span class="hljs-function">Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(Val v)</span></span>;
@@ -65,6 +65,8 @@ a { color: #02AEF1; text-decoration: none; }
 }
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    <span class="hljs-comment">// λ x: T. e</span>
+    <span class="hljs-comment">// (x: T) ⇒ e</span>
     Val x;
     Expr e;
 }
@@ -72,8 +74,10 @@ a { color: #02AEF1; text-decoration: none; }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Expr f, x;
 }
-<span class="hljs-comment">// Forall, Arrow</span>
+
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Pi</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    <span class="hljs-comment">// π x: T. e</span>
+    <span class="hljs-comment">// (x: T) → e</span>
     Val x;
     Expr e;
 }</code></pre>
@@ -124,6 +128,6 @@ a { color: #02AEF1; text-decoration: none; }
     }
 }</code></pre>
 <p>所以实际上 <code>Pi</code> 就是一个类型检查期的标识，并不参与最终值的演算。因为不区分值和类型，其中 <code>Env</code> 保存的内容改为 <code>Val</code> ，并且 <code>lookup</code> 改为用 <code>UUID</code> 检索。</p>
-<p>这样就构造出了一个相当强大的类型系统，它的表现力已经超越了几乎所有常见语言的类型系统。之后将会介绍如何利用这个强大的类型系统表达复杂的类型，做一些常见类型系统做不到的事情。</p>
+<p>这样就构造出了一个相当强大的类型系统，它的依赖类型（Dependent Type）特性是常见类型系统里面所没有的。之后将会介绍如何利用这个强大的类型系统表达复杂的类型，做一些常见类型系统做不到的事情。</p>
 </body>
 </html>

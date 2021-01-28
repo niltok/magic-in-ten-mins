@@ -97,15 +97,11 @@ a { color: #02AEF1; text-decoration: none; }
 <h2 id="异常">异常</h2>
 <p>拿到了有界续延我们就能实现一大堆控制流魔法，这里拿异常处理举个例子，通过CPS写法自己实现一个 <code>try-throw</code> 。</p>
 <p>首先最基本的想法是把每次调用 <code>try</code> 的 <code>catch</code> 函数保存起来，由于 <code>try</code> 可层层嵌套所以每次压入栈中，然后 <code>throw</code> 的时候将最近的 <code>catch</code> 函数取出来调用即可：</p>
-<pre><code class="language-java">Stack&lt;Consumer&lt;Exception&gt;&gt; cs = 
-    <span class="hljs-keyword">new</span> Stack&lt;&gt;();
+<pre><code class="language-java">Stack&lt;Consumer&lt;Exception&gt;&gt; cs = <span class="hljs-keyword">new</span> Stack&lt;&gt;();
 
-<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Try</span><span class="hljs-params">(
-        Consumer&lt;Runnable&gt; body,
-        BiConsumer&lt;Exception, Runnable&gt; 
-                  handler,
-        Runnable cont)</span> </span>{
-
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Try</span><span class="hljs-params">(Consumer&lt;Runnable&gt; body,
+         BiConsumer&lt;Exception, Runnable&gt; handler,
+         Runnable cont)</span> </span>{
     cs.push(e -&gt; handler.accept(e, cont));
     body.accept(cont);
     cs.pop();
@@ -120,8 +116,7 @@ a { color: #02AEF1; text-decoration: none; }
     Try(
     cont -&gt; {
         System.out.println(<span class="hljs-string">&quot;try&quot;</span>);
-        <span class="hljs-keyword">if</span> (t == <span class="hljs-number">0</span>) Throw(
-            <span class="hljs-keyword">new</span> ArithmeticException());
+        <span class="hljs-keyword">if</span> (t == <span class="hljs-number">0</span>) Throw(<span class="hljs-keyword">new</span> ArithmeticException());
         <span class="hljs-keyword">else</span> {
             System.out.println(<span class="hljs-number">100</span> / t);
             cont.run();

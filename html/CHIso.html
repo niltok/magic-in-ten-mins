@@ -1,0 +1,82 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFC; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; color: #EF96AB; }
+h2 { margin-top: 2em; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
+code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; }
+pre { overflow-x: auto; padding: 10px; }
+a { color: #02AEF1; text-decoration: none; }
+@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
+@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
+.hljs-keyword { color: #F288AF; }
+.hljs-comment { color: #929CA6; }
+.hljs-string { color: #0594A6; }
+.hljs-title { color: #4581D9 }
+</style>
+</head>
+<body>
+<p>
+<a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
+<h1 id="十分钟魔法练习：curry-howard-同构">十分钟魔法练习：Curry-Howard 同构</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：构造演算</p>
+</blockquote>
+<h2 id="记忆碎片">记忆碎片</h2>
+<p>我初中刚学几何证明的时候想过一个问题，能否用计算机来自动批改证明。那时候我还在用 VB 语言，能想到的办法也就只有字符串匹配替换。比如说下面的证明：</p>
+<pre><code>已知: a ∥ b, c ∥ d, a ∦ d 
+求证: b ∦ c
+∵ a ∥ b
+   a ∦ d
+∴ b ∦ d
+∵ c ∥ d
+∴ b ∦ c</code></pre>
+<p>可以用下面的语法来表示：</p>
+<pre><code>known: parallel(a, b), parallel(c, d), !parallel(a, d)
+<span class="hljs-comment">// 已知 ⇒ 结论</span>
+{ parallel(a, b), !parallel(a, d) } ⇒ { !parallel(b, d) }
+{ parallel(c, d), !parallel(b, d) } ⇒ { !parallel(b, c) }</code></pre>
+<p>然后对每一步证明遍历一遍公理和已知然后进行匹配。这样当然很低效，匹配证据的顺序的时间复杂度是指数级的，如果每次手动提供依据就可以大大提高效率，比如改成下面的表示法：</p>
+<pre><code><span class="hljs-comment">// 公理</span>
+Axiom parallelAxiom { parallel ( a, b ), !parallel ( a, c ) } ⇒ !parallel ( b, c )
+Axiom sym { parallel ( a, b ) } ⇒ parallel ( b, a )
+<span class="hljs-comment">// 证明</span>
+parallelogram { p: parallel ( a, b ), 
+                q: parallel ( c, d ), 
+                r: !parallel ( a, d ) } ⇒ !parallel ( b, c )
+    = parallelAxiom ( sym ( q ), sym ( parallelAxiom ( p, r ) ) )</code></pre>
+<p>细想的话实际上 <code>parallelogram</code> 的定义有点像是个函数类型： <code>p, q, r</code> 三个依据就像是函数的三个参数，指代的三个命题就像是参数的类型，而证据 <code>parallelAxiom, sym</code> 的使用就像是函数调用一样，把一系列已知变换成一个结论。而且 <code>parallelogram</code> 这个证明同样也可以作为证据被其他证明使用。</p>
+<h2 id="curry-howard-同构">Curry-Howard 同构</h2>
+<blockquote>
+<p>命题即类型，证明即程序</p>
+</blockquote>
+<p>Curry-Howard 同构（Curry-Howard Isomorphism, 有些范畴人倾向叫它 Curry-Howard Correspondence）指出了程序和证明的相似性：一个命题可以看做一个类型，蕴含可以看做函数类型，全称量词可以看做 <code>forall</code> ，否定可以看做没有实例的空类型（Empty Type, Void），析取可以看做和类型，合取可以看做积类型。实际上我们可以按照以上规则将任意证明转化成一段程序，而对程序进行类型检查就是对证明的检查。证明的过程就是利用现有实例构造出指定类型的实例的过程。</p>
+<p>利用 Curry-Howard 同构编写的一种类型检查器可以帮助数学家检查证明过程，这样的类型检查器被称为证明辅助器（Proof Assistant）。比较常见的证明辅助器有 Agda, Arend, Coq, Lean, F* 等。一个语言能用作辅助证明，最基本要拥有依赖类型（Dependent Type），例如对于上面的简单证明 <code>p</code> 的类型 <code>parallel ( a, b )</code> 也会依赖 <code>a, b</code> 。不过构造演算的类型系统足够表述上面的证明：</p>
+<pre><code>parallelAxiom = Axiom (
+    (a: Line) → (b: Line) → (c: Line) → 
+    parallel a b → !parallel a c → !parallel b c )
+sym = Axiom ( 
+    (a: Line) → (b: Line) → 
+    parallel a b → parallel b a )
+
+parallelogram = 
+    (a: Line) ⇒ (b: Line) ⇒ (c: Line) ⇒ (d: Line) ⇒ 
+    (p: parallel a b) ⇒ (q: parallel c d) ⇒ (r: !parallel a d) ⇒
+    parallelAxiom d b c (sym c d q) (sym b d (parallelAxiom a b d p r))</code></pre>
+<p>其中 <code>Axiom</code> 用于表示公理，公理实际上就是一个包含类型信息的不可计算实例：</p>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Axiom</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
+    Expr t;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>; }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">fullReduce</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>; }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> </span>{ <span class="hljs-keyword">return</span> t; }
+}</code></pre>
+<p>构造出公理时就默认它是正确的，因为我们获得了对应类型的实例。把命题当成公理非常方便但是滥用公理容易造成大问题，如果不慎引入了一个错误的公理那么整个证明都变得不正确了。</p>
+</body>
+</html>

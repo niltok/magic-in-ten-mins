@@ -34,19 +34,12 @@ a { color: #02AEF1; text-decoration: none; }
 <p>显然Java默认异常处理无法直接实现这样的需求，因为在异常抛出时整个调用栈的信息全部被清除了。</p>
 <p>但如果我们有了异常抛出时的续延那么可以同时抛出，在 <code>catch</code> 块中调用这个续延就能恢复之前的执行状态。</p>
 <p>下面是实现可恢复异常的 <code>try-catch</code> ：</p>
-<pre><code class="language-java">Stack&lt;BiConsumer&lt;Exception, Runnable&gt;&gt; 
-    cs = <span class="hljs-keyword">new</span> Stack&lt;&gt;();
+<pre><code class="language-java">Stack&lt;BiConsumer&lt;Exception, Runnable&gt;&gt; cs = <span class="hljs-keyword">new</span> Stack&lt;&gt;();
 
-<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Try</span><span class="hljs-params">(
-        Consumer&lt;Runnable&gt; body,
-        TriConsumer&lt;Exception, 
-                    Runnable, 
-                    Runnable&gt;
-            handler,
-        Runnable cont)</span> </span>{
-
-    cs.push((e, c) -&gt; 
-            handler.accept(e, cont, c));
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Try</span><span class="hljs-params">(Consumer&lt;Runnable&gt; body,
+         TriConsumer&lt;Exception, Runnable, Runnable&gt; handler,
+         Runnable cont)</span> </span>{
+    cs.push((e, c) -&gt; handler.accept(e, cont, c));
     body.accept(cont);
     cs.pop();
 }
@@ -60,13 +53,9 @@ a { color: #02AEF1; text-decoration: none; }
     cont -&gt; {
         System.out.println(<span class="hljs-string">&quot;try&quot;</span>);
         <span class="hljs-keyword">if</span> (t == <span class="hljs-number">0</span>)
-            Throw(
-            <span class="hljs-keyword">new</span> ArithmeticException(),
-            () -&gt; {
-                System.out.println(
-                    <span class="hljs-string">&quot;resumed&quot;</span>);
-                cont.run();
-            });
+            Throw(<span class="hljs-keyword">new</span> ArithmeticException(), () -&gt; {
+            System.out.println(<span class="hljs-string">&quot;resumed&quot;</span>);
+            cont.run(); });
         <span class="hljs-keyword">else</span> {
             System.out.println(<span class="hljs-number">100</span> / t);
             cont.run();
@@ -85,26 +74,17 @@ resumed
 <span class="hljs-keyword">final</span></code></pre>
 <h2 id="代数作用">代数作用</h2>
 <p>如果说在刚刚异常恢复的基础上希望在恢复时修补之前的异常错误就需要把之前的 <code>resume</code> 函数加上参数，这样修改以后它就成了代数作用（Algebaic Effect）的基础工具：</p>
-<pre><code class="language-java">Stack&lt;BiConsumer&lt;Object, 
-                 Consumer&lt;Object&gt;&gt;&gt; 
-    cs = <span class="hljs-keyword">new</span> Stack&lt;&gt;();
+<pre><code class="language-java">Stack&lt;BiConsumer&lt;Object, Consumer&lt;Object&gt;&gt;&gt; cs = <span class="hljs-keyword">new</span> Stack&lt;&gt;();
 
-<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Try</span><span class="hljs-params">(
-        Consumer&lt;Runnable&gt; body,
-        TriConsumer&lt;Object, 
-                    Runnable, 
-                    Consumer&lt;Object&gt;&gt;
-            handler,
-        Runnable cont)</span> </span>{
-
-    cs.push((e, c) -&gt; 
-            handler.accept(e, cont, c));
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Try</span><span class="hljs-params">(Consumer&lt;Runnable&gt; body,
+         TriConsumer&lt;Object, Runnable, Consumer&lt;Object&gt;&gt; handler,
+         Runnable cont)</span> </span>{
+    cs.push((e, c) -&gt; handler.accept(e, cont, c));
     body.accept(cont);
     cs.pop();
 }
 
-<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Perform</span><span class="hljs-params">(Object e, 
-             Consumer&lt;Object&gt; cont)</span> </span>{
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Perform</span><span class="hljs-params">(Object e, Consumer&lt;Object&gt; cont)</span> </span>{
     cs.peek().accept(e, cont);
 }</code></pre>
 <p>使用方式如下：</p>
@@ -113,15 +93,10 @@ resumed
     cont -&gt; {
         System.out.println(<span class="hljs-string">&quot;try&quot;</span>);
         <span class="hljs-keyword">if</span> (t == <span class="hljs-number">0</span>)
-            Perform(
-            <span class="hljs-keyword">new</span> ArithmeticException(),
-            v -&gt; {
-                System.out.println(
-                    <span class="hljs-string">&quot;resumed&quot;</span>);
-                System.out.println(
-                    <span class="hljs-number">100</span> / (Integer) v);
-                cont.run();
-            });
+            Perform(<span class="hljs-keyword">new</span> ArithmeticException(), v -&gt; {
+            System.out.println(<span class="hljs-string">&quot;resumed&quot;</span>);
+            System.out.println(<span class="hljs-number">100</span> / (Integer) v);
+            cont.run(); });
         <span class="hljs-keyword">else</span> {
             System.out.println(<span class="hljs-number">100</span> / t);
             cont.run();

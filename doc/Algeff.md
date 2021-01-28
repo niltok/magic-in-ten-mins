@@ -15,19 +15,12 @@
 下面是实现可恢复异常的 `try-catch` ：
 
 ```java
-Stack<BiConsumer<Exception, Runnable>> 
-    cs = new Stack<>();
+Stack<BiConsumer<Exception, Runnable>> cs = new Stack<>();
 
-void Try(
-        Consumer<Runnable> body,
-        TriConsumer<Exception, 
-                    Runnable, 
-                    Runnable>
-            handler,
-        Runnable cont) {
-    
-    cs.push((e, c) -> 
-            handler.accept(e, cont, c));
+void Try(Consumer<Runnable> body,
+         TriConsumer<Exception, Runnable, Runnable> handler,
+         Runnable cont) {
+    cs.push((e, c) -> handler.accept(e, cont, c));
     body.accept(cont);
     cs.pop();
 }
@@ -45,13 +38,9 @@ void test(int t) {
     cont -> {
         System.out.println("try");
         if (t == 0)
-            Throw(
-            new ArithmeticException(),
-            () -> {
-                System.out.println(
-                    "resumed");
-                cont.run();
-            });
+            Throw(new ArithmeticException(), () -> {
+            System.out.println("resumed");
+            cont.run(); });
         else {
             System.out.println(100 / t);
             cont.run();
@@ -79,26 +68,17 @@ final
 如果说在刚刚异常恢复的基础上希望在恢复时修补之前的异常错误就需要把之前的 `resume` 函数加上参数，这样修改以后它就成了代数作用（Algebaic Effect）的基础工具：
 
 ```java
-Stack<BiConsumer<Object, 
-                 Consumer<Object>>> 
-    cs = new Stack<>();
+Stack<BiConsumer<Object, Consumer<Object>>> cs = new Stack<>();
 
-void Try(
-        Consumer<Runnable> body,
-        TriConsumer<Object, 
-                    Runnable, 
-                    Consumer<Object>>
-            handler,
-        Runnable cont) {
-    
-    cs.push((e, c) -> 
-            handler.accept(e, cont, c));
+void Try(Consumer<Runnable> body,
+         TriConsumer<Object, Runnable, Consumer<Object>> handler,
+         Runnable cont) {
+    cs.push((e, c) -> handler.accept(e, cont, c));
     body.accept(cont);
     cs.pop();
 }
 
-void Perform(Object e, 
-             Consumer<Object> cont) {
+void Perform(Object e, Consumer<Object> cont) {
     cs.peek().accept(e, cont);
 }
 ```
@@ -111,15 +91,10 @@ void test(int t) {
     cont -> {
         System.out.println("try");
         if (t == 0)
-            Perform(
-            new ArithmeticException(),
-            v -> {
-                System.out.println(
-                    "resumed");
-                System.out.println(
-                    100 / (Integer) v);
-                cont.run();
-            });
+            Perform(new ArithmeticException(), v -> {
+            System.out.println("resumed");
+            System.out.println(100 / (Integer) v);
+            cont.run(); });
         else {
             System.out.println(100 / t);
             cont.run();

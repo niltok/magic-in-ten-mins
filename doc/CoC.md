@@ -27,7 +27,7 @@
 
 ## 构造演算
 
-在 λ 立方的顶端放着 λC ，也叫构造演算（Calculus of Construction, CoC）。在构造演算中类型可以作为函数的输入，也可以作为函数的输出，那么实际上我们可以把项和函数作为相同的东西，不再加以区分。这样四种不同的函数也可以不加以区分放在一起，同时加入类别（Sort）来表达类型和类型的类型。而且因为 `A → B` 等价于 `∀ _: A. B` ，那么系统 F ω 中的 `TForall` 和 `TArr` 也可以合并。这样 CoC 的语法树表示如下：
+在 λ 立方的顶端放着 λC ，也叫构造演算（Calculus of Construction, CoC）。在构造演算中类型可以作为函数的输入，也可以作为函数的输出，那么实际上我们可以把项和函数作为相同的东西 `Fun` ，不再加以区分。这样四种不同的函数也可以不加以区分放在一起，同时加入类别（Sort）来表达类型和类型的类型。而且因为 `A → B` 等价于 `∀ _: A. B` ，那么系统 F ω 中的 `TForall` 和 `TArr` 也可以合并为 `Pi` 。这样 CoC 的语法树表示如下：
 
 ```java
 interface Expr {
@@ -52,6 +52,8 @@ class Val implements Expr {
 }
 
 class Fun implements Expr {
+    // λ x: T. e
+    // (x: T) ⇒ e
     Val x;
     Expr e;
 }
@@ -59,8 +61,10 @@ class Fun implements Expr {
 class App implements Expr {
     Expr f, x;
 }
-// Forall, Arrow
+
 class Pi implements Expr {
+    // π x: T. e
+    // (x: T) → e
     Val x;
     Expr e;
 }
@@ -118,4 +122,4 @@ class Pi implements Expr {
 
 所以实际上 `Pi` 就是一个类型检查期的标识，并不参与最终值的演算。因为不区分值和类型，其中 `Env` 保存的内容改为 `Val` ，并且 `lookup` 改为用 `UUID` 检索。
 
-这样就构造出了一个相当强大的类型系统，它的表现力已经超越了几乎所有常见语言的类型系统。之后将会介绍如何利用这个强大的类型系统表达复杂的类型，做一些常见类型系统做不到的事情。
+这样就构造出了一个相当强大的类型系统，它的依赖类型（Dependent Type）特性是常见类型系统里面所没有的。之后将会介绍如何利用这个强大的类型系统表达复杂的类型，做一些常见类型系统做不到的事情。

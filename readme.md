@@ -89,6 +89,16 @@ QQ群：1070975853 |
 [Markdown](doc/Mu.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/Mu.html)
 
+中等 | 向量和有限集(Vector & FinSet) |
+[Markdown](doc/VecFin.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/VecFin.html)
+
+## 形式化验证
+
+偏易 | Curry-Howard 同构(Curry-Howard Isomorphism)[构造演算] |
+[Markdown](doc/CHIso.md) |
+[HTML](https://goldimax.github.io/magic-in-ten-mins/html/CHIso.html)
+
 ## 编程范式
 
 简单 | 表驱动编程(Table-Driven Programming)[简单 Java 基础] |
