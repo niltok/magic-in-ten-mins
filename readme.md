@@ -89,7 +89,7 @@ QQ群：1070975853 |
 [Markdown](doc/Mu.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/Mu.html)
 
-中等 | 向量和有限集(Vector & FinSet) |
+中等 | 向量和有限集(Vector & FinSet)[构造演算， ADT ，依赖类型模式匹配] |
 [Markdown](doc/VecFin.md) |
 [HTML](https://goldimax.github.io/magic-in-ten-mins/html/VecFin.html)
 
