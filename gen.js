@@ -41,10 +41,12 @@ const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sa
 
 const head = $$('head')(charset + viewpoint + title + style)
 
-const star = $$('p')('<a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a>')
+const star = '<a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a>'
+const home = '<a href="https://magic.huohuo.moe">🏠Homepage🏠</a>'
 
 const gen = s => {
-    return $$('html')(head + $$('body')(star + marked(s, { highlight: s => hljs.highlightAuto(s, ['java']).value })))
+    return $$('html')(head + $$('body')($$('p')(home + ' | ' + star) + 
+        marked(s, { highlight: s => hljs.highlightAuto(s, ['java']).value })))
 }
 
 fs.readdirSync("doc").forEach(f => {
