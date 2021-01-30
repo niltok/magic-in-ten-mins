@@ -41,7 +41,7 @@ const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sa
 
 const head = $$('head')(charset + viewpoint + title + style)
 
-const star = '<a href="https://github.com/goldimax/magic-in-ten-mins">⭐Star me on GitHub⭐</a>'
+const star = '<a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me on GitHub⭐</a>'
 const home = '<a href="https://magic.huohuo.moe">🏠Homepage🏠</a>'
 
 const gen = s => {
