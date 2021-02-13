@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFC; line-height: 2em; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
+h2 { margin-top: 2em; line-height: 1.5em; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
+code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 10px; }
+a { color: #02AEF1; text-decoration: none; }
+@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
+@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
+.hljs-keyword { color: #F288AF; }
+.hljs-comment { color: #929CA6; }
+.hljs-string { color: #0594A6; }
+.hljs-title { color: #4581D9 }
+</style>
+</head>
+<body>
+<p>
+<a href="https://magic.huohuo.moe">🏠Homepage🏠</a> | <a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
+<h1 id="十分钟魔法练习：莱布尼兹相等性">十分钟魔法练习：莱布尼兹相等性</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：构造演算</p>
+</blockquote>
+<h2 id="相等类型">相等类型</h2>
+<p>相等关系可以作为一个命题，那么也可以作为一个类型，被称为相等类型（Identity type）。相等类型有多种编码形式，这里先介绍莱布尼兹（Leibniz）给出的定义：</p>
+<blockquote>
+<p>x 和 y 相等，当且仅当他们的所有性质一样，也就是说对于所有 P 可以得到 P x 蕴含 P y</p>
+</blockquote>
+<p>用构造演算表达就是：</p>
+<pre><code>Eq = (T: *) ⇒ (x: T) ⇒ (y: T) ⇒ 
+     (P: T → *) → P x → P y</code></pre>
+<p>对于 <code>Eq</code> 类型，它拥有唯一的构造器用于构造出 <code>x = x</code> ，其类型为：</p>
+<pre><code>(T: *) → (x: T) → Eq T x x</code></pre>
+<h2 id="自反性">自反性</h2>
+<p>相等类型的构造器的类型也是个命题，它指出对于任意的 <code>x</code> 都存在 <code>x = x</code> ，也就是相等的自反性（Reflexive），而构造器的实现就是对自反性的证明。为了证明自反性，可以观察一下展开了的构造器类型：</p>
+<pre><code>(T: *) → (x: T) → (P: T → *) → P x → P x</code></pre>
+<p>最终我们需要一个类型为 <code>P x</code> 的实例而在之前我们已经拿到了一个类型为 <code>P x</code> 的参数，直接作为函数结果即可：</p>
+<pre><code>Refl = (T: *) ⇒ (x: T) ⇒ 
+       (P: T → *) ⇒ (Px: P x) ⇒ 
+       Px</code></pre>
+<h2 id="传递性">传递性</h2>
+<p>如果 <code>x = y</code> 并且 <code>y = z</code> 那么可以得到 <code>x = z</code> ，这就是相等的传递性（Transitivity），命题的类型是：</p>
+<pre><code>(T: *) → (x: T) → (y: T) → (z: T) →
+Eq T x y → Eq T y z → Eq T x z</code></pre>
+<p>直接看可能比较难想出如何构造函数来证明传递性，还是可以按照如上方法展开类型：</p>
+<pre><code>(T: *) → (x: T) → (y: T) → (z: T) →
+((P: T → *) → P x → P y) → ((P: T → *) → P y → P z) →
+(P: T → *) → P x → P z</code></pre>
+<p>观察发现有参数类型为 <code>P x</code> 的实例，而通过类型为 <code>(P: T → *) → P x → P y</code> 的实例可以把它转换成类型为 <code>P z</code> 的实例，同样的方法还能继续转换成类型为 <code>P z</code> 的实例。于是就得到以下函数：</p>
+<pre><code>Trans = (T: *) ⇒ (x: T) ⇒ (y: T) ⇒ (z: T) ⇒
+        (xEqy: Eq T x y) ⇒ (yEqz: Eq T y z) ⇒
+        (P: T → *) ⇒ (Px: P x) ⇒ yEqz P (xEqy P Px)</code></pre>
+<h2 id="对称性">对称性</h2>
+<p>相等是对称的，也就是说 <code>x = y</code> 一定能得到 <code>y = x</code> ，相等的对称性（Symmetry）用类型表示就是：</p>
+<pre><code>(T: *) → (x: T) → (y: T) → Eq T x y → Eq T y x</code></pre>
+<p>想要证明这个命题有一些难度，核心思想就是利用相等的定义来构造出合适的性质替换利用自反性构造出的实例等式两边的内容：</p>
+<pre><code>Sym = (T: *) ⇒ (x: T) ⇒ (y: T) ⇒
+      (xEqy: Eq T x y) ⇒ 
+      xEqy ((z: T) ⇒ Eq T z x) (Refl T x)</code></pre>
+<p>因为有了 <code>xEqy</code> 就可以把任意命题 <code>Q x</code> 变成 <code>Q y</code>，如果构造命题 <code>Q = (z: T) ⇒ Eq T z x</code> ，那么 <code>Q x</code> 就是 <code>Eq T x x</code> 也就是 <code>Refl T x</code> 构造出实例的类型，应用给 <code>xEqy</code> 就可以得到类型为 <code>Q y</code> 也就是 <code>Eq T y x</code> 的实例，也就是我们的目标。</p>
+<h2 id="合同性">合同性</h2>
+<p>如果 <code>x = y</code> 那么显然对于同一个函数 <code>f</code> 来说 <code>f x = f y</code> ，这就是相等的合同性（Congruence）也叫替换性（Substitution），用构造演算表示就是：</p>
+<pre><code>(A: *) → (B: *) → (f: A → B) → 
+(x: A) → (y: A) → 
+Eq A x y → Eq B (f x) (f y)</code></pre>
+<p>合同性的证明非常类似于对称性的证明，只需要构造一个命题 <code>Q = (z: A) ⇒ P (f x) → P (f z)</code> 即可：</p>
+<pre><code>Cong = (A: *) ⇒ (B: *) ⇒ (f: A → B) ⇒
+       (x: A) ⇒ (y: A) ⇒
+       (xEqy: Eq A x y) ⇒
+       xEqy ((z: A) ⇒ Eq B (f x) (f z)) (Refl B (f x))</code></pre>
+</body>
+</html>

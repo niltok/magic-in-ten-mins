@@ -139,6 +139,12 @@ Y 组合子(Y Combinator)
 Curry-Howard 同构(Curry-Howard Isomorphism)
 [构造演算]
 
+偏难 |
+[Markdown](doc/LeiEq.md) |
+[HTML](https://magic.huohuo.moe/html/LeiEq.html) |
+莱布尼兹相等性(Leibniz Equality)
+[构造演算]
+
 ## 编程范式
 
 简单 |
