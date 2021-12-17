@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -33,11 +35,12 @@ a { color: #02AEF1; text-decoration: none; }
 <p>单子(Monad)是指一种有一个类型参数的数据结构，拥有 <code>pure</code> （也叫 <code>unit</code> 或者 <code>return</code> ）和 <code>flatMap</code> （也叫 <code>bind</code> 或者 <code>&gt;&gt;=</code> ）两种操作：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Monad</span>&lt;<span class="hljs-title">M</span>&gt; </span>{
     &lt;A&gt; <span class="hljs-function">HKT&lt;M, A&gt; <span class="hljs-title">pure</span><span class="hljs-params">(A v)</span></span>;
-
+    
     &lt;A, B&gt; <span class="hljs-function">HKT&lt;M, B&gt;
     <span class="hljs-title">flatMap</span><span class="hljs-params">(HKT&lt;M, A&gt; ma, 
             Function&lt;A, HKT&lt;M, B&gt;&gt; f)</span></span>;
-}</code></pre>
+}
+</code></pre>
 <p>其中 <code>pure</code> 要求返回一个包含参数类型内容的数据结构， <code>flatMap</code> 要求把 <code>ma</code> 中的值经过 <code>f</code> 以后再串起来。</p>
 <p>举个最经典的例子：</p>
 <h2 id="list-monad">List Monad</h2>
@@ -47,7 +50,7 @@ a { color: #02AEF1; text-decoration: none; }
         list.add(v);
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> HKTList&lt;&gt;(list);
     }
-
+    
     <span class="hljs-keyword">public</span> &lt;A, B&gt; HKT&lt;HKTList&lt;?&gt;, B&gt; 
     flatMap(HKT&lt;HKTList&lt;?&gt;, A&gt; ma, 
            Function&lt;A, HKT&lt;HKTList&lt;?&gt;, B&gt;&gt; f) {
@@ -57,7 +60,8 @@ a { color: #02AEF1; text-decoration: none; }
                     .value.stream())
             .collect(HKTList.collector());
     }
-}</code></pre>
+}
+</code></pre>
 <p>简单来说 <code>pure(v)</code> 将得到 <code>{v}</code> ，而 <code>flatMap({1, 2, 3}, v -&gt; {v + 1, v + 2})</code> 将得到 <code>{2, 3, 3, 4, 4, 5}</code> 。这都是 Java 里面非常常见的操作了，并没有什么新意。</p>
 <h2 id="maybe-monad">Maybe Monad</h2>
 <p>Java 不是一个空安全的语言，也就是说任何对象类型的变量都有可能为 <code>null</code> 。对于一串可能出现空值的逻辑来说，判空常常是件麻烦事：</p>
@@ -66,7 +70,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-keyword">if</span> (ma.value == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;();
     <span class="hljs-keyword">if</span> (mb.value == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;();
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;(ma.value + mb.value);
-}</code></pre>
+}
+</code></pre>
 <p>其中 <code>Maybe</code> 是个 <code>HKT</code> 的包装类型：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Maybe</span>&lt;<span class="hljs-title">A</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title">HKT</span>&lt;<span class="hljs-title">Maybe</span>&lt;?&gt;, <span class="hljs-title">A</span>&gt; </span>{
     A value;
@@ -76,7 +81,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-title">narrow</span><span class="hljs-params">(HKT&lt;Maybe&lt;?&gt;, T&gt; v)</span> </span>{
         <span class="hljs-keyword">return</span> (Maybe&lt;T&gt;) v;
     }
-}</code></pre>
+}
+</code></pre>
 <p>像这样定义 <code>Maybe Monad</code> ：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MaybeM</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Monad</span>&lt;<span class="hljs-title">Maybe</span>&lt;?&gt;&gt; </span>{
     <span class="hljs-keyword">public</span> &lt;A&gt; HKT&lt;Maybe&lt;?&gt;, A&gt; pure(A v) {
@@ -89,7 +95,8 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">if</span> (v == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;();
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> f.apply(v);
     }
-}</code></pre>
+}
+</code></pre>
 <p>上面 <code>addI</code> 的代码就可以改成：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> Maybe&lt;Integer&gt;
 <span class="hljs-title">addM</span><span class="hljs-params">(Maybe&lt;Integer&gt; ma, Maybe&lt;Integer&gt; mb)</span> </span>{
@@ -99,7 +106,8 @@ a { color: #02AEF1; text-decoration: none; }
         m.flatMap(mb, b -&gt; <span class="hljs-comment">//   b &lt;- mb</span>
         m.pure(a + b)))    <span class="hljs-comment">//   pure (a + b)</span>
     );
-}</code></pre>
+}
+</code></pre>
 <p>这样看上去就比上面的连续 <code>if-return</code> 优雅很多。在一些有语法糖的语言 (<code>Haskell</code>) 里面 Monad 的逻辑甚至可以像上面右边的注释一样简单明了。</p>
 <blockquote>
 <p>我知道会有人说，啊，我有更简单的写法：</p>
@@ -111,7 +119,8 @@ a { color: #02AEF1; text-decoration: none; }
     } <span class="hljs-keyword">catch</span> (Exception e) {
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;();
     }
-}</code></pre>
+}
+</code></pre>
 <p>确实，这样写也挺简洁直观的， <code>Maybe Monad</code> 在有异常的 Java 里面确实不是一个很好的例子，不过 <code>Maybe Monad</code> 确实是在其他没有异常的函数式语言里面最为常见的 Monad 用法之一。而之后我也会介绍一些异常也无能为力的 Monad 用法。</p>
 </blockquote>
 </body>

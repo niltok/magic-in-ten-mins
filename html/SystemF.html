@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -33,15 +35,19 @@ a { color: #02AEF1; text-decoration: none; }
 <p>类型函数定义 <code>Λ t. E</code> 定义了一个类型变量 <code>t</code> ，可以在表达式 <code>E</code> 中使用，其类型是 <code>∀ t. [Typeof(E)]</code> 。</p>
 <p>类型函数应用 <code>F T</code> 类似于函数应用，当 <code>F</code> 的类型为 <code>∀ t. E</code> 时 <code>F T</code> 的类型是 <code>E(t → T)</code> ，也就是 <code>E</code> 中所有自由的 <code>t</code> 被替换为 <code>T</code> 。  </p>
 <p>比如 <code>true</code> 的定义可以写成：</p>
-<pre><code><span class="hljs-keyword">true</span> = Λ a. λ (x: a). λ (y: a). (x: a)</code></pre>
+<pre><code>true = Λ a. λ <span class="hljs-comment">(x: a)</span>. λ <span class="hljs-comment">(y: a)</span>. <span class="hljs-comment">(x: a)</span>
+</code></pre>
 <p>其类型是：</p>
-<pre><code>∀ a. a → a → a</code></pre>
+<pre><code>∀ <span class="hljs-selector-tag">a</span>. <span class="hljs-selector-tag">a</span> → <span class="hljs-selector-tag">a</span> → <span class="hljs-selector-tag">a</span>
+</code></pre>
 <p>这就有点类似 Java 中的泛型函数：</p>
 <pre><code class="language-java">&lt;A&gt; <span class="hljs-function">A <span class="hljs-title">True</span><span class="hljs-params">(A x, A y)</span> </span>{
     <span class="hljs-keyword">return</span> x;
-}</code></pre>
+}
+</code></pre>
 <p>而类型函数应用就像是给函数填入泛型参数的类型，像这样：</p>
-<pre><code>Λ x. <span class="hljs-keyword">true</span> x</code></pre>
+<pre><code>Λ <span class="hljs-keyword">x</span>. <span class="hljs-keyword">true</span> <span class="hljs-keyword">x</span>
+</code></pre>
 <p>会得到 <code>true</code> 本身。</p>
 <p>表达式中加入了新东西那么显然类型系统也需要有一些改变，系统 F 的类型系统由类型变量 <code>x</code> ，类型函数 <code>∀ t. E</code> ，函数类型 <code>a → b</code> 构成：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{}
@@ -64,7 +70,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + a + <span class="hljs-string">&quot; → &quot;</span> + b + <span class="hljs-string">&quot;)&quot;</span>;
     }
-}</code></pre>
+}
+</code></pre>
 <p>注意 <code>TVal</code> 的 <code>id</code> 字段是像无类型 λ 演算中一样 <code>equals</code> 函数只需要比较 <code>id</code> 字段。</p>
 <p>既然有类型函数那就需要有类似函数应用的操作来填入类型参数，同时还需要函数来生成 <code>UUID</code> ：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{
@@ -118,7 +125,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.applyUUID(v), b.applyUUID(v));
     }
-}</code></pre>
+}
+</code></pre>
 <p>这里的实现和无类型 λ 演算很像。不过要注意 <code>TForall</code> 的 <code>equals</code> 函数实现，在比较前需要先把变量统一一下。</p>
 <p>再在简单类型 λ 演算的基础上给表达式加上类型函数定义和类型函数应用，同时还需要协助类型系统生成类型的 <code>UUID</code> ：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
@@ -164,7 +172,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">applyUUID</span><span class="hljs-params">(TVal v)</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> AppT(e.applyUUID(v), t.applyUUID(v));
     }
-}</code></pre>
+}
+</code></pre>
 <p>其中 <code>Val</code>, <code>Fun</code>, <code>App</code> 的定义和简单类型 λ 演算中基本一致，这里不作展示。他们的 <code>UUID</code> 生成只需要想 <code>AppT</code> 那样递归就可以，无需特殊操作。</p>
 <p>而测试代码</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">SystemF</span> </span>{
@@ -190,9 +199,11 @@ a { color: #02AEF1; text-decoration: none; }
         System.out.println(T.checkType(<span class="hljs-keyword">new</span> NilEnv()));
         System.out.println(IF.checkType(<span class="hljs-keyword">new</span> NilEnv()));
     }
-}</code></pre>
+}
+</code></pre>
 <p>运行会输出：</p>
-<pre><code>(∀ a. (a → (a → a)))
-(∀ a. ((∀ x. (x → (x → x))) → (a → (a → a))))</code></pre>
+<pre><code><span class="hljs-comment">(∀ a. (a → (a → a)</span>))
+<span class="hljs-comment">(∀ a. ((∀ x. (x → (x → x)</span>)) → <span class="hljs-comment">(a → (a → a)</span>)))
+</code></pre>
 </body>
 </html>

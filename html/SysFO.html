@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -32,7 +34,8 @@ a { color: #02AEF1; text-decoration: none; }
 <p>在 Java 和 C# 中有泛型，在 C++ 中有模板，他们都可以让一个类型接受一些类型产生一个类型，比如：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Just</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
     T value;
-}</code></pre>
+}
+</code></pre>
 <p><code>Just</code> 就是个能接受类型参数 <code>T</code> 的类型，它被称为类型构造器（Type Constructor）。在系统 F 中加入类型构造器后它被称为系统 F ω （System F ω）。加入了类型构造器后就可以在 λ 演算中构造泛型容器了，比如构造泛型的 List 。</p>
 <p>实际上这相当于在类型系统中嵌入了一个完整的 λ 演算解释器，所以我们需要在系统 F 的类型系统中加入 <code>TFun</code> 来定义一个类型函数 <code>TApp</code> 来应用一个类型函数：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Type</span> </span>{
@@ -67,7 +70,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">public</span> Type <span class="hljs-title">apply</span><span class="hljs-params">(TVal v, Type t)</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TArr(a.apply(v, t), b.apply(v, t));
     }
-}</code></pre>
+}
+</code></pre>
 <p>其中 <code>TVal</code> 、 <code>TFun</code> 和 <code>TApp</code> 的函数实现和无类型 λ 演算中的表达式基本一致，不过注意要加上 <code>equals</code> 函数的实现，并且 <code>TFun</code> 在比较前需要把变量替换成一样的， <code>fullReduce</code> 函数在 Y 组合子那期中给出了实现，这里就不贴出展示了。而 <code>TForall</code> 的实现可以参考 System F ， <code>TArr</code> 的实现也只是简单进行递归调用，非常简单。</p>
 <p>而表达式相比系统 F 需要的改动是 <code>TVal</code> 在检查类型时需要先调用 <code>fullReduce</code> 来化简类型：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
@@ -100,7 +104,8 @@ a { color: #02AEF1; text-decoration: none; }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppT</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Expr e;
     Type t;
-}</code></pre>
+}
+</code></pre>
 <p>有了类型构造器，我们就可以表达带有泛型的容器，比如列表（建议只看注释）：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">TypeCons</span> </span>{
     <span class="hljs-comment">// List = λ X. ∀ R. (X → (R → R)) → (R → R)</span>
@@ -126,7 +131,8 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-comment">// (∀ X. (X → ((∀ R. ((X → (R → R)) → (R → R))) → (∀ R. ((X → (R → R)) → (R → R))))))</span>
         System.out.println(cons.checkType());
     }
-}</code></pre>
+}
+</code></pre>
 <p>这个列表的构造类似于自然数，每次在原列表的外面套一层来增加一项。</p>
 <p>注意上面的类型系统中是个无类型的 λ 演算，实际上类型也是可以拥有类型的，被称为种类（Kind）。基础类型和函数类型的种类是 <code>*</code> ，而类型构造器的种类是 <code>* → *</code> 。而为了增强类型检查器的能力我们也可以先进行种类检查，不过这里并没实现。</p>
 </body>

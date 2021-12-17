@@ -2,7 +2,7 @@ const marked = require('marked')
 const fs = require('fs')
 const hljs = require('highlight.js')
 
-if (fs.existsSync("html")) fs.rmdirSync("html", {
+if (fs.existsSync("html")) fs.rmSync("html", {
     recursive: true
 })
 
@@ -23,8 +23,9 @@ const sh1 = 'h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }\n'
 const sh2 = 'h2 { margin-top: 2em; line-height: 1.5em; }\n'
 const scenter = 'h1, h2, h3 { text-align: center; }\n'
 const squote = 'blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }\n'
-const scode = 'code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }\n'
-const spre = 'pre { overflow-x: auto; padding: 10px; }\n'
+const scode = 'code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }\n'
+const spre = 'pre { overflow-x: auto; padding: 1rem; }\n'
+const sprecode = 'pre>code { padding-inline: 0; }\n'
 const sscorll = '::-webkit-scrollbar, .element::-webkit-scrollbar, .element { opacity: 0.5; }\n'
 const sa = 'a { color: #02AEF1; text-decoration: none; }\n'
 
@@ -34,10 +35,11 @@ const sdarkpre = '@media (prefers-color-scheme: dark) { pre, code { color: #D8D8
 const hlkeyword = '.hljs-keyword { color: #F288AF; }\n'
 const hlconmment = '.hljs-comment { color: #929CA6; }\n'
 const hlstring = '.hljs-string { color: #0594A6; }\n'
-const hltitle = '.hljs-title { color: #4581D9 }\n'
+const hltitle = '.hljs-title { color: #4581D9; }\n'
+const hltype = '.hljs-type, .hljs-built_in { color: #fca311; }\n'
 
-const hlcss = hlkeyword + hlconmment + hlstring + hltitle
-const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sa + sdarkbody + sdarkpre + hlcss)
+const hlcss = hlkeyword + hlconmment + hlstring + hltitle + hltype
+const style = $$('style')(sbody + sfont + sh1 + sh2 + squote + scode + spre + sprecode + sa + sdarkbody + sdarkpre + hlcss)
 
 const head = $$('head')(charset + viewpoint + title + style)
 
@@ -45,14 +47,22 @@ const star = '<a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me o
 const home = '<a href="https://magic.huohuo.moe">🏠Homepage🏠</a>'
 
 const gen = s => {
-    return $$('html')(head + $$('body')($$('p')(home + ' | ' + star) + 
-        marked(s, { highlight: s => hljs.highlightAuto(s, ['java']).value })))
+    return $$('html')(head + $$('body')($$('p')(home + ' | ' + star) +
+        marked(s, {
+            highlight: (code, lang) => {
+                if (typeof lang == 'undefined' || lang == '')
+                    return hljs.highlightAuto(code).value
+                else if (lang == 'nohighlight')
+                    return code
+                else return hljs.highlight(code, { language: lang }).value
+            }
+        })))
 }
 
 fs.readdirSync("doc").forEach(f => {
-    if (f.endsWith(".md")){
+    if (f.endsWith(".md")) {
         const content = fs.readFileSync("doc/" + f).toString()
-        fs.writeFileSync("html/" + f.substr(0, f.length - 3) + ".html", gen(content))
+        fs.writeFileSync("html/" + f.slice(0, f.length - 3) + ".html", gen(content))
     }
 })
 

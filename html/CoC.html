@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -34,11 +36,12 @@ a { color: #02AEF1; text-decoration: none; }
 <p>简单类型 λ 演算中项和类型是分离的，其中只有针对项的函数，它接收一个项返回另一个项，其得到的对子是 <code>(*, *)</code> 。系统 F 对类型系统进行了扩充，在项中增加了一种函数，接收一个类型返回一个项，其得到的对子是 <code>(□, *)</code> 。而系统 F ω 进一步增加了接收类型返回类型的函数，也就是 <code>(□, □)</code> 。那么可以想象应该还存在一类函数接收一个值产生一个类型，其得到的对子应该是 <code>(*, □)</code> 。</p>
 <p>对于所有 λ 演算都存在 <code>(*, *)</code> 的函数，而另外三种不同函数是三种额外的特性，可以自由组合来构造新的类型系统，一共能组合出六种不同的类型系统：</p>
 <pre><code>    ω ------ C
-  / |      / |
-2 ------ P2  |
-|   _ω --|- _Pω
-| /      | /
-→ ------ P</code></pre>
+  / |<span class="hljs-string">      / </span>|
+2 ------ P2  |<span class="hljs-string">
+</span>|<span class="hljs-string">   _ω --</span>|<span class="hljs-string">- _Pω
+</span>|<span class="hljs-string"> /      </span>|<span class="hljs-string"> /
+→ ------ P</span>
+</code></pre>
 <p>左下角的 λ→ 就是简单类型 λ 演算，和它相连的三条边对应在其基础上分别添加了三种不同函数的 λ 演算。 λ2 就是系统 F ，包含 <code>(□, *)</code> 函数。 λ<u>ω</u> 就是去除了系统 F 对应特性的系统 F ω ，也叫系统 F <u>ω</u> 。右下的 λP 就是在简单类型 λ 中加入了 <code>(*, □)</code> 的 λ 演算，而这样的类型系统中类型依赖值所以也叫依赖类型系统（Dependent Type System），在 C++ 中模板可以有值参数所以实际上 C++ 的类型系统中包括依赖类型（Dependent Type）。</p>
 <p>这个立方体就被称为 λ 立方（Lambda Cube）。</p>
 <h2 id="构造演算">构造演算</h2>
@@ -80,7 +83,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-comment">// (x: T) → e</span>
     Val x;
     Expr e;
-}</code></pre>
+}
+</code></pre>
 <p>其中 <code>Expr</code> 的接口的函数被分成了三组，第一组是预生成 <code>id</code> 只需要简单递归生成就可以，之前也展示过；第二组是对表达式的化简，只需注意 <code>App</code> 在化简时只应用 <code>Fun</code> 应该忽略 <code>Pi</code> ，并且递归化简时别忘了变量部分的类型也是一个表达式；第三组就是类型检查部分了， <code>Fun</code> 的类型是 <code>Pi</code> ， <code>Pi</code> 的类型是 <code>e</code> 的类型， <code>App</code> 把表达式应用到 <code>Pi</code> 上：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Sort</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">checkType</span><span class="hljs-params">(Env env)</span> </span>{
@@ -126,7 +130,8 @@ a { color: #02AEF1; text-decoration: none; }
         }
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
-}</code></pre>
+}
+</code></pre>
 <p>所以实际上 <code>Pi</code> 就是一个类型检查期的标识，并不参与最终值的演算。因为不区分值和类型，其中 <code>Env</code> 保存的内容改为 <code>Val</code> ，并且 <code>lookup</code> 改为用 <code>UUID</code> 检索。</p>
 <p>这样就构造出了一个相当强大的类型系统，它的依赖类型（Dependent Type）特性是常见类型系统里面所没有的。之后将会介绍如何利用这个强大的类型系统表达复杂的类型，做一些常见类型系统做不到的事情。</p>
 </body>

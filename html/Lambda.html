@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -91,21 +93,26 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + f + <span class="hljs-string">&quot; &quot;</span> + x + <span class="hljs-string">&quot;)&quot;</span>;
     }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
 <p>注意到上面代码中 <code>Val</code> 有一个类型为 <code>UUID</code> 的字段，同时 <code>equals</code> 函数只比较 <code>id</code> 字段，这个字段是用来区分相同名字的不同变量的。如果不做区分那么对于下面的 λ 表达式：</p>
-<pre><code>λ z. (λ x. (λ z. x)) z</code></pre>
+<pre><code>λ z. (λ <span class="hljs-keyword">x</span>. (λ z. <span class="hljs-keyword">x</span>)) z
+</code></pre>
 <p>会被规约成</p>
-<pre><code>λ z. (λ z. z)</code></pre>
+<pre><code>λ z. <span class="hljs-comment">(λ z. z)</span>
+</code></pre>
 <p>然而实际上最内层的 <code>z</code> 最开始是被最外层的函数定义定义的，而这里它被内层的函数定义错误地捕获（Capture）了，所以正确的规约结果应该是：</p>
-<pre><code>λ z<span class="hljs-string">&#x27;. (λ z. z&#x27;</span>)</code></pre>
+<pre><code>λ z&#x27;. (λ z. z&#x27;)
+</code></pre>
 </blockquote>
 <p>然后就可以构造 λ 表达式了，比如 <code>(λ x. x (λ x. x)) y</code> 就可以这样构造：</p>
 <pre><code class="language-java">Expr expr = <span class="hljs-keyword">new</span> App(
     <span class="hljs-keyword">new</span> Fun(<span class="hljs-string">&quot;x&quot;</span>, 
         <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>), 
             <span class="hljs-keyword">new</span> Fun(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>)))), 
-    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>));</code></pre>
+    <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>));
+</code></pre>
 <p>然后就可以定义归约函数 <code>reduce</code> 和应用自由变量函数 <code>apply</code> 还有用来生成 <code>UUID</code> 的 <code>genUUID</code> 函数和 <code>applyUUID</code> 函数：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function">Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span></span>;

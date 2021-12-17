@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -32,12 +34,13 @@ a { color: #02AEF1; text-decoration: none; }
 <p>解析器（Parser）是编译器的一部分，它读取源代码（Source Code），输出一个抽象语法树（Abstract Syntax Tree, AST）。某种程度上来说，解析器是一种可组合的东西，字符解析器组成了整数解析器，整数解析器组成了浮点数解析器。</p>
 <p>这样可组合的解析器有一个抽象的函数表达：</p>
 <pre><code class="language-java">Function&lt;ParseState, 
-         Maybe&lt;Pair&lt;A, ParseState&gt;&gt;&gt;</code></pre>
+         Maybe&lt;Pair&lt;A, ParseState&gt;&gt;&gt;
+</code></pre>
 <p>其中 <code>ParseState</code> 是包含当前解析位置的源文本的类型。返回值用 <code>Maybe</code> 包起来因为解析可能失败。 <code>A</code> 就是解析出来的具体数据类型。返回值中包括解析后的状态 <code>ParseState</code> ，这样就可以传递给下一个解析器函数，从而组合多个解析器。</p>
 <p>而且很显然这个函数是一个 Monad ，为了为它实现 Monad 需要用 HKT 包装一下：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parser</span>&lt;<span class="hljs-title">A</span>&gt;
         <span class="hljs-keyword">implements</span> <span class="hljs-title">HKT</span>&lt;<span class="hljs-title">Parser</span>&lt;?&gt;, <span class="hljs-title">A</span>&gt; </span>{
-
+    
     <span class="hljs-keyword">static</span> &lt;A&gt; <span class="hljs-function">Parser&lt;A&gt;
     <span class="hljs-title">narrow</span><span class="hljs-params">(HKT&lt;Parser&lt;?&gt;, A&gt; v)</span> </span>{
         <span class="hljs-keyword">return</span> (Parser&lt;A&gt;) v;
@@ -64,11 +67,12 @@ a { color: #02AEF1; text-decoration: none; }
                      <span class="hljs-keyword">new</span> ParseState(s)),
             r -&gt; m.pure(r.first)));
     }
-}</code></pre>
+}
+</code></pre>
 <p>然后就可以实现 Parser Monad 了：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ParserM</span> 
     <span class="hljs-keyword">implements</span> <span class="hljs-title">Monad</span>&lt;<span class="hljs-title">Parser</span>&lt;?&gt;&gt; </span>{
-
+    
     <span class="hljs-keyword">public</span> &lt;A&gt; HKT&lt;Parser&lt;?&gt;, A&gt; 
     pure(A v) {
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt;
@@ -134,6 +138,7 @@ a { color: #02AEF1; text-decoration: none; }
              m.flatMap(<span class="hljs-keyword">this</span>,
         a -&gt; m.flatMap(p,
         b -&gt; m.pure(f.apply(a, b)))));
-}</code></pre>
+}
+</code></pre>
 </body>
 </html>

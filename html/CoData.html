@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -32,7 +34,8 @@ a { color: #02AEF1; text-decoration: none; }
 <h2 id="adt-的局限性">ADT 的局限性</h2>
 <p>很显然， ADT 可以构造任何树形的数据结构：树的节点内分支用和类型连接，层级间节点用积类型连接。</p>
 <p>但是同样很显然 ADT 并不能搞出环形的数据结构或者说是无穷大小的数据结构。比如下面的代码：</p>
-<pre><code class="language-java">IntList list = <span class="hljs-keyword">new</span> IntCons(<span class="hljs-number">1</span>, list);</code></pre>
+<pre><code class="language-java">IntList list = <span class="hljs-keyword">new</span> IntCons(<span class="hljs-number">1</span>, list);
+</code></pre>
 <p>编译器会表示 <code>list</code> 在使用时未初始化。</p>
 <p>为什么会这样呢？ ADT 是归纳构造的，也就是说它必须从非递归的基本元素开始组合构造成更大的元素。</p>
 <p>如果我们去掉这些基本元素那就没法凭空构造大的元素，也就是说如果去掉归纳的第一步那整个归纳过程毫无意义。</p>
@@ -44,7 +47,7 @@ a { color: #02AEF1; text-decoration: none; }
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InfIntList</span> </span>{
     <span class="hljs-keyword">int</span> head;
     Supplier&lt;InfIntList&gt; next;
-
+    
     InfIntList(
         <span class="hljs-keyword">int</span> head, 
         Supplier&lt;InfIntList&gt; next
@@ -52,7 +55,8 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">this</span>.head = head;
         <span class="hljs-keyword">this</span>.next = next;
     }
-}</code></pre>
+}
+</code></pre>
 <p>这里的 <code>Supplier</code> 可以做到仅在需要 <code>next</code> 的时候才求值。使用的例子如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Codata</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">static</span> InfIntList
@@ -61,13 +65,14 @@ a { color: #02AEF1; text-decoration: none; }
          () -&gt; <span class="hljs-keyword">new</span> InfIntList(<span class="hljs-number">2</span>, 
          Codata::infAlt));
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> 
     <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
         System.out.println(
             infAlt().next.get().head);
     }
-}</code></pre>
+}
+</code></pre>
 <p>运行会输出 <code>2</code> 。注意，这里的 <code>infAlt</code> 从某种角度来看实际上就是个长度为 2 的环形结构。</p>
 <p>用这样的思路可以构造出无限大的树、带环的图等数据结构。</p>
 <p>不过以上都是对余代数数据类型的一种模拟，实际上在对其支持良好的语言都会自动加上 <code>Supplier</code> 来辅助构造，同时还能处理好对无限大（其实是环）的数据结构的无限递归变换（<code>map</code>, <code>fold</code> ...）的操作。</p>

@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -31,9 +33,11 @@ a { color: #02AEF1; text-decoration: none; }
 </blockquote>
 <h2 id="y-组合子的类型">Y 组合子的类型</h2>
 <p>Y 组合子在无类型 λ 演算中是这样定义的</p>
-<pre><code>Y = λ f. (λ x. f (x x)) (λ x. f (x x))</code></pre>
+<pre><code>Y <span class="hljs-operator">=</span> λ f. (λ <span class="hljs-keyword">x</span>. f (<span class="hljs-keyword">x</span> <span class="hljs-keyword">x</span>)) (λ <span class="hljs-keyword">x</span>. f (<span class="hljs-keyword">x</span> <span class="hljs-keyword">x</span>))
+</code></pre>
 <p>但是它的类型是什么呢？实际上我们可以构造如下式子来分析：</p>
-<pre><code>Y f = f (Y f)</code></pre>
+<pre><code><span class="hljs-keyword">Y</span> f = f (<span class="hljs-keyword">Y</span> f)
+</code></pre>
 <p>假设 <code>f</code> 的类型为 <code>A</code> ， <code>Y</code> 的类型为 <code>A → B</code> ，那么 <code>Y f</code> 的类型就是 <code>B</code> ，所以等式右边的类型也应该为 <code>B</code> ，那么 <code>f</code> 的类型就应当是 <code>A = B → B</code> ，解得 <code>Y</code> 的类型为 <code>(B → B) → B</code> 。这就解得了 Y 组合子的宏观上的类型 <code>π T: *. (T → T) → T</code> 。</p>
 <p>不过如果想完整地写出 Y 组合子中每个变量的类型就会遇到困难， <code>x</code> 的类型是什么呢？如果假设 <code>x</code> 的类型是 <code>A → B</code> 那么考虑到存在 <code>x x</code> 这样的结构， <code>A</code> 应该就是 <code>A → B</code> ，但这样又回到了最开始的问题，假设 <code>x</code> 的类型是 <code>(A → B) → B</code> 。显然这样最后并不收敛， <code>x</code> 的类型没有解。</p>
 <p>既然 Y 组合子中有些变量的类型无法解出那么实际上在 Lambda Cube 中的各个类型系统都是无法构造 Y 组合子的，这就意味着这些类型系统没有办法递归，而通过这些类型系统检查的程序是一定会停机的。而实际上停机是好的，如果想让带 μ 结构的程序保证停机就需要做停机检查，当然停机问题是不可判定的所以停机检查只能通过一定能停机的程序子集。</p>
@@ -42,7 +46,7 @@ a { color: #02AEF1; text-decoration: none; }
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mu</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Val x;
     Expr e;
-
+    
     <span class="hljs-function">Expr <span class="hljs-title">open</span><span class="hljs-params">()</span> </span>{ <span class="hljs-comment">// unfold</span>
         <span class="hljs-keyword">return</span> e.apply(x, <span class="hljs-keyword">this</span>);
     }
@@ -62,7 +66,7 @@ a { color: #02AEF1; text-decoration: none; }
             <span class="hljs-keyword">return</span> pi.e;
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
         <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span> == o) <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
         <span class="hljs-keyword">if</span> (o == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
@@ -73,7 +77,8 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">return</span> Objects.equals(e.apply(x, mu.x), mu.e);
         <span class="hljs-comment">//                    ^^^^^^^^^^^^^^^^</span>
     }
-}</code></pre>
+}
+</code></pre>
 <p>注意在比较的时候如果类型不一致需要尝试展开再继续比较，而且对于其他所有的表达式元素在比较时都需要对 μ 特殊处理，这里拿 <code>Fun</code> 举个例子：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fun</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">equals</span><span class="hljs-params">(Object o)</span> </span>{
@@ -86,7 +91,8 @@ a { color: #02AEF1; text-decoration: none; }
         Fun fun = (Fun) o;
         <span class="hljs-keyword">return</span> Objects.equals(e, fun.e.apply(fun.x, x));
     }
-}</code></pre>
+}
+</code></pre>
 <p>在 <code>App</code> 中碰到 μ 也要展开一下：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">reduce</span><span class="hljs-params">()</span> </span>{
@@ -122,7 +128,8 @@ a { color: #02AEF1; text-decoration: none; }
         }
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
-}</code></pre>
+}
+</code></pre>
 <p>μ 只在使用的时候才会展开一次，这是为了防止出现求值时无限递归的情况。</p>
 <blockquote>
 <p>实际上 μ 这个东西只是用来处理类型的，但是 CoC 里面不区分类型和项所以这里也用于项的递归了。</p>

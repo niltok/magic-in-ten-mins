@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -39,7 +41,8 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">return</span> fun.e.apply(fun.x, x).reduce();
     }
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr, x);
-}</code></pre>
+}
+</code></pre>
 <p>并且函数的 <code>reduce</code> 并不会 <code>reduce</code> 函数内部表达式而是直接返回 <code>this</code> 。</p>
 <p>这样处理和平时见过的常规语言似乎很不一样，C、Java在处理函数参数时都选择先对参数求值再传参。</p>
 <p>像这样先传参再归约的求值思路就叫非严格求值（Non-strict Evaluation），也叫惰性求值（Lazy Evaluation）。其最大好处是在很多时候函数的参数没有被使用过的情况下节省了求值时归约次数。</p>
@@ -55,21 +58,26 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">return</span> fun.e.apply(fun.x, xr).strictReduce();
     }
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> App(fr, xr);
-}</code></pre>
+}
+</code></pre>
 <p>λ 演算中所有的表达式都是<strong>纯</strong>的，也就是说不同的求值策略和求值顺序并不会影响最终求值的结果。所以不同的求值策略求出的结果都是等价的，只是打印出来的效果不同。这与 C 系语言就很不一样。</p>
 <h2 id="完全-β-归约">完全 β 归约</h2>
 <p>如果想要让打印出的表达式被化到最简还需要在严格求值的基础上把函数定义中的表达式也进一步归约：</p>
 <pre><code class="language-java"><span class="hljs-comment">// class Fun</span>
 <span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">fullBetaReduce</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(x, e.fullBetaReduce());
-}</code></pre>
+}
+</code></pre>
 <p>这就是完全 β 归约。它会将任何能归约的地方归约，即使这个函数并没有被应用函数内部也会被归约。</p>
 <h2 id="对比">对比</h2>
 <p>对于λ表达式：</p>
-<pre><code>(λ n. λ f. λ x. (f (n f x)) (λ f. λ x. x))</code></pre>
+<pre><code>(λ n. λ f. λ x. (<span class="hljs-name">f</span> (<span class="hljs-name">n</span> f x)) (λ f. λ x. x))
+</code></pre>
 <p>进行非严格求值会得到：</p>
-<pre><code>λ f. λ x. f ((λ f. λ x. x) f x)</code></pre>
+<pre><code>λ f. λ <span class="hljs-keyword">x</span>. f ((λ f. λ <span class="hljs-keyword">x</span>. <span class="hljs-keyword">x</span>) f <span class="hljs-keyword">x</span>)
+</code></pre>
 <p>进行完全β归约会得到：</p>
-<pre><code>λ f. λ x. f x</code></pre>
+<pre><code>λ f. λ <span class="hljs-keyword">x</span>. f <span class="hljs-keyword">x</span>
+</code></pre>
 </body>
 </html>

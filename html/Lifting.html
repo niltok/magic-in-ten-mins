@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -40,7 +42,8 @@ a { color: #02AEF1; text-decoration: none; }
 &lt;A, B&gt; Function&lt;M&lt;A&gt;, M&lt;B&gt;&gt; 
     lift1(Function&lt;A, B&gt; f) {}
 &lt;A, B, C&gt; BiFunction&lt;M&lt;A&gt;, M&lt;B&gt;, M&lt;C&gt;&gt;
-    lift2(Function&lt;A, B, C&gt;) {}</code></pre>
+    lift2(Function&lt;A, B, C&gt;) {}
+</code></pre>
 <h2 id="fmap">fmap</h2>
 <p>看到这个函数签名肯定有人会拍案而起：这不就是 fmap 么？</p>
 <p>fmap is a lifting surly. 因为它符合 lifting 的函数签名，但是 lifting 并不一定是 fmap 。只要符合这样的函数签名就可以说是一个 lifting 。</p>
@@ -59,16 +62,18 @@ liftM2List(BiFunction&lt;A, B, C&gt; f) {
         a -&gt; m.flatMap(<span class="hljs-keyword">new</span> HKTList&lt;&gt;(mb),
         b -&gt; m.pure(f.apply(a, b))))
     ).value;
-}</code></pre>
+}
+</code></pre>
 <p>而对 <code>Integer::sum</code> 进行提升以后的函数输入 <code>[1, 2, 3]</code> 和 <code>[2, 3, 4]</code> 就会得到 <code>[3, 4, 5, 4, 5, 6, 5, 6, 7]</code> 。实际上就是对于任意两个元素组合操作。</p>
 <p>再比如 <code>liftM5</code> 在 <code>Haskell</code> 中的表述为：</p>
-<pre><code class="language-haskell">liftM5 f ma mb mc md me = <span class="hljs-keyword">do</span>
+<pre><code class="language-haskell"><span class="hljs-title">liftM5</span> f ma mb mc md me = <span class="hljs-keyword">do</span>
   a &lt;- ma
   b &lt;- mb
   c &lt;- mc
   d &lt;- md
-  e &lt;- <span class="hljs-function">me
-  <span class="hljs-title">pure</span> <span class="hljs-params">(f a b c d e)</span></span></code></pre>
+  e &lt;- me
+  pure (f a b c d e)
+</code></pre>
 <p>也就是 <code>liftM[n]</code> 就相当于嵌套 <code>n</code> 层 <code>flatMap</code> 提取 <code>Monad</code> 中的值然后应用给被提升的函数。</p>
 </body>
 </html>

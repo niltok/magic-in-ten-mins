@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -43,11 +45,13 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-keyword">if</span> (s &gt;= <span class="hljs-number">70</span>) <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;C&#x27;</span>;
     <span class="hljs-keyword">if</span> (s &gt;= <span class="hljs-number">60</span>) <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;D&#x27;</span>;
     <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;E&#x27;</span>;
-}</code></pre>
+}
+</code></pre>
 <p>等学了 <code>switch</code> 语句以后有些聪明的人会把它改成 <code>switch(s/10)</code> 的写法。</p>
 <p>但是这两种写法都有个同样的问题：如果需要不断添加等第个数那最终 <code>getLevel</code> 函数就会变得很长很长，最终变得不可维护。</p>
 <p>学会循环和数组后会有聪明人回头再看这个程序，会发现这个程序由反复的</p>
-<pre><code class="language-java"><span class="hljs-keyword">if</span> (s &gt;= _) <span class="hljs-keyword">return</span> _;</code></pre>
+<pre><code class="language-java"><span class="hljs-keyword">if</span> (s &gt;= _) <span class="hljs-keyword">return</span> _;
+</code></pre>
 <p>构成，可以改成循环结构，把对应的数据塞进数组：</p>
 <pre><code class="language-java"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span>[]  score = 
     {<span class="hljs-number">90</span>, <span class="hljs-number">80</span>, <span class="hljs-number">70</span>, <span class="hljs-number">60</span>};
@@ -59,7 +63,8 @@ a { color: #02AEF1; text-decoration: none; }
             &amp;&amp; s &lt; score[pos];
          pos++);
     <span class="hljs-keyword">return</span> level[pos];
-}</code></pre>
+}
+</code></pre>
 <p>这样的好处是只需要在两个数组中添加一个值就能加一组等第而不需要碰 <code>getLevel</code> 的逻辑代码。</p>
 <p>而且进一步讲， <code>score</code> 和 <code>level</code> 数组可以被存在外部文件中作为配置文件，与源代码分离，这样不用重新编译就能轻松添加一组等第。</p>
 <p>这就是表驱动编程最初阶的形式，通过抽取相似的逻辑并把不同的数据放入表中来避免逻辑重复，提高可读性和可维护性。</p>
@@ -94,7 +99,8 @@ a { color: #02AEF1; text-decoration: none; }
                 .collect(Collectors
                          .joining(<span class="hljs-string">&quot;\n&quot;</span>));
     }
-}</code></pre>
+}
+</code></pre>
 <h2 id="逻辑表">逻辑表</h2>
 <p>初学者在写习题的时候还会碰到另一种没啥规律的东西，比如：</p>
 <blockquote>
@@ -117,7 +123,8 @@ a { color: #02AEF1; text-decoration: none; }
             <span class="hljs-keyword">if</span> (index[i] == e) 
                 event[i].run();
     }
-}</code></pre>
+}
+</code></pre>
 <p>这样如果需要添加一个用户输入指令只需要在 <code>event</code> 表和 <code>index</code> 表中添加对应逻辑和索引，修改用户的指令对应的逻辑也变得非常方便，甚至可以把用户指令存在配置文件里提供自定义修改。这样用户输入和时间触发两个逻辑就不会串在一起，维护起来更加方便。</p>
 <h2 id="自动机">自动机</h2>
 <p>如果再加个逻辑表能修改的跳转状态就构成了自动机（Automaton）。这里举个例子，利用自动机实现了一个复杂的 UI ，在 <code>menu</code> 界面可以选择开始玩或者退出，在 <code>move</code> 界面可以选择移动或者打印位置或者返回 <code>menu</code> 界面：</p>
@@ -136,10 +143,10 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">this</span>::menu,
         <span class="hljs-keyword">this</span>::move
     };
-
+    
     <span class="hljs-keyword">int</span> state;
     <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>, y = <span class="hljs-number">0</span>;
-
+    
     <span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CharEvent</span> </span>{
         <span class="hljs-keyword">char</span> c;
         Runnable e;
@@ -148,7 +155,7 @@ a { color: #02AEF1; text-decoration: none; }
             <span class="hljs-keyword">this</span>.e = e;
         }
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">menu</span><span class="hljs-params">(<span class="hljs-keyword">char</span> c)</span> </span>{
         CharEvent[] events = {
             <span class="hljs-keyword">new</span> CharEvent(<span class="hljs-string">&#x27;p&#x27;</span>, () -&gt; 
@@ -176,7 +183,7 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">for</span> (CharEvent i : events)
             <span class="hljs-keyword">if</span> (i.c == c) i.e.run();
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">jumpTo</span><span class="hljs-params">(<span class="hljs-keyword">int</span> s)</span> </span>{
         state = s;
         draw[state].run();
@@ -189,7 +196,8 @@ a { color: #02AEF1; text-decoration: none; }
     {
         jumpTo(<span class="hljs-number">0</span>);
     }
-}</code></pre>
+}
+</code></pre>
 <p>实际上更标准的写法应该把状态设定成枚举，这里为了演示的简单期间并没有那样写。</p>
 <p>同时推荐不用下标作为表的索引标签，并总是把所有相关状态打包起来放在同一个类里面而不是用不同数组的相同下标来访问，这样可以有更加紧凑的语义和更好的缓存命中率。</p>
 </body>

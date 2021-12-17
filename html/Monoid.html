@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -42,7 +44,8 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-function"><span class="hljs-keyword">default</span> T <span class="hljs-title">appends</span><span class="hljs-params">(Stream&lt;T&gt; x)</span> </span>{
         <span class="hljs-keyword">return</span> x.reduce(empty(), <span class="hljs-keyword">this</span>::append);
     }
-}</code></pre>
+}
+</code></pre>
 <h2 id="应用：optional">应用：Optional</h2>
 <p>在 Java8 中有个新的类 <code>Optional</code> 可以用来表示可能有值的类型，而我们可以对它定义个 Monoid ：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OptionalM</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title">Monoid</span>&lt;<span class="hljs-title">Optional</span>&lt;<span class="hljs-title">T</span>&gt;&gt; </span>{
@@ -54,9 +57,11 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">if</span> (a.isPresent()) <span class="hljs-keyword">return</span> a;
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> b;
     }
-}</code></pre>
+}
+</code></pre>
 <p>这样对于 appends 来说我们将获得一串 Optional 中第一个不为空的值，对于需要进行一连串尝试操作可以这样写：</p>
-<pre><code class="language-java"><span class="hljs-keyword">new</span> OptionalM&lt;<span class="hljs-keyword">int</span>&gt;.appends(Stream.of(try1(), try2(), try3(), try4()))</code></pre>
+<pre><code class="language-java"><span class="hljs-keyword">new</span> OptionalM&lt;<span class="hljs-keyword">int</span>&gt;.appends(Stream.of(try1(), try2(), try3(), try4()))
+</code></pre>
 <h2 id="应用：ordering">应用：Ordering</h2>
 <p>对于 <code>Comparable</code> 接口可以构造出：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OrderingM</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Monoid</span>&lt;<span class="hljs-title">int</span>&gt; </span>{
@@ -65,7 +70,8 @@ a { color: #02AEF1; text-decoration: none; }
         <span class="hljs-keyword">if</span> (a == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> b;
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> a;
     }
-}</code></pre>
+}
+</code></pre>
 <p>同样如果有一串带有优先级的比较操作就可以用 appends 串起来，比如：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Student</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Comparable</span> </span>{
     String name;
@@ -81,7 +87,8 @@ a { color: #02AEF1; text-decoration: none; }
             from.compareTo(s.from)
         ));
     }
-}</code></pre>
+}
+</code></pre>
 <p>这样的写法比一连串 <code>if-else</code> 优雅太多。</p>
 <h2 id="扩展">扩展</h2>
 <p>在 Monoid 接口里面加 default 方法可以支持更多方便的操作：</p>
@@ -105,13 +112,15 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-title">append</span><span class="hljs-params">(Runnable a, Runnable b)</span> </span>{
         <span class="hljs-keyword">return</span> () -&gt; { a(); b(); };
     }
-}</code></pre>
+}
+</code></pre>
 <p>然后就可以像下面这样使用上面的定义:</p>
 <pre><code class="language-java"><span class="hljs-keyword">new</span> Todo.appends(Stream.of(
     logic1,
     () -&gt; { logic2(); },
     Todo.when(condition1, logic3)
-))</code></pre>
+))
+</code></pre>
 <blockquote>
 <p>注：上面的 Optional 并不是 lazy 的，实际运用中加上非空短路能提高效率。</p>
 </blockquote>

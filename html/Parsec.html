@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -42,7 +44,8 @@ a { color: #02AEF1; text-decoration: none; }
 &lt;B&gt; <span class="hljs-function">Parser&lt;B&gt;
 <span class="hljs-title">use</span><span class="hljs-params">(Parser&lt;B&gt; p)</span> </span>{
     <span class="hljs-keyword">return</span> combine(p, (a, b) -&gt; b);
-}</code></pre>
+}
+</code></pre>
 <p><code>or</code> 组合子可以在解析失败的时候用参数解析器来重新解析：</p>
 <pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
 <span class="hljs-function">Parser&lt;A&gt;
@@ -54,7 +57,8 @@ a { color: #02AEF1; text-decoration: none; }
             <span class="hljs-keyword">return</span> p.runParser(s);
         <span class="hljs-keyword">return</span> r;
     });
-}</code></pre>
+}
+</code></pre>
 <p><code>many</code> 组合子用来构造匹配任意个相同的解析器的解析器，用了 List 来返回结果，所以代码比较复杂：</p>
 <pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
 Parser&lt;List&lt;A&gt;&gt;
@@ -73,7 +77,8 @@ many() {
                          r.value.first);
         <span class="hljs-keyword">return</span> rs;
     });
-}</code></pre>
+}
+</code></pre>
 <p><code>some</code> 组合子利用 <code>many</code> 定义，用来构造匹配一个及以上相同的解析器的解析器：</p>
 <pre><code class="language-java"><span class="hljs-comment">// class Parser&lt;A&gt;</span>
 Parser&lt;List&lt;A&gt;&gt;
@@ -82,20 +87,22 @@ some() {
         xs.add(<span class="hljs-number">0</span>, x);
         <span class="hljs-keyword">return</span> xs;
     });
-}</code></pre>
+}
+</code></pre>
 <h2 id="常见解析器">常见解析器</h2>
 <p>最基本的是 <code>id</code> 解析器，解析任意一个字符并作为解析结果返回：</p>
 <pre><code class="language-java"><span class="hljs-keyword">static</span> Parser&lt;Character&gt; id =
         <span class="hljs-keyword">new</span> Parser&lt;&gt;(s -&gt; {
-
+            
     <span class="hljs-keyword">if</span> (s.p == s.s.length())
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;();
-
+            
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe&lt;&gt;(
         <span class="hljs-keyword">new</span> Pair&lt;&gt;(s.s.charAt(s.p),
                     s.next()));
-
-});</code></pre>
+            
+});
+</code></pre>
 <p>有了 <code>id</code> 解析器之后构造的解析器就只需要把 <code>id</code> 和组合子组合而不需要再关心解析一个字符的细节。</p>
 <p>最常用的解析器就是 <code>pred</code> ，解析一个符合要求的字符：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> Parser&lt;Character&gt;
@@ -106,12 +113,14 @@ some() {
          c -&gt; f.test(c) ?
                   m.pure(c) :
                   m.fail()));
-}</code></pre>
+}
+</code></pre>
 <p>另一个常用的解析器是 <code>character</code> ，解析特定字符：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">static</span> Parser&lt;Character&gt;
 <span class="hljs-title">character</span><span class="hljs-params">(<span class="hljs-keyword">char</span> x)</span> </span>{
     <span class="hljs-keyword">return</span> pred(c -&gt; c == x);
-}</code></pre>
+}
+</code></pre>
 <h2 id="组合">组合</h2>
 <p>既然叫解析器组合子，那么它们是用来组合的，这里给出如何用它们组合出一个解析浮点数的解析器例子：</p>
 <pre><code class="language-java"><span class="hljs-comment">// 解析一个数字字符</span>
@@ -141,6 +150,7 @@ some() {
                 <span class="hljs-keyword">return</span> ans;
             }),
             Double::sum)).or(integer
-            .map(Integer::doubleValue));</code></pre>
+            .map(Integer::doubleValue));
+</code></pre>
 </body>
 </html>

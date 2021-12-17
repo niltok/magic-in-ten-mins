@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -32,8 +34,9 @@ a { color: #02AEF1; text-decoration: none; }
 <h2 id="简单类型-λ-演算">简单类型 λ 演算</h2>
 <p>简单类型 λ 演算（Simply-Typed Lambda Calculus）是在无类型 λ 演算（Untyped Lambda Calculus）的基础上加了个非常简单的类型系统。</p>
 <p>这个类型系统包含两种类型结构，一种是内建的基础类型 <code>T</code> ，一种是函数类型 <code>A → B</code> ，其中函数类型由源类型 <code>A</code> 和目标类型 <code>B</code> 组成：</p>
-<pre><code>Type = BaseType + FunctionType
-FunctionType = Type * Type</code></pre>
+<pre><code><span class="hljs-keyword">Type</span> <span class="hljs-type">= </span>BaseType + FunctionType
+FunctionType = <span class="hljs-keyword">Type</span> <span class="hljs-type">* </span><span class="hljs-keyword">Type</span>
+</code></pre>
 <p>注意函数类型的符号是右结合的，也就是说 <code>A → A → A</code> 等价于 <code>A → (A → A)</code> 。</p>
 <p>用 Java 代码可以表示为：</p>
 <pre><code class="language-java"><span class="hljs-comment">// 构造函数， equals 已省去</span>
@@ -51,7 +54,8 @@ FunctionType = Type * Type</code></pre>
     <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;(&quot;</span> + src + <span class="hljs-string">&quot; → &quot;</span> + tar + <span class="hljs-string">&quot;)&quot;</span>;
     }
-}</code></pre>
+}
+</code></pre>
 <h2 id="年轻人的第一个-typechecker">年轻人的第一个 TypeChecker</h2>
 <p>然后需把类型嵌入到 λ 演算的语法树中：</p>
 <pre><code class="language-java"><span class="hljs-comment">// 构造函数， toString 已省去</span>
@@ -65,7 +69,8 @@ FunctionType = Type * Type</code></pre>
 }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Expr</span> </span>{
     Expr f, x;
-}</code></pre>
+}
+</code></pre>
 <p>注意只有函数定义的变量需要标记类型，表达式的类型是可以被简单推导出的。同时还需要一个环境来保存定义变量的类型（其实是一个不可变链表）：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Env</span> </span>{
     <span class="hljs-function">Type <span class="hljs-title">lookup</span><span class="hljs-params">(String s)</span> <span class="hljs-keyword">throws</span> BadTypeException</span>;
@@ -82,7 +87,8 @@ FunctionType = Type * Type</code></pre>
         <span class="hljs-keyword">if</span> (s.equals(v.x)) <span class="hljs-keyword">return</span> v.type;
         <span class="hljs-keyword">return</span> next.lookup(s);
     }
-}</code></pre>
+}
+</code></pre>
 <p>而对于这样简单的模型，类型检查只需要判断 <code>F X</code> 中的 <code>F</code> 需要是函数类型，并且 <code>(λ x. F) E</code> 中 <code>x</code> 的类型和 <code>E</code> 的类型一致。</p>
 <p>而类型推导也很简单：变量的类型就是它被标记的类型；函数定义的类型就是以它变量的标记类型为源，它函数体的类型为目标的函数类型；而函数应用的类型就是函数的目标类型，在能通过类型检查的情况下。</p>
 <p>以上用 Java 代码描述就是：</p>
@@ -109,9 +115,11 @@ FunctionType = Type * Type</code></pre>
             <span class="hljs-keyword">return</span> ((TArr) tf).tar;
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadTypeException();
     }
-}</code></pre>
+}
+</code></pre>
 <p>下面的测试代码对</p>
-<pre><code>(λ (x: <span class="hljs-keyword">int</span>). (λ (y: <span class="hljs-keyword">int</span> → bool). (y x)))</code></pre>
+<pre><code>(λ (<span class="hljs-name">x:</span> int). (λ (<span class="hljs-name">y:</span> int → bool). (<span class="hljs-name">y</span> x)))
+</code></pre>
 <p>进行了类型检查，会打印输出 <code>(int → ((int → bool) → bool))</code> ：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">STLambda</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> BadTypeException </span>{
@@ -120,9 +128,11 @@ FunctionType = Type * Type</code></pre>
             <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-keyword">new</span> TArr(<span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;int&quot;</span>), <span class="hljs-keyword">new</span> TVal(<span class="hljs-string">&quot;bool&quot;</span>))),
                 <span class="hljs-keyword">new</span> App(<span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;y&quot;</span>), <span class="hljs-keyword">new</span> Val(<span class="hljs-string">&quot;x&quot;</span>)))).checkType(<span class="hljs-keyword">new</span> NilEnv()));
     }
-}</code></pre>
+}
+</code></pre>
 <p>而如果对</p>
-<pre><code>(λ (x: bool). (λ (y: <span class="hljs-keyword">int</span> → bool). (y x)))</code></pre>
+<pre><code>(λ (<span class="hljs-name">x:</span> bool). (λ (<span class="hljs-name">y:</span> int → bool). (<span class="hljs-name">y</span> x)))
+</code></pre>
 <p>进行类型检查就会抛出 <code>BadTypeException</code> 。</p>
 </body>
 </html>

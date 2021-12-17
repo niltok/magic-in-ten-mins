@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -38,7 +40,8 @@ a { color: #02AEF1; text-decoration: none; }
     &lt;T&gt; <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pick</span><span class="hljs-params">(T thing)</span> </span>{
         <span class="hljs-keyword">new</span> Hand().hold(thing);
     }
-}</code></pre>
+}
+</code></pre>
 <p>不过像上面的 <code>hand</code> 在每次调用的时候都创建一个实例对 GC 就很不友好，实际上如果不是一次性的东西完全可以复用：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
     Hand hand = <span class="hljs-keyword">new</span> Hand();
@@ -48,7 +51,8 @@ a { color: #02AEF1; text-decoration: none; }
     &lt;T&gt; <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pick</span><span class="hljs-params">(T thing)</span> </span>{
         hand.hold(thing);
     }
-}</code></pre>
+}
+</code></pre>
 <p>这样处理 <code>Human</code> 的依赖可以增强扩展性，比如换一个 <code>Hand</code> 实现只需要改一个地方。</p>
 <p>而这个 <code>Hand</code> 在这里就是 <code>Human</code> 的一个<strong>依赖</strong>，也就是说 <code>Human</code> <strong>依赖</strong> <code>Hand</code> 。</p>
 <h2 id="依赖注入">依赖注入</h2>
@@ -63,7 +67,8 @@ a { color: #02AEF1; text-decoration: none; }
     Human(Hand hand) {
         <span class="hljs-keyword">this</span>.hand = hand;
     }
-}</code></pre>
+}
+</code></pre>
 <p>这样使用 <code>Human</code> 的代码在构造 <code>Human</code> 的时候就需要传入它的依赖，也就是完成一次对 <code>Human</code> 的<strong>依赖注入</strong>（Dependency Injection），依赖从使用 <code>Human</code> 的代码转移到了 <code>Human</code> 中。</p>
 <p>这样设计就可以在造人的时候选择人有什么样的手，甚至还能让两个人共用一个手。</p>
 <h2 id="自动注入">自动注入</h2>
@@ -79,7 +84,8 @@ a { color: #02AEF1; text-decoration: none; }
             hand = <span class="hljs-keyword">new</span> HandDefault();
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Human(hand);
     }
-}</code></pre>
+}
+</code></pre>
 <p>这种注入依赖的方法对一堆依赖的模块效果拔群，只需要配置部分依赖就可以正确使用。</p>
 <h2 id="依赖注入框架">依赖注入框架</h2>
 <p>工厂模式有个问题，当产出物非常非常复杂的时候代码量极大，但这实际上都是能自动生成的重复代码，于是人们就在这一层上进一步抽象，做出了依赖注入框架来自动生成装配工厂代码。</p>
@@ -88,7 +94,8 @@ a { color: #02AEF1; text-decoration: none; }
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
     <span class="hljs-meta">@Resource(name=&quot;handDefault&quot;)</span>
     Hand hand;
-}</code></pre>
+}
+</code></pre>
 <p>而调用 <code>context.getBean(&quot;Human&quot;)</code> 就可以得到一个 <code>Human</code> 的实例。</p>
 <h2 id="读取器单子">读取器单子</h2>
 <p>如果你精通函数式编程就会想到为啥 <code>Hand</code> 要放在对象里面呢，保存状态多不好。于是第一个程序可以改成：</p>
@@ -99,7 +106,8 @@ a { color: #02AEF1; text-decoration: none; }
     &lt;T&gt; <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pick</span><span class="hljs-params">(Hand hand, T thing)</span> </span>{
         hand.hold(thing);
     }
-}</code></pre>
+}
+</code></pre>
 <p>不过这样每个函数都要传一遍 <code>Hand</code> 就挺麻烦的，这时候就可以使用 <code>Reader Monad</code> 来改写这两个方法：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Human</span> </span>{
     <span class="hljs-function">Reader&lt;Hand, Hand&gt; <span class="hljs-title">please</span><span class="hljs-params">()</span> </span>{
@@ -120,7 +128,8 @@ a { color: #02AEF1; text-decoration: none; }
                 <span class="hljs-keyword">return</span> m.pure(hand);
             }));
     }
-}</code></pre>
+}
+</code></pre>
 <p>这样就可以让一个环境在函数之间隐式传递，来达到依赖注入的目的。</p>
 <p>不过……这似乎看上去更加复杂了……</p>
 <p>我在这里只是提供一种思路，在某些对 <code>Monad</code> 支持良好的语言中这种思路是一种更简便的办法。</p>
@@ -139,7 +148,8 @@ a { color: #02AEF1; text-decoration: none; }
             cont.run();
         })
     }
-}</code></pre>
+}
+</code></pre>
 <p>这样看上去就比 <code>Reader Monad</code> 的写法清晰很多，虽然回调的写法也挺反人类的……不过在支持代数作用的语言里面这种写法将是强力的依赖注入工具。</p>
 </body>
 </html>

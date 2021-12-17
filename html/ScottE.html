@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -30,41 +32,49 @@ a { color: #02AEF1; text-decoration: none; }
 <p>前置技能：构造演算， ADT ，μ</p>
 </blockquote>
 <p>斯科特编码（Scott Encoding）可以在 λ 演算上编码 ADT 。其核心思想就是利用解构函数来处理和类型不同的分支，比如对于如下类型：</p>
-<pre><code>Either&lt;A, B&gt; = Left&lt;A&gt; + Right&lt;B&gt;</code></pre>
+<pre><code>Either<span class="hljs-attribute">&lt;A, B&gt;</span> = Left<span class="hljs-attribute">&lt;A&gt;</span> + Right<span class="hljs-attribute">&lt;B&gt;</span>
+</code></pre>
 <p>在构造演算中拥有类型：</p>
-<pre><code>Either = λ A: *. λ B: *. (C: *) → (A → C) → (B → C) → C</code></pre>
+<pre><code>Either = λ A: *. λ B: *. <span class="hljs-comment">(C: *)</span> → <span class="hljs-comment">(A → C)</span> → <span class="hljs-comment">(B → C)</span> → C
+</code></pre>
 <p>它接受两个解构函数，分别用来处理 Left 分支和 Right 分支然后返回其中一个分支的处理结果。可以按照这个类型签名构造出以下两个类型构造器：</p>
-<pre><code>Left  = λ A: *. λ B: *. λ val: A. (λ C: *. λ l: A → C. λ r: B → C. l val)
-Right = λ A: *. λ B: *. λ val: B. (λ C: *. λ l: A → C. λ r: B → C. r val)</code></pre>
+<pre><code><span class="hljs-string">Left</span>  <span class="hljs-string">=</span> <span class="hljs-string">λ</span> <span class="hljs-attr">A:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">B:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">val:</span> <span class="hljs-string">A.</span> <span class="hljs-string">(λ</span> <span class="hljs-attr">C:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">l:</span> <span class="hljs-string">A</span> <span class="hljs-string">→</span> <span class="hljs-string">C.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">r:</span> <span class="hljs-string">B</span> <span class="hljs-string">→</span> <span class="hljs-string">C.</span> <span class="hljs-string">l</span> <span class="hljs-string">val)</span>
+<span class="hljs-string">Right</span> <span class="hljs-string">=</span> <span class="hljs-string">λ</span> <span class="hljs-attr">A:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">B:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">val:</span> <span class="hljs-string">B.</span> <span class="hljs-string">(λ</span> <span class="hljs-attr">C:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">l:</span> <span class="hljs-string">A</span> <span class="hljs-string">→</span> <span class="hljs-string">C.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">r:</span> <span class="hljs-string">B</span> <span class="hljs-string">→</span> <span class="hljs-string">C.</span> <span class="hljs-string">r</span> <span class="hljs-string">val)</span>
+</code></pre>
 <p>乍一看挺复杂的，不过两个构造器具有非常相似的结构，区别仅仅是 <code>val</code> 的类型和最内侧调用的函数。实际上构造一个 <code>Left</code> 的值时先填入对应 <code>Either</code> 的类型参数然后再填入储存的值就可以得到一个符合 <code>Either</code> 类型签名的实例，解构时填入不同分支的解构函数就一定会得到 <code>Left</code> 分支解构函数处理的结果。</p>
 <p>再举个 <code>List</code> 的例子：</p>
-<pre><code>List = λ T: *. (μ L: *. (R: *) → R → (T → L → R) → R)
+<pre><code><span class="hljs-string">List</span> <span class="hljs-string">=</span> <span class="hljs-string">λ</span> <span class="hljs-attr">T:</span> <span class="hljs-string">*.</span> <span class="hljs-string">(μ</span> <span class="hljs-attr">L:</span> <span class="hljs-string">*.</span> <span class="hljs-string">(R:</span> <span class="hljs-string">*)</span> <span class="hljs-string">→</span> <span class="hljs-string">R</span> <span class="hljs-string">→</span> <span class="hljs-string">(T</span> <span class="hljs-string">→</span> <span class="hljs-string">L</span> <span class="hljs-string">→</span> <span class="hljs-string">R)</span> <span class="hljs-string">→</span> <span class="hljs-string">R)</span>
 
-Nil  = λ T: *. (λ R: *. λ nil: R. λ cons: T → List T → R. nil)
-Cons = λ T: *. λ val: T. λ next: List T. 
-    (λ R: *. λ nil: R. λ cons: T → List T → T. cons val next)
+<span class="hljs-string">Nil</span>  <span class="hljs-string">=</span> <span class="hljs-string">λ</span> <span class="hljs-attr">T:</span> <span class="hljs-string">*.</span> <span class="hljs-string">(λ</span> <span class="hljs-attr">R:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">nil:</span> <span class="hljs-string">R.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">cons:</span> <span class="hljs-string">T</span> <span class="hljs-string">→</span> <span class="hljs-string">List</span> <span class="hljs-string">T</span> <span class="hljs-string">→</span> <span class="hljs-string">R.</span> <span class="hljs-string">nil)</span>
+<span class="hljs-string">Cons</span> <span class="hljs-string">=</span> <span class="hljs-string">λ</span> <span class="hljs-attr">T:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">val:</span> <span class="hljs-string">T.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">next:</span> <span class="hljs-string">List</span> <span class="hljs-string">T.</span> 
+    <span class="hljs-string">(λ</span> <span class="hljs-attr">R:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">nil:</span> <span class="hljs-string">R.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">cons:</span> <span class="hljs-string">T</span> <span class="hljs-string">→</span> <span class="hljs-string">List</span> <span class="hljs-string">T</span> <span class="hljs-string">→</span> <span class="hljs-string">T.</span> <span class="hljs-string">cons</span> <span class="hljs-string">val</span> <span class="hljs-string">next)</span>
 
-map = λ A: *. λ B: *. λ f: A → B. μ m: List A → List B.
-    λ list: List A. 
-    list (List B)
-    (Nil B)
-    (λ x: A. λ xs: List A. Cons B (f x) (m xs))</code></pre>
+<span class="hljs-string">map</span> <span class="hljs-string">=</span> <span class="hljs-string">λ</span> <span class="hljs-attr">A:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">B:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">f:</span> <span class="hljs-string">A</span> <span class="hljs-string">→</span> <span class="hljs-string">B.</span> <span class="hljs-string">μ</span> <span class="hljs-attr">m:</span> <span class="hljs-string">List</span> <span class="hljs-string">A</span> <span class="hljs-string">→</span> <span class="hljs-string">List</span> <span class="hljs-string">B.</span>
+    <span class="hljs-string">λ</span> <span class="hljs-attr">list:</span> <span class="hljs-string">List</span> <span class="hljs-string">A.</span> 
+    <span class="hljs-string">list</span> <span class="hljs-string">(List</span> <span class="hljs-string">B)</span>
+    <span class="hljs-string">(Nil</span> <span class="hljs-string">B)</span>
+    <span class="hljs-string">(λ</span> <span class="hljs-attr">x:</span> <span class="hljs-string">A.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">xs:</span> <span class="hljs-string">List</span> <span class="hljs-string">A.</span> <span class="hljs-string">Cons</span> <span class="hljs-string">B</span> <span class="hljs-string">(f</span> <span class="hljs-string">x)</span> <span class="hljs-string">(m</span> <span class="hljs-string">xs))</span>
+</code></pre>
 <p>也就是说，积类型 <code>A * B * ... * Z</code> 会被翻译为</p>
-<pre><code>(A: *) → (B: *) → ... → (Z: *) →
-    (Res: *) → (A → B → ... → Z → Res) → Res</code></pre>
+<pre><code><span class="hljs-comment">(A: *)</span> → <span class="hljs-comment">(B: *)</span> → ... → <span class="hljs-comment">(Z: *)</span> →
+    <span class="hljs-comment">(Res: *)</span> → <span class="hljs-comment">(A → B → ... → Z → Res)</span> → Res
+</code></pre>
 <p>和类型 <code>A + B + ... + Z</code> 会被翻译为</p>
-<pre><code>(A: *) → (B: *) → ... → (Z: *) →
-    (Res: *) → (A → Res) → (B → Res) → ... → (Z → Res) → Res</code></pre>
+<pre><code><span class="hljs-comment">(A: *)</span> → <span class="hljs-comment">(B: *)</span> → ... → <span class="hljs-comment">(Z: *)</span> →
+    <span class="hljs-comment">(Res: *)</span> → <span class="hljs-comment">(A → Res)</span> → <span class="hljs-comment">(B → Res)</span> → ... → <span class="hljs-comment">(Z → Res)</span> → Res
+</code></pre>
 <p>并且两者可以互相嵌套从而构成复杂的类型。</p>
 <p>如果给和类型的每个分支取个名字，并且允许在解构调用的时候按照名字索引，随意改变分支顺序，在解糖阶段把解构函数调整成正确的顺序那么就可以得到很多函数式语言里面的模式匹配（Pattern match）。然后就可以像这样表示 <code>List</code> ：</p>
-<pre><code>type List: * → * 
-| Nil: (T: *) → List T
-| Cons: (T: *) → T → List T → List T</code></pre>
+<pre><code><span class="hljs-built_in">type</span> Li<span class="hljs-symbol">st:</span> * → * 
+| <span class="hljs-built_in">N</span><span class="hljs-symbol">il:</span> (<span class="hljs-symbol">T:</span> *) → List <span class="hljs-built_in">T</span>
+| Co<span class="hljs-symbol">ns:</span> (<span class="hljs-symbol">T:</span> *) → <span class="hljs-built_in">T</span> → List <span class="hljs-built_in">T</span> → List <span class="hljs-built_in">T</span>
+</code></pre>
 <p>解糖的时候利用类型签名可以重建构造函数。像这样使用 <code>List</code> ：</p>
-<pre><code>map = λ A: *. λ B: *. λ f: A → B. μ m: List A → List B. 
-    λ list: List A. 
-    match list (List B)
-    | Cons _ x xs → Cons B (f x) (m xs)
-    | Nil  _      → Nil B</code></pre>
+<pre><code><span class="hljs-string">map</span> <span class="hljs-string">=</span> <span class="hljs-string">λ</span> <span class="hljs-attr">A:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">B:</span> <span class="hljs-string">*.</span> <span class="hljs-string">λ</span> <span class="hljs-attr">f:</span> <span class="hljs-string">A</span> <span class="hljs-string">→</span> <span class="hljs-string">B.</span> <span class="hljs-string">μ</span> <span class="hljs-attr">m:</span> <span class="hljs-string">List</span> <span class="hljs-string">A</span> <span class="hljs-string">→</span> <span class="hljs-string">List</span> <span class="hljs-string">B.</span> 
+    <span class="hljs-string">λ</span> <span class="hljs-attr">list:</span> <span class="hljs-string">List</span> <span class="hljs-string">A.</span> 
+    <span class="hljs-string">match</span> <span class="hljs-string">list</span> <span class="hljs-string">(List</span> <span class="hljs-string">B)</span>
+    <span class="hljs-string">|</span> <span class="hljs-string">Cons</span> <span class="hljs-string">_</span> <span class="hljs-string">x</span> <span class="hljs-string">xs</span> <span class="hljs-string">→</span> <span class="hljs-string">Cons</span> <span class="hljs-string">B</span> <span class="hljs-string">(f</span> <span class="hljs-string">x)</span> <span class="hljs-string">(m</span> <span class="hljs-string">xs)</span>
+    <span class="hljs-string">|</span> <span class="hljs-string">Nil</span>  <span class="hljs-string">_</span>      <span class="hljs-string">→</span> <span class="hljs-string">Nil</span> <span class="hljs-string">B</span>
+</code></pre>
 </body>
 </html>

@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -34,13 +36,15 @@ a { color: #02AEF1; text-decoration: none; }
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Functor</span>&lt;<span class="hljs-title">F</span>&gt; </span>{
     &lt;A, B&gt;
     <span class="hljs-function">F&lt;B&gt; <span class="hljs-title">map</span><span class="hljs-params">(F&lt;A&gt; a, Function&lt;A, B&gt; f)</span></span>;
-}</code></pre>
+}
+</code></pre>
 <p>并不能通过 <code>javac</code> 的编译，编译器会告诉你F不能有泛型参数。</p>
 <p>最简单粗暴的解决方案就是放弃类型检查，全上 <code>Object</code> ，如：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Functor</span>&lt;<span class="hljs-title">F</span>&gt; </span>{
     <span class="hljs-function">Object <span class="hljs-title">map</span><span class="hljs-params">(Object a, 
                Function&lt;Object, Object&gt; f)</span></span>;
-}</code></pre>
+}
+</code></pre>
 <p>实际上Java经常这么干，标准库中到处是 <code>Object</code> 的身影，重载的各种接口也常常要手工转换类型， <code>equals</code> 要和 <code>Object</code> 比较， <code>compareTo</code> 要和 <code>Object</code> 比较……似乎习惯了以后也挺好，又不是不能用！</p>
 <h2 id="高阶类型">高阶类型</h2>
 <p>假设类型的类型是 <code>Type</code> ，比如 <code>int</code> 和 <code>String</code> 类型都是 <code>Type</code> 。</p>
@@ -53,36 +57,39 @@ a { color: #02AEF1; text-decoration: none; }
 </blockquote>
 <p>虽然在Java中不能直接表示出高阶类型，但是我们可以通过加一个中间层来在保留完整信息的情况下强类型地模拟出高阶类型。</p>
 <p>首先，我们需要一个中间层：</p>
-<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">HKT</span>&lt;<span class="hljs-title">F</span>, <span class="hljs-title">A</span>&gt; </span>{}</code></pre>
+<pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">HKT</span>&lt;<span class="hljs-title">F</span>, <span class="hljs-title">A</span>&gt; </span>{}
+</code></pre>
 <p>然后我们就可以用 <code>HKT&lt;F, A&gt;</code> 来表示 <code>F&lt;A&gt;</code> ，这样操作完 <code>HKT&lt;F, A&gt;</code> 后我们仍然有完整的类型信息来还原 <code>F&lt;A&gt;</code> 的类型。</p>
 <p>这样，上面 <code>Functor</code> 就可以写成：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Functor</span>&lt;<span class="hljs-title">F</span>&gt; </span>{
     &lt;A, B&gt; 
     <span class="hljs-function">HKT&lt;F, B&gt; <span class="hljs-title">map</span><span class="hljs-params">(HKT&lt;F, A&gt; ma, 
                   Function&lt;A, B&gt; f)</span></span>;
-}</code></pre>
+}
+</code></pre>
 <p>这样就可以编译通过了。而对于想实现 <code>Functor</code> 的类，需要先实现 <code>HKT</code> 这个中间层，这里拿 <code>List</code> 举例：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HKTList</span>&lt;<span class="hljs-title">A</span>&gt; 
     <span class="hljs-keyword">implements</span> <span class="hljs-title">HKT</span>&lt;<span class="hljs-title">HKTList</span>&lt;?&gt;, <span class="hljs-title">A</span>&gt; </span>{
-
+    
     List&lt;A&gt; value;
-
+    
     HKTList() {
         value = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
     }
-
+    
     HKTList(List&lt;A&gt; v) {
         value = v;
     }
-
+    
     <span class="hljs-keyword">static</span> &lt;T&gt; <span class="hljs-function">HKTList&lt;T&gt;
     <span class="hljs-title">narrow</span><span class="hljs-params">(HKT&lt;HKTList&lt;?&gt;, T&gt; v)</span> </span>{
         <span class="hljs-keyword">return</span> (HKTList&lt;T&gt;) v;
     }
-
+    
     <span class="hljs-keyword">static</span> &lt;T&gt; Collector&lt;T, ?, HKTList&lt;T&gt;&gt;
     collector() { <span class="hljs-comment">/* ... */</span> }
-}</code></pre>
+}
+</code></pre>
 <p>注意 <code>HKTList</code> 把自己作为了 <code>HKT</code> 的第一个参数来保存自己的类型信息，这样对于 <code>HKT&lt;HKTList&lt;?&gt;, T&gt;</code> 这个接口来说就只有自己这一个子类，而在 <code>narrow</code> 函数中可以安全地把这个唯一子类转换回来。</p>
 <p>这样，实现 <code>Functor</code> 类就是一件简单的事情了：</p>
 <pre><code class="language-java"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListF</span>
@@ -91,11 +98,12 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-keyword">public</span> &lt;A, B&gt; HKT&lt;HKTList&lt;?&gt;, B&gt;
     map(HKT&lt;HKTList&lt;?&gt;, A&gt; ma, 
         Function&lt;A, B&gt; f) {
-
+        
         <span class="hljs-keyword">return</span> HKTList.narrow(ma)
             .value.stream().map(f)
             .collect(HKTList.collector());
     }
-}</code></pre>
+}
+</code></pre>
 </body>
 </html>

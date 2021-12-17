@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -36,16 +38,19 @@ a { color: #02AEF1; text-decoration: none; }
     <span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>;                <span class="hljs-comment">// 1</span>
     i++;                      <span class="hljs-comment">// 2</span>
     System.out.println(i);    <span class="hljs-comment">// 3</span>
-}</code></pre>
+}
+</code></pre>
 <p>它第二行以及之后的续延就是：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>{
     i++;                      <span class="hljs-comment">// 2</span>
     System.out.println(i);    <span class="hljs-comment">// 3</span>
-}</code></pre>
+}
+</code></pre>
 <p>而第三行之后的续延是：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>{
     System.out.println(i);    <span class="hljs-comment">// 3</span>
-}</code></pre>
+}
+</code></pre>
 <p>实际上可以把这整个程序的每一行改成一个续延然后用函数调用串起来变成和刚才的程序一样的东西：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cont1</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>;                <span class="hljs-comment">// 1</span>
@@ -60,7 +65,8 @@ a { color: #02AEF1; text-decoration: none; }
 }
 <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{
     cont1();
-}</code></pre>
+}
+</code></pre>
 <h2 id="续延传递风格">续延传递风格</h2>
 <p>续延传递风格（Continuation-Passing Style, CPS）是指把程序的续延作为函数的参数来获取函数返回值的编程思路。</p>
 <p>听上去很难理解，把上面的三个 <code>cont</code> 函数改成CPS就很好理解了：</p>
@@ -81,7 +87,8 @@ a { color: #02AEF1; text-decoration: none; }
     i -&gt; logic2(i, 
     i -&gt; logic3(i, 
     i -&gt; {})));
-}</code></pre>
+}
+</code></pre>
 <p>每个 <code>logic</code> 函数的最后一个参数 <code>f</code> 就是整个程序的续延，而在每个函数的逻辑结束后整个程序的续延也就是未来会被调用。而 <code>test</code> 函数把整个程序组装起来。</p>
 <p>小朋友，你有没有觉得最后的 <code>test</code> 函数写法超眼熟呢？实际上这个写法就是 Monad 的写法， Monad 的写法就是 CPS 。</p>
 <p>另一个角度来说，这也是回调函数的写法，每个 <code>logic</code> 函数完成逻辑后调用了回调函数 <code>f</code> 来完成剩下的逻辑。实际上，异步回调思想很大程度上就是 CPS 。</p>
@@ -90,7 +97,8 @@ a { color: #02AEF1; text-decoration: none; }
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">callT</span><span class="hljs-params">()</span> </span>{
     test();
     System.out.println(<span class="hljs-number">3</span>);
-}</code></pre>
+}
+</code></pre>
 <p>那么对于 <code>logic</code> 函数来说调用的 <code>f</code> 这个续延并不包括 <code>callT</code> 中的打印语句，那么实际上 <code>f</code> 这个续延并不是整个函数的未来而是 <code>test</code> 这个函数局部的未来。</p>
 <p>这样代表局部程序的未来的函数就叫有界续延（Delimited Continuation）。</p>
 <p>实际上在大多时候用的比较多的还是有界续延，因为在 Java 中获取整个程序的续延还是比较困难的，这需要全用 CPS 的写法。</p>
@@ -109,7 +117,8 @@ a { color: #02AEF1; text-decoration: none; }
 
 <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Throw</span><span class="hljs-params">(Exception e)</span> </span>{
     cs.peek().accept(e);
-}</code></pre>
+}
+</code></pre>
 <p>这里 <code>body</code> 、 <code>Try</code> 、 <code>handler</code> 的最后一个参数都是这个程序的有界续延。</p>
 <p>有了 <code>try-throw</code> 就可以按照CPS风格调用它们来达到处理异常的目的：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">(<span class="hljs-keyword">int</span> t)</span> </span>{
@@ -127,14 +136,17 @@ a { color: #02AEF1; text-decoration: none; }
         cont.run();
     },
     () -&gt; System.out.println(<span class="hljs-string">&quot;final&quot;</span>));
-}</code></pre>
+}
+</code></pre>
 <p>调用 <code>test(0)</code> 会得到：</p>
 <pre><code><span class="hljs-keyword">try</span>
 <span class="hljs-keyword">catch</span>
-<span class="hljs-keyword">final</span></code></pre>
+<span class="hljs-keyword">final</span>
+</code></pre>
 <p>而调用 <code>test(1)</code> 会得到：</p>
 <pre><code><span class="hljs-keyword">try</span>
 <span class="hljs-number">100</span>
-<span class="hljs-keyword">final</span></code></pre>
+<span class="hljs-keyword">final</span>
+</code></pre>
 </body>
 </html>

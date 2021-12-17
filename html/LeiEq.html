@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -35,46 +37,57 @@ a { color: #02AEF1; text-decoration: none; }
 <p>x 和 y 相等，当且仅当他们的所有性质一样，也就是说对于所有 P 可以得到 P x 蕴含 P y</p>
 </blockquote>
 <p>用构造演算表达就是：</p>
-<pre><code>Eq = (T: *) ⇒ (x: T) ⇒ (y: T) ⇒ 
-     (P: T → *) → P x → P y</code></pre>
+<pre><code><span class="hljs-keyword">Eq</span> = <span class="hljs-comment">(T: *)</span> ⇒ <span class="hljs-comment">(x: T)</span> ⇒ <span class="hljs-comment">(y: T)</span> ⇒ 
+     <span class="hljs-comment">(P: T → *)</span> → P x → P y
+</code></pre>
 <p>对于 <code>Eq</code> 类型，它拥有唯一的构造器用于构造出 <code>x = x</code> ，其类型为：</p>
-<pre><code>(T: *) → (x: T) → Eq T x x</code></pre>
+<pre><code><span class="hljs-comment">(T: *)</span> → <span class="hljs-comment">(x: T)</span> → <span class="hljs-keyword">Eq</span> T x x
+</code></pre>
 <h2 id="自反性">自反性</h2>
 <p>相等类型的构造器的类型也是个命题，它指出对于任意的 <code>x</code> 都存在 <code>x = x</code> ，也就是相等的自反性（Reflexive），而构造器的实现就是对自反性的证明。为了证明自反性，可以观察一下展开了的构造器类型：</p>
-<pre><code>(T: *) → (x: T) → (P: T → *) → P x → P x</code></pre>
+<pre><code><span class="hljs-comment">(T: *)</span> → <span class="hljs-comment">(x: T)</span> → <span class="hljs-comment">(P: T → *)</span> → P x → P x
+</code></pre>
 <p>最终我们需要一个类型为 <code>P x</code> 的实例而在之前我们已经拿到了一个类型为 <code>P x</code> 的参数，直接作为函数结果即可：</p>
-<pre><code>Refl = (T: *) ⇒ (x: T) ⇒ 
-       (P: T → *) ⇒ (Px: P x) ⇒ 
-       Px</code></pre>
+<pre><code>Refl = <span class="hljs-comment">(T: *)</span> ⇒ <span class="hljs-comment">(x: T)</span> ⇒ 
+       <span class="hljs-comment">(P: T → *)</span> ⇒ <span class="hljs-comment">(Px: P x)</span> ⇒ 
+       Px
+</code></pre>
 <h2 id="传递性">传递性</h2>
 <p>如果 <code>x = y</code> 并且 <code>y = z</code> 那么可以得到 <code>x = z</code> ，这就是相等的传递性（Transitivity），命题的类型是：</p>
-<pre><code>(T: *) → (x: T) → (y: T) → (z: T) →
-Eq T x y → Eq T y z → Eq T x z</code></pre>
+<pre><code><span class="hljs-comment">(T: *)</span> → <span class="hljs-comment">(x: T)</span> → <span class="hljs-comment">(y: T)</span> → <span class="hljs-comment">(z: T)</span> →
+<span class="hljs-keyword">Eq</span> T x y → <span class="hljs-keyword">Eq</span> T y z → <span class="hljs-keyword">Eq</span> T x z
+</code></pre>
 <p>直接看可能比较难想出如何构造函数来证明传递性，还是可以按照如上方法展开类型：</p>
 <pre><code>(T: *) → (x: T) → (y: T) → (z: T) →
-((P: T → *) → P x → P y) → ((P: T → *) → P y → P z) →
-(P: T → *) → P x → P z</code></pre>
+((<span class="hljs-keyword">P</span>: T → *) → <span class="hljs-keyword">P</span> x → <span class="hljs-keyword">P</span> y) → ((<span class="hljs-keyword">P</span>: T → *) → <span class="hljs-keyword">P</span> y → <span class="hljs-keyword">P</span> z) →
+(<span class="hljs-keyword">P</span>: T → *) → <span class="hljs-keyword">P</span> x → <span class="hljs-keyword">P</span> z
+</code></pre>
 <p>观察发现有参数类型为 <code>P x</code> 的实例，而通过类型为 <code>(P: T → *) → P x → P y</code> 的实例可以把它转换成类型为 <code>P z</code> 的实例，同样的方法还能继续转换成类型为 <code>P z</code> 的实例。于是就得到以下函数：</p>
-<pre><code>Trans = (T: *) ⇒ (x: T) ⇒ (y: T) ⇒ (z: T) ⇒
-        (xEqy: Eq T x y) ⇒ (yEqz: Eq T y z) ⇒
-        (P: T → *) ⇒ (Px: P x) ⇒ yEqz P (xEqy P Px)</code></pre>
+<pre><code>Trans = (<span class="hljs-built_in">T</span>: *) ⇒ (x: <span class="hljs-built_in">T</span>) ⇒ (y: <span class="hljs-built_in">T</span>) ⇒ (z: <span class="hljs-built_in">T</span>) ⇒
+        (xEqy: Eq <span class="hljs-built_in">T</span> x y) ⇒ (yEqz: Eq <span class="hljs-built_in">T</span> y z) ⇒
+        (P: <span class="hljs-built_in">T</span> → *) ⇒ (Px: P x) ⇒ yEqz P (xEqy P Px)
+</code></pre>
 <h2 id="对称性">对称性</h2>
 <p>相等是对称的，也就是说 <code>x = y</code> 一定能得到 <code>y = x</code> ，相等的对称性（Symmetry）用类型表示就是：</p>
-<pre><code>(T: *) → (x: T) → (y: T) → Eq T x y → Eq T y x</code></pre>
+<pre><code><span class="hljs-comment">(T: *)</span> → <span class="hljs-comment">(x: T)</span> → <span class="hljs-comment">(y: T)</span> → <span class="hljs-keyword">Eq</span> T x y → <span class="hljs-keyword">Eq</span> T y x
+</code></pre>
 <p>想要证明这个命题有一些难度，核心思想就是利用相等的定义来构造出合适的性质替换利用自反性构造出的实例等式两边的内容：</p>
-<pre><code>Sym = (T: *) ⇒ (x: T) ⇒ (y: T) ⇒
-      (xEqy: Eq T x y) ⇒ 
-      xEqy ((z: T) ⇒ Eq T z x) (Refl T x)</code></pre>
+<pre><code>Sym = <span class="hljs-comment">(T: *)</span> ⇒ <span class="hljs-comment">(x: T)</span> ⇒ <span class="hljs-comment">(y: T)</span> ⇒
+      <span class="hljs-comment">(xEqy: Eq T x y)</span> ⇒ 
+      xEqy <span class="hljs-comment">((z: T)</span> ⇒ <span class="hljs-keyword">Eq</span> T z x) <span class="hljs-comment">(Refl T x)</span>
+</code></pre>
 <p>因为有了 <code>xEqy</code> 就可以把任意命题 <code>Q x</code> 变成 <code>Q y</code>，如果构造命题 <code>Q = (z: T) ⇒ Eq T z x</code> ，那么 <code>Q x</code> 就是 <code>Eq T x x</code> 也就是 <code>Refl T x</code> 构造出实例的类型，应用给 <code>xEqy</code> 就可以得到类型为 <code>Q y</code> 也就是 <code>Eq T y x</code> 的实例，也就是我们的目标。</p>
 <h2 id="合同性">合同性</h2>
 <p>如果 <code>x = y</code> 那么显然对于同一个函数 <code>f</code> 来说 <code>f x = f y</code> ，这就是相等的合同性（Congruence）也叫替换性（Substitution），用构造演算表示就是：</p>
-<pre><code>(A: *) → (B: *) → (f: A → B) → 
-(x: A) → (y: A) → 
-Eq A x y → Eq B (f x) (f y)</code></pre>
+<pre><code><span class="hljs-comment">(A: *)</span> → <span class="hljs-comment">(B: *)</span> → <span class="hljs-comment">(f: A → B)</span> → 
+<span class="hljs-comment">(x: A)</span> → <span class="hljs-comment">(y: A)</span> → 
+<span class="hljs-keyword">Eq</span> A x y → <span class="hljs-keyword">Eq</span> B <span class="hljs-comment">(f x)</span> <span class="hljs-comment">(f y)</span>
+</code></pre>
 <p>合同性的证明非常类似于对称性的证明，只需要构造一个命题 <code>Q = (z: A) ⇒ P (f x) → P (f z)</code> 即可：</p>
-<pre><code>Cong = (A: *) ⇒ (B: *) ⇒ (f: A → B) ⇒
-       (x: A) ⇒ (y: A) ⇒
-       (xEqy: Eq A x y) ⇒
-       xEqy ((z: A) ⇒ Eq B (f x) (f z)) (Refl B (f x))</code></pre>
+<pre><code>Cong = (<span class="hljs-keyword">A</span>: *) ⇒ (B: *) ⇒ (f: <span class="hljs-keyword">A</span> → B) ⇒
+       (x: <span class="hljs-keyword">A</span>) ⇒ (y: <span class="hljs-keyword">A</span>) ⇒
+       (xEqy: Eq <span class="hljs-keyword">A</span> x y) ⇒
+       xEqy ((z: <span class="hljs-keyword">A</span>) ⇒ Eq B (f x) (f z)) (Refl B (f x))
+</code></pre>
 </body>
 </html>

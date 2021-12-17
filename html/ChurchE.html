@@ -10,15 +10,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,
 h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
 h2 { margin-top: 2em; line-height: 1.5em; }
 blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-family: Consolas,Menlo,Monaco,source-code-pro,Courier New,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 10px; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
 a { color: #02AEF1; text-decoration: none; }
 @media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
 @media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
 .hljs-keyword { color: #F288AF; }
 .hljs-comment { color: #929CA6; }
 .hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9 }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
 </style>
 </head>
 <body>
@@ -33,42 +35,52 @@ a { color: #02AEF1; text-decoration: none; }
 <p>众所周知， λ 演算是一个图灵完备的计算模型，它能计算任何图灵机能算的东西。那么很显然它也能表示任何我们平时所用的 C 、 Java 能表示的数据结构。虽然这听起来挺不可思议的，毕竟 λ 演算中本身只有变量、函数定义、函数应用三种结构。</p>
 <p>信息的编码大概是计算机科学中最为接近魔法的内容，凝结了最强的人类的智慧结晶。同一个量的不同表现形式，同构、抽象与组合都让人感到惊叹不已。</p>
 <p>为了方便起见，这里引入一个语法糖 let 绑定（let-binding）来<strong>命名</strong>表达式：</p>
-<pre><code>x = E
-...后续代码</code></pre>
+<pre><code><span class="hljs-attribute">x</span> = E
+...后续代码
+</code></pre>
 <p>它解糖（Desugar）后等价于：</p>
-<pre><code>(λ x. ...后续代码) E</code></pre>
+<pre><code><span class="hljs-comment">(λ x. ...后续代码)</span> E
+</code></pre>
 <h2 id="布尔">布尔</h2>
 <p>通常来说丘奇编码（Church Encoding）的布尔表达为：</p>
-<pre><code><span class="hljs-keyword">true</span>  = λ x. λ y. x
-<span class="hljs-keyword">false</span> = λ x. λ y. y</code></pre>
+<pre><code><span class="hljs-keyword">true</span>  <span class="hljs-operator">=</span> λ <span class="hljs-keyword">x</span>. λ y. <span class="hljs-keyword">x</span>
+<span class="hljs-keyword">false</span> <span class="hljs-operator">=</span> λ <span class="hljs-keyword">x</span>. λ y. y
+</code></pre>
 <p>理论上这两个量的定义互相替换后和这种表达也是同构的，不过通常来说大家约定这种表示因为它更符合直觉。</p>
 <p>实际上定义了布尔以后并不需要定义 if ，布尔量本身就可以接替 if 的作用，只需要将 if 的两个分支应用上去：</p>
-<pre><code>(boolValue thenTodo elseTodo)</code></pre>
+<pre><code>(<span class="hljs-built_in">bool</span>Value thenTodo elseTodo)
+</code></pre>
 <p>如果<code>boolValue</code>是<code>true</code>那么求值就会得到<code>thenTodo</code>否则会得到<code>elseTodo</code>。</p>
 <p>我们不需要 if ，这很神奇。不过为了语义考虑也可以定义一个没有实际意义的 if ：</p>
-<pre><code>if = λ x. λ a. λ b. (x a b)</code></pre>
+<pre><code><span class="hljs-keyword">if</span> = λ x. λ <span class="hljs-selector-tag">a</span>. λ <span class="hljs-selector-tag">b</span>. (x <span class="hljs-selector-tag">a</span> b)
+</code></pre>
 <p>这样 <code>if true a b</code> 就可以得到 <code>a</code> ， <code>if false a b</code> 就可以得到 <code>b</code> 。</p>
 <h2 id="自然数">自然数</h2>
 <p>皮亚诺构造（Peano Construct）是目前普遍使用的自然数定义。简单来说， 0 用 Z 表示， n 用 n 个 S 和一个 Z 表示。比如 3 就是 SSSZ 。而皮亚诺构造的加法就相当于把一个数的 Z 换成另一个数，就比如 3+3 就是 SSS(SSSZ) 。乘法就相当于把一个数的每个 S 换成另一个数的 S 部分，比如 3*3 就是 (SSS)(SSS)(SSS)Z 。</p>
 <p>而这在 λ 演算中可以表示为：</p>
-<pre><code>0 = λ f. λ x. x
-3 = λ f. λ x. f (f (f x))</code></pre>
+<pre><code><span class="hljs-symbol">0 </span>= λ f. λ x. x
+<span class="hljs-symbol">3 </span>= λ f. λ x. f (f (f x))
+</code></pre>
 <p>这样的表示方法叫丘奇数（Church number），非常类似于皮亚诺构造。实际上，它是和皮亚诺构造同构的。</p>
 <p>丘奇数的加法和乘法很简单，加法只需要把 x 替换成另一个数就好了，乘法只需要把f替换成另一个数就好了：</p>
-<pre><code>+ = λ m. λ n. (λ f. λ x. <span class="hljs-function">m <span class="hljs-title">f</span> <span class="hljs-params">(n f x)</span>)
-* </span>= λ m. λ n. (λ f. λ x. m (n f) x)</code></pre>
+<pre><code>+ <span class="hljs-operator">=</span> λ m. λ n. (λ f. λ <span class="hljs-keyword">x</span>. m f (n f <span class="hljs-keyword">x</span>))
+* <span class="hljs-operator">=</span> λ m. λ n. (λ f. λ <span class="hljs-keyword">x</span>. m (n f) <span class="hljs-keyword">x</span>)
+</code></pre>
 <p>而某种程度上来说，一个自然数就是固定次数的循环，以 x 为初始值，把 f 循环执行 n 遍。比如 m*n 就相当于把 m 循环累加加 n 次。</p>
 <p>我们不需要 for ，这很神奇。</p>
 <h2 id="元组">元组</h2>
 <p>终于到了数据结构部分， λ 表达式保存数据的原理是把参数全部放在一个接受一个提取器的函数里面：</p>
-<pre><code>pair   = λ a. λ b. λ f. f a b
-first  = λ p. p (λ x. λ y. x)
-second = λ p. p (λ x. λ y. y)</code></pre>
+<pre><code>pair   = λ <span class="hljs-selector-tag">a</span>. λ <span class="hljs-selector-tag">b</span>. λ f. f <span class="hljs-selector-tag">a</span> <span class="hljs-selector-tag">b</span>
+first  = λ <span class="hljs-selector-tag">p</span>. <span class="hljs-selector-tag">p</span> (λ x. λ y. x)
+second = λ <span class="hljs-selector-tag">p</span>. <span class="hljs-selector-tag">p</span> (λ x. λ y. y)
+</code></pre>
 <p>这样就可以保证 <code>first (pair x y)</code> 始终等于 <code>x</code> 而 <code>second (pair x y)</code> 始终等于 <code>y</code> 。其中 <code>λ x. λ y. x</code> 和 <code>λ x. λ y. y</code> 就是提取器函数。</p>
 <p>进一步讲，把元组串起来就可以变成列表，比如：</p>
-<pre><code>list&#x27; = pair a1 (pair a2 (pair a3 ...))</code></pre>
+<pre><code><span class="hljs-attribute">list</span>&#x27; = pair a<span class="hljs-number">1</span> (pair a<span class="hljs-number">2</span> (pair a<span class="hljs-number">3</span> ...))
+</code></pre>
 <p>而如果列表分叉就成了树：</p>
-<pre><code>tree&#x27; = pair (pair a1 a2) (pair a3 a4)</code></pre>
+<pre><code><span class="hljs-attribute">tree</span>&#x27; = pair (pair a<span class="hljs-number">1</span> a<span class="hljs-number">2</span>) (pair a<span class="hljs-number">3</span> a<span class="hljs-number">4</span>)
+</code></pre>
 <p>我们用函数构造出了数据结构，这很神奇。</p>
 </body>
 </html>
