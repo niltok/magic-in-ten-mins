@@ -3,7 +3,8 @@
 [Rust 版 - 光量子](https://github.com/PhotonQuantum/magic-in-ten-mins-rs) |
 [C++ 版 - 图斯卡蓝瑟](https://github.com/tusikalanse/magic-in-ten-mins-cpp) |
 [C# 版 - CWKSC](https://github.com/CWKSC/magic-in-ten-mins-csharp) |
-[Lua 版 - Ofey Chan](https://github.com/ofey404/magic-in-ten-mins-lua)
+[Lua 版 - Ofey Chan](https://github.com/ofey404/magic-in-ten-mins-lua) |
+[Ocaml 版 - 光吟](https://github.com/LighghtEeloo/magic-in-ten-mins-ml)
 
 抽象与组合
 
