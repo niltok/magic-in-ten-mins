@@ -126,7 +126,7 @@ some() {
 <pre><code class="language-java"><span class="hljs-comment">// 解析一个数字字符</span>
 <span class="hljs-keyword">static</span> Parser&lt;Integer&gt; digit =
     pred(c -&gt; <span class="hljs-string">&#x27;0&#x27;</span> &lt;= c &amp;&amp; c &lt;= <span class="hljs-string">&#x27;9&#x27;</span>)
-                    p(c -&gt; c - <span class="hljs-string">&#x27;0&#x27;</span>);
+        .map(c -&gt; c - <span class="hljs-string">&#x27;0&#x27;</span>);
 <span class="hljs-comment">// 解析一个自然数</span>
 <span class="hljs-keyword">static</span> Parser&lt;Integer&gt; nat =
         digit.some().map(xs -&gt; {
