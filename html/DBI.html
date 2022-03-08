@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+<title>
+十分钟魔法练习</title>
+<style>
+body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFC; line-height: 2em; }
+body { font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
+h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
+h2 { margin-top: 2em; line-height: 1.5em; }
+blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
+code, pre { font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
+pre { overflow-x: auto; padding: 1rem; }
+pre>code { padding-inline: 0; }
+a { color: #02AEF1; text-decoration: none; }
+@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
+@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
+.hljs-keyword { color: #F288AF; }
+.hljs-comment { color: #929CA6; }
+.hljs-string { color: #0594A6; }
+.hljs-title { color: #4581D9; }
+.hljs-type, .hljs-built_in { color: #fca311; }
+</style>
+</head>
+<body>
+<p>
+<a href="https://magic.huohuo.moe">🏠Homepage🏠</a> | <a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
+<h1 id="十分钟魔法练习：de-bruijn-索引">十分钟魔法练习：De Bruijn 索引</h1>
+<h3 id="by-「玩火」">By 「玩火」</h3>
+<blockquote>
+<p>前置技能：Java 基础，ADT，λ 演算</p>
+</blockquote>
+<h2 id="符号命名">符号命名</h2>
+<p>在 λ 演算的实现介绍中提到过关于符号重名的问题，需要通过重命名来避免规约时因为重名导致符号引用对象出错。如 <code>λ z. (λ x. (λ z. x)) z</code> 如果不做重命名处理就会变成 <code>λ z. (λ z. z)</code> ，而正确情况应该是 <code>λ z&#39;. (λ z. z&#39;)</code>。为了保证符号的唯一性，之前采用了生成 UUID 对原符号重命名的策略。</p>
+<p>而为了达到「唯一」这一目的，除了随机一个非常大的数以外还有个更好的办法，那就是利用「在 AST 上距离所引用符号跨过的 λ 抽象层数」来生成唯一的符号名。</p>
+<p>比如 <code>λ x. (λ z. x) x</code> 中内层 λ 中的 <code>x</code> 距离所引用的 <code>λ x.</code> 跨过了一个 <code>λ z.</code> 所以可以命名为 <code>1</code> ，而外侧右边的 <code>x</code> 向外看最近的一层 λ 抽象就是其引用的符号所以可以命名为 <code>0</code>。</p>
+<p>那么 <code>λ x. (λ z. x) x</code> 用这种方法就表示为 <code>λ. (λ. 1) 0</code>。类似的，上面提到的 <code>λ z. (λ x. (λ z. x)) z</code> 就可以表示为 <code>λ. (λ. (λ. 1)) 0</code>。</p>
+<p>不过看上去这个办法有个很显然的困惑，如果向上能数的 λ 抽象层数超过符号值了那意味着什么呢？比如 <code>λ. 1</code> 中的 <code>1</code>，实际上它是一个未捕获的自由符号，就比较类似于 <code>λ x. y</code> 中的 <code>y</code> 。</p>
+<p>这种表示符号的索引方案就称为「De Bruijn 索引 (De Bruijn index)」。</p>
+<h2 id="实现细节">实现细节</h2>
+<p>这个处理方案和之前的 UUID 方案实现基本相同，唯一要注意的点就是 <code>apply</code> 操作时符号的变化。考虑规约 <code>(λ. X) e</code> 时把 <code>e</code> 应用到 <code>λ. X</code> 中，最简单的情况是整个表达式 <code>(λ. X) e</code> 中无自由变量，那就只需要将 <code>X</code> 中绑定到这一层的符号替换为 <code>e</code> 。</p>
+<p>当 <code>X</code> 中有自由变量时就需要考虑替换后自由变量的引用对象保持不变，注意到替换后少了一层 λ 抽象，所以需要把 <code>X</code> 中的自由变量引用的符号层数减一。</p>
+<p>而当 <code>e</code> 中有自由变量时就要考虑当它所替换的符号层数，每深一层就需要把 <code>e</code> 中的自由变量引用的符号层数加一。</p>
+<p>说起来好抽象，举个例子就是 <code>(λ. 0 (λ. 1)) 1</code> 规约得到的结果是 <code>1 (λ. 2)</code>。代码中要注意的点如下：</p>
+<pre><code class="language-java"><span class="hljs-comment">////</span>
+<span class="hljs-comment">// class Val</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">lift</span><span class="hljs-params">(<span class="hljs-keyword">int</span> v)</span> </span>{
+    <span class="hljs-comment">// `e` 中的自由变量</span>
+    <span class="hljs-keyword">if</span> (v &lt; <span class="hljs-keyword">this</span>.v) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Val(<span class="hljs-keyword">this</span>.v + <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">apply</span><span class="hljs-params">(<span class="hljs-keyword">int</span> v, Expr e)</span> </span>{
+    <span class="hljs-comment">// 替换</span>
+    <span class="hljs-keyword">if</span> (v == <span class="hljs-keyword">this</span>.v) <span class="hljs-keyword">return</span> e;
+    <span class="hljs-comment">// `X` 中的自由变量</span>
+    <span class="hljs-keyword">if</span> (v &lt; <span class="hljs-keyword">this</span>.v) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Val(<span class="hljs-keyword">this</span>.v - <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+
+<span class="hljs-comment">////</span>
+<span class="hljs-comment">// class Fun</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> Expr <span class="hljs-title">apply</span><span class="hljs-params">(<span class="hljs-keyword">int</span> v, Expr e)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fun(<span class="hljs-keyword">this</span>.e.apply(v + <span class="hljs-number">1</span>, e.lift(<span class="hljs-number">0</span>)));
+}
+</code></pre>
+<h2 id="二进制编码">二进制编码</h2>
+<p>在 De Bruijn 索引的基础上，可以构造二进制编码来紧凑地存储 λ 表达式：</p>
+<ul>
+<li><code>00</code> 代表 <code>Fun</code>，它后面接一个参数</li>
+<li><code>01</code> 代表 <code>App</code>，它后面接两个参数</li>
+<li><code>111...1</code> 代表 <code>Val</code>，其中第一个 <code>1</code> 之后的 <code>1</code> 的数量就代表了 <code>Val</code> 的索引值</li>
+</ul>
+<p>比如 <code>(λ. 0 (λ. 1)) 1</code> 的二进制编码就是 <code>01 00 01 1 00 11 11</code>。</p>
+<p>像这样的前缀编码可以无歧义地解析，状态机也非常简单。再过一遍哈夫曼编码以后文件可以压缩地很小。</p>
+</body>
+</html>

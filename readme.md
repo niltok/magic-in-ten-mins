@@ -97,6 +97,12 @@ QQ群：1070975853 |
 λ 演算(Lambda Calculus)
 [Java 基础， ADT]
 
+较难 |
+[Markdown](doc/DBI.md) |
+[HTML](https://magic.huohuo.moe/html/DBI.html) | 
+De Bruijn 索引(De Bruijn index)
+[Java 基础，ADT，λ 演算]
+
 偏易 |
 [Markdown](doc/EvalStrategy.md) |
 [HTML](https://magic.huohuo.moe/html/EvalStrategy.html) | 
