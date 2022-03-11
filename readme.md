@@ -4,7 +4,8 @@
 [C++ 版 - 图斯卡蓝瑟](https://github.com/tusikalanse/magic-in-ten-mins-cpp) |
 [C# 版 - CWKSC](https://github.com/CWKSC/magic-in-ten-mins-csharp) |
 [Lua 版 - Ofey Chan](https://github.com/ofey404/magic-in-ten-mins-lua) |
-[Ocaml 版 - 光吟](https://github.com/LighghtEeloo/magic-in-ten-mins-ml)
+[Ocaml 版 - 光吟](https://github.com/LighghtEeloo/magic-in-ten-mins-ml) |
+[Python 版 - penguin_wwy](https://github.com/penguin-wwy/magic-in-ten-mins-py)
 
 抽象与组合
 
