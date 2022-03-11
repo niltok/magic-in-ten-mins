@@ -126,7 +126,7 @@ character(char x) {
 // 解析一个数字字符
 static Parser<Integer> digit =
     pred(c -> '0' <= c && c <= '9')
-                    p(c -> c - '0');
+        .map(c -> c - '0');
 // 解析一个自然数
 static Parser<Integer> nat =
         digit.some().map(xs -> {
