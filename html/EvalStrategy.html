@@ -71,7 +71,7 @@ a { color: #02AEF1; text-decoration: none; }
 <p>这就是完全 β 归约。它会将任何能归约的地方归约，即使这个函数并没有被应用函数内部也会被归约。</p>
 <h2 id="对比">对比</h2>
 <p>对于λ表达式：</p>
-<pre><code>(λ n. λ f. λ x. (<span class="hljs-name">f</span> (<span class="hljs-name">n</span> f x)) (λ f. λ x. x))
+<pre><code>(λ n. λ f. λ x. (<span class="hljs-name">f</span> (<span class="hljs-name">n</span> f x))) (λ f. λ x. x)
 </code></pre>
 <p>进行非严格求值会得到：</p>
 <pre><code>λ f. λ <span class="hljs-keyword">x</span>. f ((λ f. λ <span class="hljs-keyword">x</span>. <span class="hljs-keyword">x</span>) f <span class="hljs-keyword">x</span>)

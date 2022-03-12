@@ -65,7 +65,7 @@ public Expr fullBetaReduce() {
 对于λ表达式：
 
 ````
-(λ n. λ f. λ x. (f (n f x)) (λ f. λ x. x))
+(λ n. λ f. λ x. (f (n f x))) (λ f. λ x. x)
 ````
 
 进行非严格求值会得到：
