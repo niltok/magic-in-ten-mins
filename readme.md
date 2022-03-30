@@ -87,7 +87,7 @@ QQ群：1070975853 |
 偏易 |
 [Markdown](doc/PiSigma.md) |
 [HTML](https://magic.huohuo.moe/html/PiSigma.html) | 
-π 类型和 Σ 类型(Pi type & Sigma type)
+Π 类型和 Σ 类型(Pi type & Sigma type)
 [ADT ，构造演算]
 
 ## 计算理论

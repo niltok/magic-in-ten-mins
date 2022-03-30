@@ -26,23 +26,23 @@ a { color: #02AEF1; text-decoration: none; }
 <body>
 <p>
 <a href="https://magic.huohuo.moe">🏠Homepage🏠</a> | <a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
-<h1 id="十分钟魔法练习：π-类型和-σ-类型">十分钟魔法练习：π 类型和 Σ 类型</h1>
+<h1 id="十分钟魔法练习：π-类型和-σ-类型">十分钟魔法练习：Π 类型和 Σ 类型</h1>
 <h3 id="by-「玩火」">By 「玩火」</h3>
 <blockquote>
 <p>前置技能：ADT，构造演算</p>
 </blockquote>
 <h2 id="π-类型">π 类型</h2>
-<p>构造演算中包含一种 <code>* → □</code> 的函数，这种函数的类型被称为 π 类型。名字很奇怪，这个类型和 π 毫无关系的啊。实际上这个名字是这么来的：</p>
-<p>首先构造一个 π 类型的函数 <code>F: T → U</code> ，在其定义域 <code>T</code> 中任取一个值 <code>x</code> 那么可以构造类型 <code>F(x)</code> ，那么实际上可以对定义域中每个值都这么操作并且把构造出的类型全部统统放入一个有名元组中 </p>
+<p>构造演算中包含一种 <code>* → □</code> 的函数，这种函数的类型被称为 Π 类型。名字很奇怪，这个类型和 π 毫无关系的啊。实际上这个名字是这么来的：</p>
+<p>首先构造一个 Π 类型的函数 <code>F: T → U</code> ，在其定义域 <code>T</code> 中任取一个值 <code>x</code> 那么可以构造类型 <code>F(x)</code> ，那么实际上可以对定义域中每个值都这么操作并且把构造出的类型全部统统放入一个有名元组中 </p>
 <pre><code>(x_0: <span class="hljs-constructor">F(<span class="hljs-params">x_0</span>)</span>, x_1: <span class="hljs-constructor">F(<span class="hljs-params">x_1</span>)</span>,<span class="hljs-operator"> ... </span>, x_n: <span class="hljs-constructor">F(<span class="hljs-params">x_n</span>)</span>)
 </code></pre>
 <p>这样的定义实际上是和原来的函数等价的，而且这个元组的类型实际上就是一个 ADT 中的积类型</p>
 <pre><code><span class="hljs-constructor">F(<span class="hljs-params">x_0</span>)</span><span class="hljs-operator"> * </span><span class="hljs-constructor">F(<span class="hljs-params">x_1</span>)</span><span class="hljs-operator"> * </span>...<span class="hljs-operator"> * </span><span class="hljs-constructor">F(<span class="hljs-params">x_n</span>)</span>
 </code></pre>
 <p>用数学的连乘符号可以表示为</p>
-<pre><code>π<span class="hljs-variable">_</span>{<span class="hljs-variable">x</span>: <span class="hljs-variable">T</span>} <span class="hljs-function"><span class="hljs-title">F</span>(<span class="hljs-variable">x</span>)</span>
+<pre><code>Π<span class="hljs-variable">_</span>{<span class="hljs-variable">x</span>: <span class="hljs-variable">T</span>} <span class="hljs-function"><span class="hljs-title">F</span>(<span class="hljs-variable">x</span>)</span>
 </code></pre>
-<p>这里有个 π 所以它就被称为 π 类型。</p>
+<p>这里有个 Π 所以它就被称为 Π 类型。</p>
 <h2 id="σ-类型">Σ 类型</h2>
 <p>设值 <code>x: T</code> ，和 π 类型函数 <code>F: T → U</code> 那么元组 <code>(x, F(x))</code> 的类型就是 Σ 类型。实际上有了上面的例子，这里也挺好理解的，对于类型 <code>T</code> 的所有 <code>x</code> 可以构造出</p>
 <pre><code>x_0: <span class="hljs-constructor">F(<span class="hljs-params">x_0</span>)</span> <span class="hljs-pattern-match">| x<span class="hljs-constructor">_1</span>: <span class="hljs-constructor">F(<span class="hljs-params">x_1</span>)</span> | <span class="hljs-operator">...</span> | x<span class="hljs-constructor">_n</span>: <span class="hljs-constructor">F(<span class="hljs-params">x_n</span>)</span></span>
