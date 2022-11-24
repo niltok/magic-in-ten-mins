@@ -1,30 +1,122 @@
-<html>
-<head>
+<!DOCTYPE html><html lang="zh-CN" prefix="og: https://ogp.me/ns#">
+<head >
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
-<title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title >
 十分钟魔法练习</title>
-<style>
-body { max-width: 650px; margin: auto; width: 90%; margin-top: 10%; margin-bottom: 10%; color: #0B0E26; background: #FAFAFC; line-height: 2em; font-variant-ligatures: common-ligatures; -webkit-font-feature-settings: "liga" on, "calt" on; font-feature-settings: "liga" on, "calt" on; }
-body { font-size: 20px; font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif; }
-h1 { font-size: 2.5em; color: #EF96AB; line-height: 1.5em; }
-h2 { margin-top: 2em; line-height: 1.5em; }
-blockquote { color: gray; margin: 0; padding: 1 1 1 20; border-left: 5px solid #EF96AB; }
-code, pre { font-size: 0.9em; line-height: 1.8em; font-family: "JetBrains Mono","等距更纱黑体 SC","Fira Code",Menlo,Monaco,source-code-pro,Courier New,Consolas,monospace; background: #FCF6FC; border-radius: 3px; padding-inline: 0.3rem; }
-pre { overflow-x: auto; padding: 1rem; }
-pre>code { padding-inline: 0; }
-a { color: #02AEF1; text-decoration: none; }
-@media (prefers-color-scheme: dark) { body { color: #D8D8D6; background: #0E0E10; } }
-@media (prefers-color-scheme: dark) { pre, code { color: #D8D8D6; background: #0E0F1F; } }
-.hljs-keyword { color: #F288AF; }
-.hljs-comment { color: #929CA6; }
-.hljs-string { color: #0594A6; }
-.hljs-title { color: #4581D9; }
-.hljs-type, .hljs-built_in { color: #fca311; }
-</style>
+<style >
+body {
+    max-width: 35em;
+    margin: auto;
+    width: 90%;
+    margin-top: 10%;
+    margin-bottom: 10%;
+    color: #0B0E26;
+    background: #FAFAFC;
+    line-height: 2em;
+    text-rendering: optimizeLegibility;
+    text-align: justify;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: calc(min(.35vw + 16px, 25px));
+    font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, PingFang SC, Microsoft YaHei, Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei, sans-serif;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #EF96AB;
+    line-height: 1.5em;
+}
+
+h2 {
+    margin-top: 2rem;
+    line-height: 1.5em;
+}
+
+h1,
+h2,
+h3 {
+    /* text-align: center; */
+}
+
+blockquote {
+    color: gray;
+    margin: 0;
+    padding: 1px 0 1px 1.2em;
+    border-left: .3em solid #EF96AB;
+}
+
+code,
+pre {
+    font-size: 0.9rem;
+    line-height: 1.8em;
+    font-family: "JetBrains Mono", "等距更纱黑体 SC", "Fira Code", Menlo, Monaco, source-code-pro, Courier New, Consolas, monospace;
+    background: #FCF6FC;
+    border-radius: 3px;
+    padding-inline: 0.3em;
+}
+
+pre {
+    overflow-x: auto;
+    padding: 1em 1.5em;
+}
+
+pre>code {
+    padding-inline: 0;
+}
+
+::-webkit-scrollbar,
+.element::-webkit-scrollbar,
+.element {
+    /* opacity: 0.5; */
+}
+
+a {
+    color: #02AEF1;
+    text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        color: #D8D8D6;
+        background: #0E0E10;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+
+    pre,
+    code {
+        color: #D8D8D6;
+        background: #0E0F1F;
+    }
+}
+
+.hljs-keyword {
+    color: #F288AF;
+}
+
+.hljs-comment {
+    color: #929CA6;
+}
+
+.hljs-string {
+    color: #0594A6;
+}
+
+.hljs-title {
+    color: #4581D9;
+}
+
+.hljs-type,
+.hljs-built_in {
+    color: #fca311;
+}</style>
 </head>
-<body>
-<p>
+<body >
+<p >
 <a href="https://magic.huohuo.moe">🏠Homepage🏠</a> | <a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me on GitHub⭐</a></p>
 <h1 id="十分钟魔法练习：curry-howard-同构">十分钟魔法练习：Curry-Howard 同构</h1>
 <h3 id="by-「玩火」">By 「玩火」</h3>
