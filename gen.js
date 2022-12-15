@@ -17,14 +17,13 @@ const title = $$('title')('十分钟魔法练习')
 const hljscss = '<link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/styles/a11y-light.min.css" rel="stylesheet">'
 const materialize = '<link href="https://cdn.bootcdn.net/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css" rel="stylesheet">'
 
-const style = $$('style')(fs.readFileSync('style.css'))
-
-const head = $$('head')(charset + viewpoint + title + style)
+let style = $$('style')(fs.readFileSync('style.css'))
 
 const star = '<a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me on GitHub⭐</a>'
 const home = '<a href="https://magic.huohuo.moe">🏠Homepage🏠</a>'
 
 const gen = s => {
+    const head = $$('head')(charset + viewpoint + title + style)
     return '<!DOCTYPE html>' + $$('html', 'lang="zh-CN" prefix="og: https://ogp.me/ns#"')
     (head + $$('body')($$('p')(home + ' | ' + star) +
         marked(s, {
@@ -44,6 +43,8 @@ fs.readdirSync("doc").forEach(f => {
         fs.writeFileSync("html/" + f.slice(0, f.length - 3) + ".html", gen(content))
     }
 })
+
+style = style.replace("text-align: justify;", "")
 
 const index = fs.readFileSync('readme.md').toString()
 fs.writeFileSync('index.html', gen(index))
