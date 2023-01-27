@@ -1,6 +1,9 @@
 const marked = require('marked')
 const fs = require('fs')
 const hljs = require('highlight.js')
+const subsetFont = require('subset-font')
+
+console.log('clean...')
 
 if (fs.existsSync("html")) fs.rmSync("html", {
     recursive: true
@@ -22,12 +25,18 @@ let style = $$('style')(fs.readFileSync('style.css'))
 const star = '<a href="https://github.com/niltok/magic-in-ten-mins">⭐Star me on GitHub⭐</a>'
 const home = '<a href="https://magic.huohuo.moe">🏠Homepage🏠</a>'
 
-const gen = s => {
+console.log('convert markdown...')
+
+let fullText = star + home
+let codeText = ''
+
+const gen = (s, style) => {
     const head = $$('head')(charset + viewpoint + title + style)
     return '<!DOCTYPE html>' + $$('html', 'lang="zh-CN" prefix="og: https://ogp.me/ns#"')
     (head + $$('body')($$('p')(home + ' | ' + star) +
         marked(s, {
             highlight: (code, lang) => {
+                codeText += code
                 if (typeof lang == 'undefined' || lang == '')
                     return hljs.highlightAuto(code).value
                 else if (lang == 'nohighlight')
@@ -40,11 +49,24 @@ const gen = s => {
 fs.readdirSync("doc").forEach(f => {
     if (f.endsWith(".md")) {
         const content = fs.readFileSync("doc/" + f).toString()
-        fs.writeFileSync("html/" + f.slice(0, f.length - 3) + ".html", gen(content))
+        fullText += content
+        fs.writeFileSync("html/" + f.slice(0, f.length - 3) + ".html", gen(content, style.replaceAll("html/", "")))
     }
 })
 
-style = style.replace("text-align: justify;", "")
-
 const index = fs.readFileSync('readme.md').toString()
-fs.writeFileSync('index.html', gen(index))
+fullText += index
+fs.writeFileSync('index.html', gen(index, style.replace("text-align: justify;", "")))
+
+console.log('convert font...')
+
+subsetFont(fs.readFileSync('body.woff2'), fullText, { targetFormat: 'woff2' }).then(f => {
+    fs.writeFileSync('html/body.woff2', f)
+    return subsetFont(fs.readFileSync('code.ttf'), codeText, { targetFormat: 'woff2' })
+}).then(f => {
+    fs.writeFileSync('html/code.woff2', f)
+    return subsetFont(fs.readFileSync('emoji.ttf'), fullText, { targetFormat: 'woff2' })
+}).then(f => {
+    fs.writeFileSync('html/emoji.woff2', f)
+    console.log('done')
+})

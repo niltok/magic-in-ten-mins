@@ -5,6 +5,21 @@
 <title >
 十分钟魔法练习</title>
 <style >
+@font-face {
+    font-family: "subset body font";
+    src: url("body.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "subset code font";
+    src: url("code.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "subset emoji font";
+    src: url("emoji.woff2") format("woff2");
+}
+
 body {
     max-width: 35em;
     margin: auto;
@@ -13,7 +28,7 @@ body {
     margin-bottom: 10%;
     color: #0B0E26;
     background: #FAFAFC;
-    line-height: 2em;
+    line-height: 1.75em;
     text-rendering: optimizeLegibility;
     text-align: justify;
 }
@@ -21,7 +36,7 @@ body {
 html {
     scroll-behavior: smooth;
     font-size: calc(min(.35vw + 16px, 25px));
-    font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, PingFang SC, Microsoft YaHei, Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei, sans-serif;
+    font-family: "subset body font", "Source Han Serif SC", "Noto Serif SC", "Songti SC", SimSun, "AR PL Sungti", "subset emoji font", serif;
 }
 
 h1 {
@@ -52,7 +67,7 @@ code,
 pre {
     font-size: 0.9rem;
     line-height: 1.8em;
-    font-family: "JetBrains Mono", "等距更纱黑体 SC", "Fira Code", Menlo, Monaco, source-code-pro, Courier New, Consolas, monospace;
+    font-family: "subset code font", "等距更纱黑体 SC", "JetBrains Mono", "Fira Code", Menlo, Monaco, source-code-pro, Courier New, Consolas, "subset emoji font", monospace;
     background: #FCF6FC;
     border-radius: 3px;
     padding-inline: 0.3em;
