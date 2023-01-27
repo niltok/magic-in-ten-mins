@@ -140,7 +140,7 @@ class App implements Expr { /* ... */ }
 class Forall implements Expr {
     TVal x;
     Expr e;
-    public Type checkType() throws BadTypeException {
+    public Type checkType(Env env) throws BadTypeException {
         return new TForall(x, e.checkType(env));
     }
     public Expr genUUID() {
