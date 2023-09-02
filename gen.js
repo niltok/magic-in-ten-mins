@@ -50,13 +50,13 @@ fs.readdirSync("doc").forEach(f => {
     if (f.endsWith(".md")) {
         const content = fs.readFileSync("doc/" + f).toString()
         fullText += content
-        fs.writeFileSync("html/" + f.slice(0, f.length - 3) + ".html", gen(content, style.replaceAll("html/", "")))
+        fs.writeFileSync("html/" + f.slice(0, f.length - 3) + ".html", gen(content, style.replace(/html\//g, "")))
     }
 })
 
 const index = fs.readFileSync('readme.md').toString()
 fullText += index
-fs.writeFileSync('index.html', gen(index, style.replace("text-align: justify;", "")))
+fs.writeFileSync('index.html', gen(index, style.replace(/text-align: justify;/g, "")))
 
 console.log('convert font...')
 

@@ -177,9 +177,9 @@ a {
 <ul>
 <li><code>00</code> 代表 <code>Fun</code>，它后面接一个参数</li>
 <li><code>01</code> 代表 <code>App</code>，它后面接两个参数</li>
-<li><code>111...1</code> 代表 <code>Val</code>，其中第一个 <code>1</code> 之后的 <code>1</code> 的数量就代表了 <code>Val</code> 的索引值</li>
+<li><code>111...10</code> 代表 <code>Val</code>，其中第一个 <code>1</code> 之后的 <code>1</code> 的数量就代表了 <code>Val</code> 的索引值</li>
 </ul>
-<p>比如 <code>(λ. 0 (λ. 1)) 1</code> 的二进制编码就是 <code>01 00 01 1 00 11 11</code>。</p>
+<p>比如 <code>(λ. 0 (λ. 1)) 1</code> 的二进制编码就是 <code>01 00 01 10 00 110 110</code>。</p>
 <p>像这样的前缀编码可以无歧义地解析，状态机也非常简单。再过一遍哈夫曼编码以后文件可以压缩地很小。</p>
 </body>
 </html>
